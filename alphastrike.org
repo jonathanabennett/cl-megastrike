@@ -1,0 +1,8 @@
+* Plan for a computer based AS game.
+
+* Point Release plan
+** 0.1 Digital Record Sheet
+** 0.2 Hot Seat Playable (Mechs only)
+** 0.3 Full basic rules implemented (Mechs only)
+** 0.4 Basic AI
+** 0.5 Begin work on Advanced rules
