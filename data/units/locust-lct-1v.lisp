@@ -43,13 +43,12 @@ systemmode:TARGETING:911 "
    :pv 18
    :kind :bm
    :size 1
-   :mv-list (list
-             (make-move-value :kind :walk :distance 8)
-             ) ;; To add a new movement type, copy the line above and paste it above this parentheses.
-   :role "scout"
+   :prime-move :walk
+   :prime-distance 8
+   :role "Scout"
    :attack-list (list
-             (make-damage-value :kind :standard
-                                :range-brackets '(1 1 0))
+             (make-attack :kind :standard
+                                :attack '(1 1 0))
              ) ;; To add a new damage type, copy the above two lines and paste them above this parentheses.
    :ov 0
    :max-armor 2

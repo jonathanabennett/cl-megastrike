@@ -19,7 +19,6 @@
   (:panes
    (record-sheet
     :application
-    :display-time t
     :display-function #'display-element)
    (int :interactor))
   (:layouts
@@ -29,10 +28,38 @@
       (1/2 int)))))
 
 (defmethod display-element ((frame alphastrike) stream)
-  (format stream "~a" (name *locust*)))
+  (let ((pane (get-frame-pane frame 'record-sheet)))
+    (with-text-style (stream (make-text-style :serif :bold :large))
+      (format stream "~a~%" (id *locust*)))
+    (formatting-table (stream)
+      (formatting-row (stream)
+        (formatting-cell (stream)
+          (general-info-block stream *locust*)))
+      (formatting-row (stream)
+          (formatting-cell (stream)
+            (attack-info-block stream *locust*)))
+      (formatting-row (stream)
+          (formatting-cell (stream)
+            (damage-info-block stream *locust*)))
+      (formatting-row (stream)
+        (formatting-cell (stream)
+          (format stream "Specials: "))
+        (formatting-cell (stream)
+          (format stream "~{~A ~}" (specials (element *locust*)))))
+      (formatting-row (stream)
+        (formatting-cell (stream)
+          (format stream "Critical Hits: "))
+        (formatting-cell (stream)
+          (format stream "~{~A ~}" (crits (element *locust*)))))
+      )))
+
 
 (defun main ()
   (load-data)
-  (setf *locust* (locust-lct-1v))
+  (setf *locust* (make-combat-unit :id 1
+                                   :pilot (make-instance
+                                           'pilot
+                                           :name "Shooty McShootyface")
+                                   :unit (locust-lct-1v)))
   (run-frame-top-level
    (make-application-frame 'alphastrike)))

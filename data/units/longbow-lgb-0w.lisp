@@ -43,18 +43,16 @@ systemmode:TARGETING:911 "
    :pv 36
    :kind :bm
    :size 4
-   :mv-list (list
-             (make-move-value :kind :walk :distance 4)
-             ) ;; To add a new movement type, copy the line above and paste it above this parentheses.
+   :prime-move :walk
+   :prime-distance 4
    :role "Missile Boat"
    :attack-list (list
-             (make-damage-value :kind :standard
-                                :range-brackets '(2 3 3))
-             (make-damage-value :kind :lrm
-                                :range-brackets '(1 3 3))
-             (make-damage-value :kind :if
-                                :range-brackets '(0 0 3))
-             ) ;; To add a new damage type, copy the above two lines and paste them above this parentheses.
+                 (make-attack :kind :standard
+                              :attack '(2 3 3))
+                 (make-attack :kind :lrm
+                              :attack '(1 3 3))
+                 (make-attack :kind :if
+                              :attack '(0 0 3)))
    :ov 0
    :max-armor 5
    :max-structure 7

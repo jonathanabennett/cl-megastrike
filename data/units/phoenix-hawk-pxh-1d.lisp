@@ -43,13 +43,14 @@ systemmode:TARGETING:911 "
    :pv 26
    :kind :bm
    :size 2
-   :mv-list (list
-             (make-move-value :kind :jump :distance 6)
-             ) ;; To add a new movement type, copy the line above and paste it above this parentheses.
+   :prime-move :walk
+   :prime-distance 6
+   :secondary-move :jump
+   :secondary-distance 6
    :role "Skirmisher"
    :attack-list (list
-             (make-damage-value :kind :standard
-                                :range-brackets '(2 2 0))
+                 (make-attack :kind :standard
+                              :attack '(2 2 0))
              ) ;; To add a new damage type, copy the above two lines and paste them above this parentheses.
    :ov 0
    :max-armor 4
