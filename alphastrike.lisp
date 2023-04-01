@@ -51,7 +51,9 @@
           (format stream "Critical Hits: "))
         (formatting-cell (stream)
           (format stream "~{~A ~}" (crits (element *locust*)))))
-      )))
+      )
+    (terpri stream)
+    (quickstats-block stream *locust*)))
 
 
 (defun main ()
