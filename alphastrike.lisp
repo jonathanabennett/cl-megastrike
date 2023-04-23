@@ -6,6 +6,8 @@
 (defun load-data ()
   "Load the contents of the data directory in prepration for execution."
   (uiop:chdir *here*)
+
+  ;; Needs a way to load the full directory
   (load "data/units/locust-lct-1v.lisp")
   (load "data/units/phoenix-hawk-pxh-1d.lisp")
   (load "data/units/marauder-mad-3r.lisp")
