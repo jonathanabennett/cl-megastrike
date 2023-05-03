@@ -23,7 +23,7 @@
       (with-text-style (stream (make-text-style :serif :bold :normal))
         (format stream "Role: "))
         (format stream "~a" (role element))
-        (terpri)
+        (format stream "~%")
       (with-text-style (stream (make-text-style :serif :bold :normal))
         (format stream "Pilot info: "))
         (format stream "~A" (display (pilot combat-unit))))))
@@ -71,7 +71,8 @@
                                             :filled t
                                             :shape :rectangle
                                             :move-cursor nil)
-              (format stream " ~a " (+ pip 1)))))
+              (format stream " ~a " (+ pip 1))))
+        (format stream "  "))
       (with-text-style (stream (make-text-style :serif :bold :normal))
         (format stream "Struct: "))
       (dotimes (pip (struct element))
@@ -84,7 +85,8 @@
                                             :filled t
                                             :shape :rectangle
                                             :move-cursor nil)
-              (format stream " ~a " (+ pip 1))))))))
+              (format stream " ~a " (+ pip 1))))
+        (format stream "  ")))))
 
 (defun specials-info-block (stream combat-unit)
   (let ((element (element combat-unit)))

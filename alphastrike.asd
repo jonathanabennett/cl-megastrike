@@ -8,6 +8,7 @@
   :serial t
   :depends-on (#:random-uuid #:cl-json #:mcclim)
   :components ((:file "package")
+               (:file "map")
                (:file "crew")
                (:file "element" :depends-on ("crew"))
                (:file "unitcard" :depends-on ("element"))
