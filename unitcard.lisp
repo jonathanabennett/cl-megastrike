@@ -1,14 +1,16 @@
 (in-package :alphastrike)
 
-(defun quckstats-block (stream combat-unit)
+(defun quickstats-block (stream combat-unit)
   "Draws the quick-stats block for a unit."
   (let ((element (element combat-unit)))
     (surrounding-output-with-border (stream :ink +light-gray+ :filled t :shape :rounded)
       (with-text-style (stream (make-text-style :serif :bold :normal))
-        (format stream "~a" (kind combat-unit)))
-      (format stream "  A/S: ~a/~a" (current-armor combat-unit) (current-struct combat-unit))
-      (format stream "  MV: ~a" (format-move combat-unit))
-      (format stream "  TMM: ~a~%" ()))))
+        (format stream "~a " (name element)))
+      (format stream "#~a " (id combat-unit))
+      (format stream "~a~%" (kind element))
+      (format stream "  A/S: ~a/~a" (current-armor element) (current-struct element))
+      (format stream "  MV: ~a" (format-move element))
+      (format stream "  TMM: ~a~%" (unit-tmm combat-unit)))))
 
 (defun general-info-block (stream combat-unit)
   "Draws the first block of the Record sheet, containing the Type, MV, Role, and Pilot info."
