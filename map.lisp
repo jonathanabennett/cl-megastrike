@@ -23,6 +23,19 @@
                      :r r
                      :s s)))
 
+
+(defun hex-from-offset (&key col row)
+  "Creates hexes from the .board files used by MegaMek, which use an offset coordinate system instead of cubic like I do."
+  (let ((q col)
+        (- row (floor (/ (+ col (* (bit-and col) -1)) 2)))
+        (s (+ (* q -1) r))))
+  (make-hexagon :q q :r r :s s))
+
+(defmethod offset-from-hex ((hex hexagon))
+  (let ((row (+ (hex r) (floor (/ (+ (hex q) (* (bit-and (hex q)) -1))))))
+        (col (hex q)))
+    (list col row)))
+
 (defmethod same-hex ((hex1 hexagon) (hex2 hexagon))
   "Hexagons are equal if their q, r, and s coordinates are the same."
   (and (= (s hex1) (s hex2))
