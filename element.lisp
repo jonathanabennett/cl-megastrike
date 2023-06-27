@@ -133,7 +133,8 @@ for bonuses."
     :documentation "A list of special abilities the unit has."
     :initarg :specials
     :accessor specials)
-   (crits ;; TODO Reconsider whether a simple list is the best way to store these.
+   (crits
+    ;; TODO Reconsider whether a simple list is the best way to store these.
     :documentation "A list of critical hits the unit has sustained. Must be members of the `crit' type."
     :initarg :crits
     :initform '()

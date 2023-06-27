@@ -51,6 +51,7 @@
                          (make-hexagon :q  1 :r  0 :s -1)
                          (make-hexagon :q -1 :r  1 :s  0)
                          (make-hexagon :q  0 :r  1 :s -1)))
+
 (defmethod display-map ((frame alphastrike) stream)
   (format stream "In the map~%")
   (dolist (loc *test-map*)
