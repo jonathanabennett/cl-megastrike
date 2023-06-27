@@ -1,7 +1,19 @@
-(in-package #:cl-alphastrike)
+(in-package #:alphastrike)
 
+(defun parse-hex-address (str)
+  (let ((x (parse-integer (subseq str 0 2)))
+        (y (parse-integer (subseq str 2 4))))
+    (list x y)))
 
-(defclass Grid ()
+(defun parse-hex-line (line)
+  (let* ((line-string (cl-ppcre:split "( )" line))
+         (hex-address (nth 1 line-string))
+         (elevation   (nth 2 line-string))
+         (terrain     (nth 3 line-string))
+         (style       (nth 4 line-string)))
+    (list hex-address elevation terrain style)))
+
+(defclass grid ()
   ((tile-hash
     :initarg :tiles
     :accessor tiles
@@ -11,12 +23,8 @@
     :accessor units
     :documentation "A hash of the Unit objects on the map, stored by xy coordinates.")))
 
-
-(defstruct Tile
+(defstruct tile
   elevation terrain depth)
-
-(defstruct Point
-  x y)
 
 ;; Code to convert from qrs to xy and back again.
 ;; Note that &1 is bitwise and, how do you do that in Common Lisp?
