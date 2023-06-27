@@ -6,10 +6,10 @@
   :license  "Specify license here"
   :version "0.0.1"
   :serial t
-  :depends-on (#:random-uuid #:cl-json #:mcclim)
+  :depends-on (#:random-uuid #:cl-json #:cl-ppcre #:mcclim)
   :components ((:file "package")
-               (:file "map")
+               (:file "board")
                (:file "crew")
                (:file "element" :depends-on ("crew"))
                (:file "unitcard" :depends-on ("element"))
-               (:file "alphastrike" :depends-on ("element" "unitcard"))))
+               (:file "alphastrike" :depends-on ("element" "unitcard" "board"))))
