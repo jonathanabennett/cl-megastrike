@@ -40,6 +40,7 @@
 
 ;; Begin by defining a Hexagon class. We are using the Cubic constructor and
 ;; storage method described by Amin at Red Blob Games.
+
 (defclass hexagon ()
   ((q
     :initarg :q
@@ -60,6 +61,18 @@
                      :q q
                      :r r
                      :s s)))
+
+(defun hex-from-offset (&key col row)
+  "Creates hexes from the .board files used by MegaMek, which use an offset coordinate system instead of cubic like I do."
+  (let ((q col)
+        (- row (floor (/ (+ col (* (bit-and col) -1)) 2)))
+        (s (+ (* q -1) r))))
+  (make-hexagon :q q :r r :s s))
+
+(defmethod offset-from-hex ((hex hexagon))
+  (let ((row (+ (hex r) (floor (/ (+ (hex q) (* (bit-and (hex q)) -1))))))
+        (col (hex q)))
+    (list col row)))
 
 (defmethod same-hex ((hex1 hexagon) (hex2 hexagon))
   "Hexagons are equal if their q, r, and s coordinates are the same."
@@ -112,16 +125,6 @@ appropriate hexagon first."
 (defmethod hex-neighbor ((hex hexagon) direction)
   (hex-addition hex (hex-direction direction)))
 
-(defclass Point ()
-  ((x
-    :initarg :x
-    :accessor x)
-   (y
-    :initarg :y
-    :accessor y)))
-
-(defun make-point (&key x y)
-  (make-instance 'Point :x x :y y))
 ;; Display Implementation
 
 (defstruct layout
@@ -138,41 +141,41 @@ appropriate hexagon first."
 
 (defun hex-to-pixel (hex layout)
   (let ((vec (layout-hex-to-pixel-matrix layout)))
-    (make-point :x (+ (* (+ (* (elt vec 0) (q hex))
+    (make-point (+ (* (+ (* (elt vec 0) (q hex))
                             (* (elt vec 1) (r hex)))
                          (layout-x-size layout))
                       (layout-x-origin layout))
-                :y (+ (* (+ (* (elt vec 2) (q hex))
+                (+ (* (+ (* (elt vec 2) (q hex))
                             (* (elt vec 3) (r hex)))
                          (layout-y-size layout))
                       (layout-y-origin layout)))))
 
 (defun pixel-to-hex (mouse-point layout)
   (let* ((vec (layout-pixel-to-hex-matrix layout))
-         (modified-point (make-point :x (/ (- (x mouse-point) (layout-x-origin layout)) (layout-x-size layout))
-                                     :y (/ (- (x mouse-point) (layout-y-origin layout)) (layout-y-size layout))))
-         (calc-q (+ (* (elt vec 0) (x modified-point)) (* (elt vec 1) (y modified-point))))
-         (calc-r (+ (* (elt vec 2) (x modified-point)) (* (elt vec 3) (y modified-point)))))
+         (modified-point (make-point (/ (- (point-x mouse-point) (layout-x-origin layout)) (layout-x-size layout))
+                                     (/ (- (point-y mouse-point) (layout-y-origin layout)) (layout-y-size layout))))
+         (calc-q (+ (* (elt vec 0) (point-x modified-point)) (* (elt vec 1) (point-y modified-point))))
+         (calc-r (+ (* (elt vec 2) (point-x modified-point)) (* (elt vec 3) (point-y modified-point)))))
     (make-hexagon :q calc-q :r calc-r :s (+ (* calc-q -1) (* calc-r -1)))))
 
 (defun find-hex-corner (center corner layout)
   (let ((angle (* 2.0 pi (/ (+ (layout-start-angle layout)
                                corner) 6))))
-    (make-point :x (+ (* (layout-x-size layout)
+    (make-point (+ (* (layout-x-size layout)
                          (cos angle))
-                      (x center))
-                :y (+ (* (layout-y-size layout)
+                      (point-x center))
+                (+ (* (layout-y-size layout)
                          (sin angle))
-                      (y center)))))
+                      (point-y center)))))
 
 (defun point-to-list (point)
-  (list (x point) (y point)))
+  (list (point-x point) (point-y point)))
 
 (defun draw-hex (hex layout)
   (let ((center (hex-to-pixel hex layout))
         (points '()))
     (dotimes (i 6)
-      (push (point-to-list (find-hex-corner center i layout)) points))
+      (push (find-hex-corner center i layout) points))
      points))
 
 (defun pixel-to-hex (origin-point point-size point)
