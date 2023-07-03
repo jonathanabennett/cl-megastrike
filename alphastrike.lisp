@@ -8,8 +8,8 @@
                               :start-angle 0
                               :x-size 10
                               :y-size 10
-                              :x-origin 100
-                              :y-origin 100))
+                              :x-origin 10
+                              :y-origin 10))
 
 (defun load-data ()
   "Load the contents of the data directory in prepration for execution."
