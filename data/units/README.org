@@ -1,51 +1,26 @@
 #+TITLE: Readme
 
-* Units in cl-alphastrike
-Units in cl-alphastrike are built using lisp functions. If you don't know lisp,
+* Units in Alphastrike
+Units in Alphastrike are built using lisp functions. If you don't know lisp,
 that's OK. It isn't too difficult to create your own.
 * The Unit file
-Units are placed in files named with the full unit name (=locust-lct-1v.lisp=).
-Variants on a design should be placed in their own files. They can be created by
-copying an existing variant and changing the numbers. Below is an example entry,
-taken from the =locust-lct-1v.lisp= file, with additional annotations.
+Units are placed in files named with the full unit name (=locust-lct-1v.lisp=). Variants on a design should be placed in their own files. They can be created by copying an existing variant and changing the numbers. Below is an example entry, taken from the =locust-lct-1v.lisp= file, with additional annotations.
 ** The file structure
-The first line should not be changed. Without it, the function which creates
-the unit cannot find the correct class and helper functions.
+The first line should not be changed. Without it, the function which creates the unit cannot find the correct class and helper functions.
+
 #+begin_src lisp
 (in-package :cl-alphastrike)
 #+end_src
-The first line you should change is the unit name in the line beginning =defun=.
-It should be changed to match the unit you are creating, with no capital letters
-and all spaces replaced with hyphens. Beneath that, you can copy/paste the flavor
-text of the unit surrounded by double quotes. The flavor text is optional.
+
+The first line you should change is the unit name in the line beginning =defun=. It should be changed to match the unit you are creating, with no capital letters and all spaces replaced with hyphens. Beneath that, you can copy/paste the flavor text of the unit surrounded by double quotes. The flavor text is optional.
+
 #+begin_src lisp
 (defun locust-lct-1v ()
-  "Overview: The Locust is undoubtedly one of the most popular and prevalent
-light BattleMechs ever made. First produced in 2499, the almost dozen distinct
-factories manufacturing the design quickly spread the design to every power in
-human space. Its combination of tough armor (for its size), exceptional speed,
-and most importantly, low cost have all contributed to the Locust's success. It
-remains the benchmark for many scouting designs, and its continual upgrades have
-ensured that it remains just as effective with every new conflict that appears.
+  "Overview: The Locust is undoubtedly one of the most popular and prevalent light BattleMechs ever made. First produced in 2499, the almost dozen distinct factories manufacturing the design quickly spread the design to every power in human space. Its combination of tough armor (for its size), exceptional speed, and most importantly, low cost have all contributed to the Locust's success. It remains the benchmark for many scouting designs, and its continual upgrades have ensured that it remains just as effective with every new conflict that appears.
 
-Capabilities: As the Locust was first developed as a recon platform, speed is
-paramount to the design's philosophy. While many variants change the weaponry to
-fill specific tasks or purposes, Locusts are nearly always pressed into service
-in ways where they can best take advantage of their speed. When in line
-regiments, they can act as a deadly flankers or harassers, and are often used in
-reactionary roles to quickly plug holes in a fluid battle line. The structural
-form of Locusts themselves are their greatest weakness; with no hands, they are
-disadvantaged in phyisical combat and occasionally have difficulty righting
-themselves after a fall.
+Capabilities: As the Locust was first developed as a recon platform, speed is paramount to the design's philosophy. While many variants change the weaponry to fill specific tasks or purposes, Locusts are nearly always pressed into service in ways where they can best take advantage of their speed. When in line regiments, they can act as a deadly flankers or harassers, and are often used in reactionary roles to quickly plug holes in a fluid battle line. The structural form of Locusts themselves are their greatest weakness; with no hands, they are disadvantaged in phyisical combat and occasionally have difficulty righting themselves after a fall.
 
-Deployment: One of the most common designs even produced, even the smallest
-mercenary or pirate outfits will often field one or more of the design.
-Production for the Locust has continued uninterrupted for centuries, and it
-plays an important role in the militaries of many smaller nations. The base
-LCT-1V was once estimated to account for more than 75% of all Locusts in
-existence at the end of the Succession Wars, though these numbers have dropped
-with the reappearance of more advanced technology. Still, it remains common in
-every military worth note.
+Deployment: One of the most common designs even produced, even the smallest mercenary or pirate outfits will often field one or more of the design. Production for the Locust has continued uninterrupted for centuries, and it plays an important role in the militaries of many smaller nations. The base LCT-1V was once estimated to account for more than 75% of all Locusts in existence at the end of the Succession Wars, though these numbers have dropped with the reappearance of more advanced technology. Still, it remains common in every military worth note.
 
 systemmanufacturer:CHASSIS:Bergan
 systemmode:CHASSIS:VII
@@ -59,41 +34,38 @@ systemmanufacturer:TARGETING:O/P
 systemmode:TARGETING:911 "
 #+end_src
 
-Here begins the actual creation of the unit. Most elements are self-explanatory
-but there are a few catches.
+Here begins the actual creation of the unit. Most elements are self-explanatory but there are a few catches.
+
 #+begin_src lisp
   (make-element
    :name "Locust LCT-1V"
    :pv 18
    #+end_src
-Here is the first catch. Unit types are called kinds in cl-alphastrike. They are
-a =:= followed by the 2 letter unit type abbreviation. Currently, only =:bm= for
-BattleMech is supported.
+
+Here is the first catch. Unit types are called kinds in cl-alphastrike. They are a =:= followed by the 2 letter unit type abbreviation. Currently, only =:bm= for BattleMech is supported.
+
    #+begin_src lisp
    :kind :bm
    :size 1
    :tmm 3
 #+end_src
-Move is split into two elements. Move-distance, which is the number of hexes the
-unit can move, and move type which is either =:walk= or =:jump=.
+
+Move is split into two or four elements. =prime-move= and =prime-distance= represent the primary movement type for the elemnt, which for a Battlemech will be =:walk=. =secondary-move= and =secondary-distance= represent the secondary movment type, which is almost always =:jump=. If a unit cannot jump (like this locust), then do not include the two lines for the secondary values.
+
+Because Alphastrike is hex-based, the distances should be the move value in hexes, not inches.
+
 #+begin_src lisp
-   :mv-distance 8
-   :mv-type :walk
+   :prime-move :walk
+   :prime-distance 8
    :role "scout"
 #+end_src
-Damage is probably the most difficult portion of creating a new unit. All units
-must have at least one =make-damage-value=, with a damage type of =:standard=.
-This represents the unit's base attack. Additionally, they could have more
-damage types such as =:lrm :srm :ac :flak=. Finally, the =:if= special ability
-is represented as a damage type (since using it replaces your regular attack).
 
-To add a new damage type, simply copy one of the calls to =make-damage-value=
-(they are 2 lines long) and change the values. All damage types must start with
-a =:= and all =range-brackets= must be in the form ='(s m l)=. Common lisp is
-picky about parentheses, so make sure that they are balanced. The parentheses
-before =make-damage-value= should be closed by a parentheses after the
-=range-brackets= list. Do not delete the lone parentheses on a line by itself,
-it closes the whole =damages= list.
+Damage is probably the most difficult portion of creating a new unit. All units must have at least one =make-attack=, with a damage =:kind= of =:standard=. This represents the unit's base attack. Additionally, they could have more damage types such as =:lrm :srm :ac :flak=. Finally, the =:if= special ability is represented as a damage type (since using it replaces your regular attack).
+
+To add a new damage type, simply copy one of the calls to =make-attack= (they are 2 lines long) and change the values. All damage types must start with a =:= and all =attack= must be in the form ='(s m l)=. If a unit does =0*= damage in a range bracket, list that as 0.5. The game detects that value and rolls randomly just as in the base game.
+
+Common lisp is picky about parentheses, so make sure that they are balanced. The parentheses before =make-attack= should be closed by a parentheses after the =attack= list. Do not delete the lone parentheses on a line by itself, it closes the whole =damages= list.
+
 #+begin_src lisp
    :damages (list
              (make-damage-value :damage-type :standard
@@ -105,19 +77,14 @@ it closes the whole =damages= list.
    :max-armor 2
    :max-structure 2
 #+end_src
-Finally, specials are a list of the abbreviations for specials from the book,
-each beginning with a =:=. Do not include Damage specials, they should be added
-above as a damage value. An example might look like this:
-='(:ENE :PRB :CASEII :TSM)=
+
+Finally, specials are a list of the abbreviations for specials from the book, each beginning with a =:=. Do not include Damage specials, they should be added above as a damage value. An example might look like this: ='(:ENE :PRB :CASEII :TSM)=
+
 #+begin_src lisp
    :specials '()
    :crits '()))
    #+end_src
-Again, balanced parentheses is important, ensure that there are 2 "extra"
-closing parentheses on the crits line: One to close =make-element= and one to
-close the =defun= at the top.
 
-When you open cl-alphastrike, it scans the =data= folder and all its subfolders
-for lisp files and loads them, so the unit should appear immediately when you
-restart cl-alphastrike. If it does not, there is probably an error in the file.
-Contact me and I'll be happy to try to help!
+Again, balanced parentheses is important, ensure that there are 2 "extra" closing parentheses on the crits line: One to close =make-element= and one to close the =defun= at the top.
+
+When you open cl-alphastrike, it scans the =data= folder and all its subfolders for lisp files and loads them, so the unit should appear immediately when you restart cl-alphastrike. If it does not, there is probably an error in the file. Contact me and I'll be happy to try to help!
