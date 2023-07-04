@@ -15,12 +15,13 @@
   "Creates hexes from the .board files used by MegaMek, which use an offset coordinate system instead of cubic like I do."
   (let* ((q col)
          (r (- row (floor (/ (+ col (* (mod (abs col) 2) -1)) 2))))
-         (s (+ (* q -1) r)))
-    (new-hexagon :q q :r r :s s)))
+         (s (* (+ q r) -1))
+         (h (new-hexagon :q q :r r :s s)))
+    h))
 
 (defun offset-from-hex (hex)
   "Creates xy coordinates from cubic coordinates using a hexagon."
-  (let ((row (+ (hexagon-r hex) (floor (/ (+ (hexagon-q hex) (* (mod (abs (hexagon-q hex)) 2) -1))))))
+  (let ((row (+ (hexagon-r hex) (floor (/ (+ (hexagon-q hex) (* (mod (abs (hexagon-q hex)) 2) -1)) 2))))
         (col (hexagon-q hex)))
     (list col row)))
 

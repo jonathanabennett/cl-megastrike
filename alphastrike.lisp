@@ -43,19 +43,14 @@
          (4/9 record-sheet)))
       (1/6 int)))))
 
-(defvar *test-map* (list (new-hexagon :q -1 :r -1 :s  2)
-                         (new-hexagon :q  0 :r -1 :s  1)
-                         (new-hexagon :q  1 :r -1 :s  0)
-                         (new-hexagon :q -1 :r  0 :s  1)
-                         (new-hexagon :q  0 :r  0 :s  0)
-                         (new-hexagon :q  1 :r  0 :s -1)
-                         (new-hexagon :q -1 :r  1 :s  0)
-                         (new-hexagon :q  0 :r  1 :s -1)))
+(defvar *test-map* (make-instance 'grid))
 
 (defmethod display-map ((frame alphastrike) stream)
-  (format stream "In the map~%")
-  (dolist (loc *test-map*)
-    (draw-polygon stream (draw-hex loc *layout*) :filled nil :line-thickness 2)))
+  (maphash (lambda (k v)
+             (draw-polygon stream (draw-hex (tile-hexagon v) *layout*) :filled t :ink  +light-green+)
+             (draw-polygon stream (draw-hex (tile-hexagon v) *layout*) :filled nil :line-thickness 2))
+           (tiles *test-map*)))
+
 
 (defmethod display-element ((frame alphastrike) stream)
   (let ((pane (get-frame-pane frame 'record-sheet)))
@@ -88,6 +83,7 @@
 
 (defun main ()
   (load-data)
+  (load-board-file #P"data/boards/16x17 Grassland 1.board" *test-map*)
   (setf *locust* (make-combat-unit :pilot (make-instance
                                            'pilot
                                            :name "Shooty McShootyface")
