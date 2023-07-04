@@ -1,12 +1,17 @@
 (in-package :alphastrike)
 
+
+(defun combat-unit-id (combat-unit)
+  (let ((id-string (random-uuid:to-string (id combat-unit))))
+    (first (cl-ppcre:split "(-)" id-string :limit 2))))
+
 (defun quickstats-block (stream combat-unit)
   "Draws the quick-stats block for a unit."
   (let ((element (element combat-unit)))
     (surrounding-output-with-border (stream :ink +light-gray+ :filled t :shape :rounded)
       (with-text-style (stream (make-text-style :serif :bold :normal))
         (format stream "~a " (name element)))
-      (format stream "#~a " (id combat-unit))
+      (format stream "#~a " (combat-unit-id combat-unit))
       (format stream "~a~%" (kind element))
       (format stream "  A/S: ~a/~a" (current-armor element) (current-struct element))
       (format stream "  MV: ~a" (format-move element))

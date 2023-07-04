@@ -11,10 +11,6 @@
     :initform 4
     :accessor skill)))
 
-
-(defgeneric display (obj)
-  (:documentation "Pretty print an object for display in the GUI"))
-
 (defmethod display ((obj pilot))
   "Formats the pilot for display in the record sheet."
   (format nil "~A: ~A" (name obj) (skill obj)))

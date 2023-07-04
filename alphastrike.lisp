@@ -60,7 +60,7 @@
 (defmethod display-element ((frame alphastrike) stream)
   (let ((pane (get-frame-pane frame 'record-sheet)))
     (with-text-style (stream (make-text-style :serif :bold :large))
-      (format stream "~a~%" (id *locust*)))
+      (format stream "~a: ~a~%" (combat-unit-id *locust*) (name (element *locust*)))
     (formatting-table (stream)
       (formatting-row (stream)
         (formatting-cell (stream)
@@ -83,16 +83,15 @@
           (format stream "~{~A ~}" (crits (element *locust*)))))
       )
     (terpri stream)
-    (quickstats-block stream *locust*)))
+    (quickstats-block stream *locust*))))
 
 
 (defun main ()
   (load-data)
-  (setf *locust* (make-combat-unit :id 1
-                                   :pilot (make-instance
+  (setf *locust* (make-combat-unit :pilot (make-instance
                                            'pilot
                                            :name "Shooty McShootyface")
-                                   :unit (locust-lct-1v)))
+                                   :unit (phoenix-hawk-pxh-1d)))
   (run-frame-top-level
    (make-application-frame 'alphastrike
                            :width 800
