@@ -1,13 +1,13 @@
 (in-package :alphastrike)
 
 (deftype elements-type ()
-  "This functions like an ENUM, defining the valid list of element types in the game."
+  "This defines the valid list of element types in the game."
   '(member 'BM 'DS))
 (deftype move-type ()
-  "This functions like an ENUM, defining the valid ways an element can move in the game."
+  "This defines the valid ways an element can move in the game."
   '(member 'WALK 'JUMP))
 (deftype crit ()
-  "This functions like an ENUM, defining the possible critical hits an element can take in the game."
+  "This defines the possible critical hits an element can take in the game."
   '(member 'ENGINE 'FIRE-CONTROL 'MP 'WEAPONS))
 
 (defclass damage-value ()
@@ -76,7 +76,6 @@
     :documentation "The size. Should be an integer from 1-4."
     :initarg :size
     :accessor size)
-   ;; TODO Redesign class so that it has primary and secondary move slots
    (primary-move
     :documentation "The kind of move that the unit can make."
     :initarg :prime-move
@@ -189,9 +188,6 @@ for bonuses."
 ;;   ((>= 4 *test-num*) (format t "branch 2"))
 ;;   ((>= 6 *test-num*) (format t "branch 3"))
 ;;   ((>= 8 *test-num*) (format t "branch 4")))
-
-;; Can you figure out how this format control string works to replace the below with
-;; "~{~@[~a~^/~]~^~}"
 
 (defun format-move (element)
   (let ((mv-string ""))
