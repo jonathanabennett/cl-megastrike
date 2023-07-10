@@ -1,14 +1,28 @@
 * Plan for a computer based AS game.
 
 * Point Release plan
-** 0.1 Digital Record Sheet
-I don't like the way I'm currently handling elements, it's going to need significant rewriting.
+** 0.1.0
+*** Next Steps
+**** Map
+Highlight on mouse over, info on click.
 
-I want to store the unit data in SQLite to see how that works.
-*** Map
-I don't want to store the map in a hash because it results in duplicated data. The address will have to be in a list that is used as the has key and also in the object itself. Maybe that's not a problem? But I don't like it.
-Storing it in a 3d array or a 2d array works because then data isn't duplicated, but that might be complicated. I think I will probably build them both and see what's going on.
-** 0.2 Hot Seat Playable (Mechs only)
-** 0.3 Full basic rules implemented (Mechs only)
-** 0.4 Basic AI
-** 0.5 Begin work on Advanced rules
+Zooming.
+
+Refactor code so it makes better sense (similar to how we did unit cards).
+**** Units
+Add units to the map.
+
+Make the units presentation types.
+**** Movement
+Calculate movement as simple straight-line distance (I can use this calculation for range later).
+**** Attack
+Roll to hit.
+Roll for damage.
+
+Manage screen updates.
+** 0.1.1
+*** Planned Expansion
+**** Map
+The hex drawing is confusing and needs to be cleaned up. I also don't like the positioning of the hex number.
+
+Make presentation types for the minimap hexes (if necessary).
