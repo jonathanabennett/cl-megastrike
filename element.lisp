@@ -38,24 +38,28 @@
   ((id
     :documentation "UUID identifying the unit"
     :initarg :id
-    :accessor id)
+    :accessor cu-id)
    (element
     :documentation "The Element"
     :initarg :element
-    :accessor element)
+    :accessor cu-element)
    (mv-status
     :documentation "The unit's movement status."
     :initform nil
-    :accessor mv-status)
+    :accessor cu-mv-status)
    (attack-status
     :documentation "The unit's attack status."
     :initform nil
-    :accessor atk-status)
+    :accessor cu-atk-status)
    (pilot
     :documentation "The pilot of the unit."
     :initarg :pilot
-    :accessor pilot
+    :accessor cu-pilot
     :initform (make-instance 'pilot :name "Shooty McShootface" :skill 4))
+   (location
+    :documentation "The q,r,s location of a unit."
+    :initarg :loc
+    :accessor cu-loc)
    ))
 
 (defclass element ()
@@ -169,7 +173,7 @@ for bonuses."
                  :specials specials
                  :crits crits))
 
-(defun make-combat-unit (&key id pilot unit)
+(defun make-combat-unit (&key id pilot unit loc)
   (if (eq id nil)
       (setf id (random-uuid::make-uuid)))
   (if (eq pilot nil)
@@ -177,7 +181,14 @@ for bonuses."
   (make-instance 'combat-unit
                 :id id
                 :pilot pilot
-                :element unit))
+                :element unit
+                :loc loc))
+
+(defmethod take-damage ((unit combat-unit))
+  (let ((elem (cu-element unit)))
+    (if (eq 0 (current-armor elem))
+        (decf (current-struct elem))
+        (decf (current-armor elem)))))
 
 (defmethod unit-tmm ((unit combat-unit))
   "This will return the TMM of a unit based on it's current mv-status."

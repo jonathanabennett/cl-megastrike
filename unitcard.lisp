@@ -2,12 +2,12 @@
 
 
 (defun combat-unit-id (combat-unit)
-  (let ((id-string (random-uuid:to-string (id combat-unit))))
+  (let ((id-string (random-uuid:to-string (cu-id combat-unit))))
     (first (cl-ppcre:split "(-)" id-string :limit 2))))
 
 (defun quickstats-block (stream combat-unit)
   "Draws the quick-stats block for a unit."
-  (let ((element (element combat-unit)))
+  (let ((element (cu-element combat-unit)))
     (surrounding-output-with-border (stream :ink +light-gray+ :filled t :shape :rounded)
       (with-text-style (stream (make-text-style :serif :bold :normal))
         (format stream "~a " (name element)))
@@ -19,7 +19,7 @@
 
 (defun general-info-block (stream combat-unit)
   "Draws the first block of the Record sheet, containing the Type, MV, Role, and Pilot info."
-  (let ((element (element combat-unit)))
+  (let ((element (cu-element combat-unit)))
     (surrounding-output-with-border (stream :ink +light-gray+ :filled t :shape :rounded)
       (with-text-style (stream (make-text-style :serif :bold :normal))
         (format stream "TP: "))
@@ -33,17 +33,17 @@
         (format stream "~%")
       (with-text-style (stream (make-text-style :serif :bold :normal))
         (format stream "Pilot info: "))
-        (format stream "~A" (display (pilot combat-unit))))))
+        (format stream "~A" (display (cu-pilot combat-unit))))))
 
 (defun attack-info-block (stream combat-unit)
   "Draws the attack and heat information."
-  (let ((element (element combat-unit)))
+  (let ((element (cu-element combat-unit)))
     (surrounding-output-with-border (stream :ink +light-gray+ :filled t :shape :rounded)
       (dolist (atk (attack-list element))
         (with-text-style (stream (make-text-style :serif :bold :normal))
           (format stream "Attack: "))
         (format stream "~a: " (kind atk))
-        (format stream "~{~a~}~%" (attack atk)))
+        (format stream "~{~a ~}~%" (attack atk)))
       (with-text-style (stream (make-text-style :serif :bold :normal))
         (format stream "OV: "))
       (format stream "~a  " (overheat element))
@@ -64,7 +64,7 @@
 
 (defun damage-info-block (stream combat-unit)
   "Draws the current damage and structure and any critical hits."
-  (let ((element (element combat-unit)))
+  (let ((element (cu-element combat-unit)))
     (surrounding-output-with-border (stream :ink +light-gray+ :filled t :shape :rounded)
       (with-text-style (stream (make-text-style :serif :bold :normal))
         (format stream "Armor: "))
@@ -76,6 +76,7 @@
               (format stream " ~a " (+ pip 1)))
             (surrounding-output-with-border (stream
                                             :filled t
+                                            :ink +red+
                                             :shape :rectangle
                                             :move-cursor nil)
               (format stream " ~a " (+ pip 1))))
@@ -90,11 +91,12 @@
               (format stream " ~a " (+ pip 1)))
             (surrounding-output-with-border (stream
                                             :filled t
+                                            :ink +red+
                                             :shape :rectangle
                                             :move-cursor nil)
               (format stream " ~a " (+ pip 1))))
         (format stream "  ")))))
 
 (defun specials-info-block (stream combat-unit)
-  (let ((element (element combat-unit)))
+  (let ((element (cu-element combat-unit)))
     "Draws the Specials"))
