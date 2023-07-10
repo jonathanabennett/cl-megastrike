@@ -3,12 +3,23 @@
 ;; Begin by defining a Hexagon class. We are using the Cubic constructor and
 ;; storage method described by Amin at Red Blob Games.
 
-(defstruct hexagon
-  q r s)
+;; Replace this with a standard class
+;; Prefix all accessors with `hexagon-'
+;; Convert defuns to defmethods
+(defclass hexagon ()
+  ((q
+    :initarg :q
+    :accessor hexagon-q)
+   (r
+    :initarg :r
+    :accessor hexagon-r)
+   (s
+    :initarg :s
+    :accessor hexagon-s)))
 
 (defun new-hexagon (&key q r s)
   (if (eq (+ q r s) 0)
-      (make-hexagon :q q :r r :s s)))
+      (make-instance 'hexagon :q q :r r :s s)))
 
 ;; Code to convert from qrs to xy and back again.
 (defun hex-from-offset (&key col row)
@@ -19,37 +30,37 @@
          (h (new-hexagon :q q :r r :s s)))
     h))
 
-(defun offset-from-hex (hex)
+(defmethod offset-from-hex ((hex hexagon))
   "Creates xy coordinates from cubic coordinates using a hexagon."
   (let ((row (+ (hexagon-r hex) (floor (/ (+ (hexagon-q hex) (* (mod (abs (hexagon-q hex)) 2) -1)) 2))))
         (col (hexagon-q hex)))
     (list col row)))
 
-(defun same-hex (hex1 hex2)
+(defmethod same-hex ((hex1 hexagon) (hex2 hexagon))
   "Hexagons are equal if their q, r, and s coordinates are the same."
   (and (= (hexagon-s hex1) (hexagon-s hex2))
        (= (hexagon-r hex1) (hexagon-r hex2))
        (= (hexagon-q hex1) (hexagon-q hex2))))
 
-(defun hex-addition (hex1 hex2)
+(defmethod hex-addition ((hex1 hexagon) (hex2 hexagon))
   "Uses Cartesian addition to add two hexagons together."
   (new-hexagon :q (+ (hexagon-q hex1) (hexagon-q hex2))
                 :r (+ (hexagon-r hex1) (hexagon-r hex2))
                 :s (+ (hexagon-s hex1) (hexagon-s hex2))))
 
-(defun hex-subtract (hex1 hex2)
+(defmethod hex-subtract ((hex1 hexagon) (hex2 hexagon))
   "Uses Cartesian subtraction to subtract hexagon b from hexagon a."
   (new-hexagon :q (- (hexagon-q hex1) (hexagon-q hex2))
                 :r (- (hexagon-r hex1) (hexagon-r hex2))
                 :s (- (hexagon-s hex1) (hexagon-s hex2))))
 
-(defun hex-multiply (hex x)
+(defmethod hex-multiply ((hex hexagon) x)
   "Uses Cartesian multiplication to multiply a hex by a value x together."
   (new-hexagon :q (* (hexagon-q hex) x)
                 :r (* (hexagon-r hex) x)
                 :s (* (hexagon-s hex) x)))
 
-(defun hex-distance (hex1 hex2)
+(defmethod hex-distance ((hex1 hexagon) (hex2 hexagon))
   "The length of the distance between two hexagons is calculated similarly to
 Manhattan distances with a square grid, but you half the sum to get the final
 distance."
@@ -65,11 +76,11 @@ distance."
   "This vector describes the offsets to calculate neighbors.")
 
 (defun hex-direction (direction)
-  "Returns the hex in a given direction."
+  "Returns the coordinate transformation to select a hex in a given direction."
   (if (and (<= 0 direction) (> 6 direction))
       (elt *hex-directions* direction)))
 
-(defun hex-neighbor (hex direction)
+(defmethod hex-neighbor ((hex hexagon) direction)
   "Finds the neighbor of a `hex' in a given `direction'.
 `direction' must be an integer between 0 and 5 inclusive."
   (hex-addition hex (hex-direction direction)))
@@ -84,7 +95,7 @@ distance."
   x-origin
   y-origin)
 
-(defun hex-to-pixel (hex layout)
+(defmethod hex-to-pixel ((hex hexagon) layout)
   "Converts from a q,r,s address, to an x,y pixel position for the center of the hex."
   (let ((vec (layout-hex-to-pixel-matrix layout)))
     (make-point (+ (* (+ (* (elt vec 0) (hexagon-q hex))
@@ -107,7 +118,7 @@ distance."
                          (sin angle))
                       (point-y center)))))
 
-(defun draw-hex (hex layout)
+(defmethod draw-hex ((hex hexagon) layout)
   (let ((center (hex-to-pixel hex layout))
         (points '()))
     (dotimes (i 6)
@@ -123,7 +134,3 @@ hex is being clicked on / hovered over."
          (calc-q (+ (* (elt vec 0) (point-x modified-point)) (* (elt vec 1) (point-y modified-point))))
          (calc-r (+ (* (elt vec 2) (point-x modified-point)) (* (elt vec 3) (point-y modified-point)))))
     (make-hexagon :q calc-q :r calc-r :s (+ (* calc-q -1) (* calc-r -1)))))
-
-;; I need to check how this is different from the code above.
-;; (defun pixel-to-hex (origin-point point-size point)
-;;   "Not yet implemented.")
