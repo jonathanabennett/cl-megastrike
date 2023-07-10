@@ -6,8 +6,8 @@
 (defvar *layout* (make-layout :hex-to-pixel-matrix (vector (/ 3.0 2.0) 0 (/ (sqrt 3.0) 2.0) (sqrt 3.0))
                               :pixel-to-hex-matrix (vector (/ 2.0 3.0) 0 (/ 1.0 3.0) (/ (sqrt 3.0) 3.0))
                               :start-angle 0
-                              :x-size 10
-                              :y-size 10
+                              :x-size 35
+                              :y-size 35
                               :x-origin 10
                               :y-origin 10))
 
