@@ -101,7 +101,9 @@
   (setf *locust* (make-combat-unit :pilot (make-instance
                                            'pilot
                                            :name "Shooty McShootyface")
-                                   :unit (phoenix-hawk-pxh-1d)))
+                                   :unit (phoenix-hawk-pxh-1d)
+                                   :loc (list 1 1 -2)))
+  (add-unit *test-map* *locust*)
   (run-frame-top-level
    (make-application-frame 'alphastrike
                            :width 800

@@ -9,11 +9,30 @@
    (units
     :initarg :units
     :accessor units
-    :initform '()
+    :initform (make-hash-table :test 'equalp)
     :documentation "A hash of the Unit objects on the map, stored by xy coordinates.")))
 
-(defstruct tile
-  hexagon elevation terrain depth)
+(defclass tile ()
+  ((hexagon
+    :initarg :hexagon
+    :accessor tile-hexagon
+    :documentation "The hexagon where this tile is located.")
+   (elevation
+    :initarg :elevation
+    :accessor tile-elevation
+    :documentation "The elevation of the tile.")
+   (terrain
+    :initarg :terrain
+    :accessor tile-terrain
+    :documentation "The terrain string from the .board file for this tile.")
+   (terrain-palette
+    :initarg :terrain-palette
+    :accessor tile-terrain-palette
+    :documentation "The color palette and design to color the tile.")))
+
+(defmethod add-unit ((g grid) (u combat-unit))
+  (if (not (gethash (cu-id u) (units g)))
+      (setf (gethash (cu-id u) (units g)) u)))
 
 (defmethod insert-tile ((g grid) (ti tile))
   "Insert tile `ti' into the `tile-hash' of grid `g'."
@@ -24,10 +43,23 @@
 (defun new-tile (line)
   (let* ((tile-list (parse-hex-line line))
          (hex-addr (parse-hex-address (nth 0 tile-list))))
-    (make-tile :hexagon (hex-from-offset :col (first hex-addr) :row (second hex-addr))
-               :elevation (parse-integer (nth 1 tile-list))
-               :terrain (nth 2 tile-list)
-               :depth (nth 3 tile-list))))
+    (make-instance 'tile
+                   :hexagon (hex-from-offset :col (first hex-addr) :row (second hex-addr))
+                   :elevation (parse-integer (nth 1 tile-list))
+                   :terrain (nth 2 tile-list)
+                   :terrain-palette (nth 3 tile-list))))
+
+(define-presentation-method present (tile
+                                     (type tile)
+                                     stream
+                                     (view textual-view) &key)
+  (draw-polygon stream (draw-hex (tile-hexagon tile) *layout*) :filled t :ink +light-green+)
+  (draw-polygon stream (draw-hex (tile-hexagon tile) *layout*) :filled nil :line-thickness 2)
+  (let ((x (first (offset-from-hex (tile-hexagon tile))))
+        (y (second (offset-from-hex (tile-hexagon tile)))))
+    (draw-text stream (format nil "~2,'0D~2,'0D" x y) (nth 3 (draw-hex (tile-hexagon tile) *layout*)))))
+
+
 
 (defun parse-hex-address (str)
 "A hex address from a board file is a string in the format xxyy"
