@@ -1,16 +1,6 @@
 (in-package #:alphastrike)
 
-(defclass grid ()
-  ((tile-hash
-    :initarg :tiles
-    :accessor tiles
-    :initform (make-hash-table :test 'equalp)
-    :documentation "The hash of the Tile objects which make up the map, stored by xy coordinates.")
-   (units
-    :initarg :units
-    :accessor units
-    :initform (make-hash-table :test 'equalp)
-    :documentation "A hash of the Unit objects on the map, stored by xy coordinates.")))
+;;; Tile class
 
 (defclass tile ()
   ((hexagon
@@ -29,16 +19,6 @@
     :initarg :terrain-palette
     :accessor tile-terrain-palette
     :documentation "The color palette and design to color the tile.")))
-
-(defmethod add-unit ((g grid) (u combat-unit))
-  (if (not (gethash (cu-id u) (units g)))
-      (setf (gethash (cu-id u) (units g)) u)))
-
-(defmethod insert-tile ((g grid) (ti tile))
-  "Insert tile `ti' into the `tile-hash' of grid `g'."
-  (if (gethash (offset-from-hex (tile-hexagon ti)) (tiles g))
-      (gethash (offset-from-hex (tile-hexagon ti)) (tiles g))
-      (setf (gethash (offset-from-hex (tile-hexagon ti)) (tiles g)) ti)))
 
 (defun new-tile (line)
   (let* ((tile-list (parse-hex-line line))
@@ -59,7 +39,31 @@
         (y (second (offset-from-hex (tile-hexagon tile)))))
     (draw-text stream (format nil "~2,'0D~2,'0D" x y) (nth 3 (draw-hex (tile-hexagon tile) *layout*)))))
 
+;;; Grid class
 
+(defclass grid ()
+  ((tile-hash
+    :initarg :tiles
+    :accessor tiles
+    :initform (make-hash-table :test 'equalp)
+    :documentation "The hash of the Tile objects which make up the map, stored by xy coordinates.")
+   (units
+    :initarg :units
+    :accessor units
+    :initform (make-hash-table :test 'equalp)
+    :documentation "A hash of the Unit objects on the map, stored by xy coordinates.")))
+
+(defmethod add-unit ((g grid) (u combat-unit))
+  (if (not (gethash (cu-id u) (units g)))
+      (setf (gethash (cu-id u) (units g)) u)))
+
+(defmethod insert-tile ((g grid) (ti tile))
+  "Insert tile `ti' into the `tile-hash' of grid `g'."
+  (if (gethash (offset-from-hex (tile-hexagon ti)) (tiles g))
+      (gethash (offset-from-hex (tile-hexagon ti)) (tiles g))
+      (setf (gethash (offset-from-hex (tile-hexagon ti)) (tiles g)) ti)))
+
+;;; Board file parsing logic
 
 (defun parse-hex-address (str)
 "A hex address from a board file is a string in the format xxyy"
