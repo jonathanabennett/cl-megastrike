@@ -26,8 +26,7 @@
 
 (define-aspect location
   (q :initform nil)
-  (r :initform nil)
-  (s :initform nil))
+  (r :initform nil))
 
 (define-aspect pilot
     (name :initform nil) (skill :initform nil))
@@ -47,7 +46,7 @@
 (defun new-element (&key short-name full-name unit-type role pv size
                       cur-armor max-armor cur-struct max-struct
                       move-list short medium long ov (cur-heat 0)
-                      special-list (crit-list '()) img tro q r s
+                      special-list (crit-list '()) img tro q r
                       (pilot "Shooty McGee") (skill 4))
   (let ((arm    (if (eq cur-armor nil) max-armor cur-armor))
         (struct (if (eq cur-struct nil) max-armor cur-armor)))
@@ -75,7 +74,6 @@
                    :info/tro tro
                    :location/q q
                    :location/r r
-                   :location/s s
                    :pilot/name pilot
                    :pilot/skill skill)))
 
@@ -120,7 +118,6 @@
   (draw-text (find-pane-named *application-frame* 'world)
              (format nil "~a" (info/short-name entity))
              (hex-to-pixel (new-hexagon :q (location/q entity)
-                                        :r (location/r entity)
-                                        :s (location/s entity)) *layout*)
+                                        :r (location/r entity)) *layout*)
              :align-x :center))
 

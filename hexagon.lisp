@@ -12,23 +12,23 @@
     :accessor hexagon-q)
    (r
     :initarg :r
-    :accessor hexagon-r)
-   (s
-    :initarg :s
-    :accessor hexagon-s)))
+    :accessor hexagon-r)))
 
-(defun new-hexagon (&key q r s)
-  (if (eq (+ q r s) 0)
-      (make-instance 'hexagon :q q :r r :s s)))
+(defmethod hexagon-s ((h hexagon))
+  (* (+ (hexagon-q h) (hexagon-r h)) -1))
+
+(defun new-hexagon (&key q r)
+  (make-instance 'hexagon :q q :r r))
 
 ;; Code to convert from qrs to xy and back again.
 (defun hex-from-offset (&key col row)
   "Creates hexes from the .board files used by MegaMek, which use an offset coordinate system instead of cubic like I do."
   (let* ((q col)
          (r (- row (floor (/ (+ col (* (mod (abs col) 2) -1)) 2))))
-         (s (* (+ q r) -1))
-         (h (new-hexagon :q q :r r :s s)))
-    h))
+         (s (* (+ q r) -1)))
+    (if (eq (+ q r s) 0)
+        (new-hexagon :q q :r r))))
+
 
 (defmethod offset-from-hex ((hex hexagon))
   "Creates xy coordinates from cubic coordinates using a hexagon."
@@ -67,12 +67,12 @@ distance."
   (let ((hex-length (hex-subtract hex1 hex2)))
     (/ (+ (abs (hexagon-q hex-length)) (abs (hexagon-r hex-length)) (abs (hexagon-s hex-length))) 2)))
 
-(defvar *hex-directions* (vector (new-hexagon :q 1 :r 0 :s -1)
-                                 (new-hexagon :q 1 :r -1 :s 0)
-                                 (new-hexagon :q 0 :r -1 :s 1)
-                                 (new-hexagon :q -1 :r 0 :s 1)
-                                 (new-hexagon :q -1 :r 1 :s 0)
-                                 (new-hexagon :q 0 :r 1 :s -1))
+(defvar *hex-directions* (vector (new-hexagon :q 1  :r 0)
+                                 (new-hexagon :q 1  :r -1)
+                                 (new-hexagon :q 0  :r -1)
+                                 (new-hexagon :q -1 :r 0)
+                                 (new-hexagon :q -1 :r 1)
+                                 (new-hexagon :q 0  :r 1))
   "This vector describes the offsets to calculate neighbors.")
 
 (defun hex-direction (direction)
@@ -125,12 +125,13 @@ distance."
       (push (find-hex-corner center i layout) points))
      points))
 
-(defun pixel-to-hex (mouse-point layout)
-  "Converts from an x,y pixel address to a q,r,s hex address. Called to determine which
-hex is being clicked on / hovered over."
-  (let* ((vec (layout-pixel-to-hex-matrix layout))
-         (modified-point (make-point (/ (- (point-x mouse-point) (layout-x-origin layout)) (layout-x-size layout))
-                                     (/ (- (point-y mouse-point) (layout-y-origin layout)) (layout-y-size layout))))
-         (calc-q (+ (* (elt vec 0) (point-x modified-point)) (* (elt vec 1) (point-y modified-point))))
-         (calc-r (+ (* (elt vec 2) (point-x modified-point)) (* (elt vec 3) (point-y modified-point)))))
-    (make-hexagon :q calc-q :r calc-r :s (+ (* calc-q -1) (* calc-r -1)))))
+;; Pretty sure this is unncessary since McCLIM's presentations handle that for me.
+;; (defun pixel-to-hex (mouse-point layout)
+;;   "Converts from an x,y pixel address to a q,r,s hex address. Called to determine which
+;; hex is being clicked on / hovered over."
+;;   (let* ((vec (layout-pixel-to-hex-matrix layout))
+;;          (modified-point (make-point (/ (- (point-x mouse-point) (layout-x-origin layout)) (layout-x-size layout))
+;;                                      (/ (- (point-y mouse-point) (layout-y-origin layout)) (layout-y-size layout))))
+;;          (calc-q (+ (* (elt vec 0) (point-x modified-point)) (* (elt vec 1) (point-y modified-point))))
+;;          (calc-r (+ (* (elt vec 2) (point-x modified-point)) (* (elt vec 3) (point-y modified-point)))))
+;;     (make-hexagon :q calc-q :r calc-r :s (+ (* calc-q -1) (* calc-r -1)))))
