@@ -1,7 +1,28 @@
 (in-package :alphastrike)
 
 (defun locust-lct-1m ()
-  "Overview: The Locust is undoubtedly one of the most popular and prevalent
+  (new-element
+   :short-name "LCT-1M"
+   :full-name "Locust LCT-1M"
+   :unit-type 'BM
+   :role 'missile-boat
+   :pv 21
+   :size 1
+   :max-armor 1
+   :max-struct 2
+   :move-list (list
+               (cons 'walk 8)
+              )
+   :short 1
+   :medium 2
+   :long 1 ;; Enter 0.5 for 0*
+   :ov 0
+   :cur-heat 0
+   :special-list '('SRCH 'SOA 'IF1)
+   :crit-list '()
+   :img #P"data/images/units/mechs/Locust_1M.png"
+   :tro
+"Overview: The Locust is undoubtedly one of the most popular and prevalent
 light BattleMechs ever made. First produced in 2499, the almost dozen distinct
 factories manufacturing the design quickly spread the design to every power in
 human space. Its combination of tough armor (for its size), exceptional speed,
@@ -38,23 +59,4 @@ systemmanufacturer:COMMUNICATIONS:Garrett
 systemmode:COMMUNICATIONS:T10-B
 systemmanufacturer:TARGETING:O/P
 systemmode:TARGETING:911 "
-  (make-element
-   :name "Locust lct-1m"
-   :pv 21
-   :kind :bm
-   :size 1
-   :mv-list (list
-             (make-move-value :kind :walk :distance 8)
-             ) ;; To add a new movement type, copy the line above and paste it above this parentheses.
-   :role "Missle Boat"
-   :attack-list (list
-             (make-damage-value :kind :standard
-                                :range-brackets '(1 2 1))
-             (make-damage-value :kind :if
-                                :range-brackets '(0 0 1))
-             ) ;; To add a new damage type, copy the above two lines and paste them above this parentheses.
-   :ov 0
-   :max-armor 1
-   :max-structure 2
-   :specials '()
-   :crits '()))
+))

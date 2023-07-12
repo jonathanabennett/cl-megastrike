@@ -1,7 +1,28 @@
 (in-package :alphastrike)
 
 (defun locust-lct-1e ()
-  "Overview: The Locust is undoubtedly one of the most popular and prevalent
+  (new-element
+   :short-name "LCT-1E"
+   :full-name "Locust LCT-1E"
+   :unit-type 'BM
+   :role 'scout
+   :pv 19
+   :size 1
+   :max-armor 2
+   :max-struct 2
+   :move-list (list
+               (cons 'walk 8)
+              )
+   :short 2
+   :medium 1
+   :long 0 ;; Enter 0.5 for 0*
+   :ov 0
+   :cur-heat 0
+   :special-list '('SRCH 'SOA 'ENE)
+   :crit-list '()
+   :img #P"data/images/units/mechs/Locust_1E.png"
+   :tro
+"Overview: The Locust is undoubtedly one of the most popular and prevalent
 light BattleMechs ever made. First produced in 2499, the almost dozen distinct
 factories manufacturing the design quickly spread the design to every power in
 human space. Its combination of tough armor (for its size), exceptional speed,
@@ -38,21 +59,4 @@ systemmanufacturer:COMMUNICATIONS:Garrett
 systemmode:COMMUNICATIONS:T10-B
 systemmanufacturer:TARGETING:O/P
 systemmode:TARGETING:911 "
-  (make-element
-   :name "Locust lct-1e"
-   :pv 19
-   :kind :bm
-   :size 1
-   :mv-list (list
-             (make-move-value :kind :walk :distance 8)
-             ) ;; To add a new movement type, copy the line above and paste it above this parentheses.
-   :role "Scout"
-   :attack-list (list
-             (make-damage-value :kind :standard
-                                :range-brackets '(2 1 0))
-             ) ;; To add a new damage type, copy the above two lines and paste them above this parentheses.
-   :ov 0
-   :max-armor 2
-   :max-structure 2
-   :specials '(:ene)
-   :crits '()))
+))
