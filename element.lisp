@@ -12,6 +12,8 @@
   "This defines the possible critical hits an element can take in the game."
   '(member 'ENGINE 'FIRE-CONTROL 'MP 'WEAPONS))
 
+;;; Aspects for Elements
+
 (define-aspect info short-name full-name unit-type role pv size tro)
 (define-aspect damageable cur-armor max-armor cur-struct max-struct crit-list)
 (define-aspect moveable move-alist move-used)
@@ -29,6 +31,8 @@
 
 (define-aspect pilot
     (name :initform nil) (skill :initform nil))
+
+;;; Element definition and Constructor
 
 (define-entity combat-unit (info
                             damageable
@@ -75,19 +79,6 @@
                    :pilot/name pilot
                    :pilot/skill skill)))
 
-
-
-(define-system log-all-entities ((entity))
-  (print (location/q entity)))
-
-(define-system draw-units ((entity display location))
-  (draw-text (find-pane-named *application-frame* 'world)
-             (format nil "~a" (info/short-name entity))
-             (hex-to-pixel (new-hexagon :q (location/q entity)
-                                        :r (location/r entity)
-                                        :s (location/s entity)) *layout*)
-             :align-x :center))
-
 (defun format-move-assoc (stream m colonp atsignp)
   (format stream "~a~a" (cdr m) (cdr (assoc (car m) *mv-designators*))))
 
@@ -119,3 +110,17 @@
   (if (eq 0 (damageable/cur-armor u))
       (decf (damageable/cur-struct u))
       (decf (damageable/cur-armor u))))
+
+;;; Systems operating on Elements
+
+(define-system log-all-entities ((entity))
+  (print (location/q entity)))
+
+(define-system draw-units ((entity display location))
+  (draw-text (find-pane-named *application-frame* 'world)
+             (format nil "~a" (info/short-name entity))
+             (hex-to-pixel (new-hexagon :q (location/q entity)
+                                        :r (location/r entity)
+                                        :s (location/s entity)) *layout*)
+             :align-x :center))
+
