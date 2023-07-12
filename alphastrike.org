@@ -1,5 +1,41 @@
 * Plan for a computer based AS game.
+Swap to Beast for an ECS system rather than what I currently have?
 
+I think this would really clean up elements a lot, but I'll need to think hard about how to define different aspects.
+** Aspect Design for Elements
+
+*** ID Info
+The Elements's name, the Elements's model info, The Elements's type, the Element's role, point-value, size
+*** Damageable
+Current/Max armor, Current/Max structure, Critical hits info
+*** Moveable
+move-alist
+**** Moves are an alist
+Format below:
+#+begin_src lisp
+((:walk . 4) (:jump . 4))
+#+end_src
+
+This can be accessed using:
+#+begin_src lisp
+(assoc :walk *move-alist*)
+#+end_src
+
+This returns ~nil~ if the unit doesn't have the the appropriate move-type
+*** Attack
+Short, Medium, Long
+*** Heat
+OV, current Heat
+*** Specials
+specials (this will literally just be a dumb list for now)
+*** Display
+image path
+*** Location
+q, r, s
+*** Pilot
+name, skill
+** Entities
+Elements default Location and Pilot values to nil to begin with
 * Point Release plan
 ** 0.1.0
 *** Next Steps

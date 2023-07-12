@@ -6,247 +6,157 @@
 (deftype move-type ()
   "This defines the valid ways an element can move in the game."
   '(member 'WALK 'JUMP))
+(defvar *mv-designators* '((:walk . "")
+                           (:jump . "j")))
 (deftype crit ()
   "This defines the possible critical hits an element can take in the game."
   '(member 'ENGINE 'FIRE-CONTROL 'MP 'WEAPONS))
 
-(defclass damage-value ()
-  ((kind
-    :documentation "What kind of attack is this?"
-    :initarg :kind
-    :accessor kind)
-   (attack
-    :documentation "A list of numbers representing the damage done at short/medium/long/extreme."
-    :initarg :attack
-    :accessor attack)))
+(define-aspect info short-name full-name unit-type role pv size tro)
+(define-aspect damageable cur-armor max-armor cur-struct max-struct crit-list)
+(define-aspect moveable move-alist move-used)
+(define-aspect attacks short medium long)
+(define-aspect heat ov cur-heat)
+(define-aspect specials special-list)
+(define-aspect display
+  (image-path :initform nil))
+(define-aspect location
+  (q :initform nil)
+  (r :initform nil)
+  (s :initform nil))
+(define-aspect pilot
+    (name :initform nil) (skill :initform nil))
 
-(defun make-attack (&key kind attack)
-  (make-instance 'damage-value
-                 :kind kind
-                 :attack attack))
+(define-entity combat-unit (info damageable moveable attacks heat specials display location pilot))
 
-;; TODO Remove and replace this.
-(defstruct move-value
-  (kind :walk)
-  distance)
+(defun new-element (&key short-name full-name unit-type role pv size
+                      cur-armor max-armor cur-struct max-struct
+                      move-list short medium long ov (cur-heat 0)
+                      special-list (crit-list '()) img tro q r s
+                      (pilot "Shooty McGee") (skill 4))
+  (let ((arm    (if (eq cur-armor nil) max-armor cur-armor))
+        (struct (if (eq cur-struct nil) max-armor cur-armor)))
+    (create-entity 'combat-unit
+                   :info/short-name short-name
+                   :info/full-name full-name
+                   :info/unit-type unit-type
+                   :info/role role
+                   :info/pv pv
+                   :info/size size
+                   :damageable/cur-armor arm
+                   :damageable/max-armor max-armor
+                   :damageable/cur-struct struct
+                   :damageable/max-struct max-struct
+                   :moveable/move-alist move-list
+                   :moveable/move-used (car (car move-list))
+                   :attacks/short short
+                   :attacks/medium medium
+                   :attacks/long long
+                   :heat/ov ov
+                   :heat/cur-heat cur-heat
+                   :specials/special-list special-list
+                   :damageable/crit-list crit-list
+                   :display/image-path img
+                   :info/tro tro
+                   :location/q q
+                   :location/r r
+                   :location/s s
+                   :pilot/name pilot
+                   :pilot/skill skill)))
 
-(defmethod display ((obj damage-value))
-  "Formats the pilot for display in the record sheet."
-  (format nil "~A: ~A" (kind obj) (attack obj)))
+(defun locust-lct-1v ()
+  (new-element
+   :short-name "LCT-1V"
+   :full-name "Locust LCT-1V"
+   :unit-type :BM
+   :role :scout
+   :pv 18
+   :size 1
+   :max-armor 2
+   :max-struct 2
+   :move-list (list
+               (cons :walk 8)
+              )
+   :short 1
+   :medium 1
+   :long 0 ;; Enter 0.5 for 0*
+   :ov 0
+   :cur-heat 0
+   :special-list '(:SRCH :SOA)
+   :crit-list '()
+   :img #P"data/images/units/defaults/default_light.png"
+   :tro
+"Overview: The Locust is undoubtedly one of the most popular and prevalent
+light BattleMechs ever made. First produced in 2499, the almost dozen distinct
+factories manufacturing the design quickly spread the design to every power in
+human space. Its combination of tough armor (for its size), exceptional speed,
+and most importantly, low cost have all contributed to the Locust's success. It
+remains the benchmark for many scouting designs, and its continual upgrades have
+ensured that it remains just as effective with every new conflict that appears.
 
-(defclass combat-unit ()
-  ((id
-    :documentation "UUID identifying the unit"
-    :initarg :id
-    :accessor cu-id)
-   (element
-    :documentation "The Element"
-    :initarg :element
-    :accessor cu-element)
-   (mv-status
-    :documentation "The unit's movement status."
-    :initform nil
-    :accessor cu-mv-status)
-   (attack-status
-    :documentation "The unit's attack status."
-    :initform nil
-    :accessor cu-atk-status)
-   (pilot
-    :documentation "The pilot of the unit."
-    :initarg :pilot
-    :accessor cu-pilot
-    :initform (make-instance 'pilot :name "Shooty McShootface" :skill 4))
-   (location
-    :documentation "The q,r,s location of a unit."
-    :initarg :loc
-    :accessor cu-loc)
-   ))
+Capabilities: As the Locust was first developed as a recon platform, speed is
+paramount to the design's philosophy. While many variants change the weaponry to
+fill specific tasks or purposes, Locusts are nearly always pressed into service
+in ways where they can best take advantage of their speed. When in line
+regiments, they can act as a deadly flankers or harassers, and are often used in
+reactionary roles to quickly plug holes in a fluid battle line. The structural
+form of Locusts themselves are their greatest weakness; with no hands, they are
+disadvantaged in phyisical combat and occasionally have difficulty righting
+themselves after a fall.
 
-(defclass element ()
-  ((name
-    :documentation "The name of the element. For exampe: Locust lct-1v"
-    :initarg :name
-    :accessor name)
-   (point-value
-    :documentation "The point value of the element."
-    :initarg :pv
-    :accessor pv)
-   (kind
-    :documentation "The unit type, must be one of the options from the element-type enum."
-    :initarg :kind
-    :type element-type
-    :accessor kind)
-   (size
-    :documentation "The size. Should be an integer from 1-4."
-    :initarg :size
-    :accessor size)
-   (primary-move
-    :documentation "The kind of move that the unit can make."
-    :initarg :prime-move
-    :accessor prime-move)
-   (primary-distance
-    :documentation "The distance of the primary move."
-    :initarg :prime-distance
-    :accessor prime-distance)
-   (secondary-move
-    :documentation "The kind of secondary movement that the unit can make."
-    :initarg :secondary-move
-    :initform nil
-    :accessor secondary-move)
-   (secondary-distance
-    :documentation "The distance of the secondary move."
-    :initarg :secondary-distance
-    :initform nil
-    :accessor secondary-distance)
-   (role
-    :documentation "A text description of the role. This will be used to create formation types
-for bonuses."
-    :initarg :role
-    :accessor role)
-   (attack-list
-    :documentation "A list of damage-value objects. Must include one with a `:standard'."
-    :initarg :attack-list
-    :accessor attack-list)
-   (overheat
-    :documentation "How much extra damage the unit can generate in exchange for gaining heat."
-    :initarg :ov
-    :accessor overheat)
-   (heat
-    :documentation "How much heat the unit currently has."
-    :initarg :heat
-    :initform 0
-    :accessor heat)
-   (max-armor
-    :documentation "Maximum armor value."
-    :initarg :max-armor
-    :accessor armor)
-   (current-armor
-    :documentation "Current armor value."
-    :initarg :current-armor
-    :accessor current-armor)
-   (max-structure
-    :documentation "Maximum structure value."
-    :initarg :max-structure
-    :accessor struct)
-   (current-structure
-    :documentation "Current structure value."
-    :initarg :current-structure
-    :accessor current-struct)
-   (specials
-    :documentation "A list of special abilities the unit has."
-    :initarg :specials
-    :accessor specials)
-   (crits
-    ;; TODO Reconsider whether a simple list is the best way to store these.
-    :documentation "A list of critical hits the unit has sustained. Must be members of the `crit' type."
-    :initarg :crits
-    :initform '()
-    :accessor crits)))
+Deployment: One of the most common designs even produced, even the smallest
+mercenary or pirate outfits will often field one or more of the design.
+Production for the Locust has continued uninterrupted for centuries, and it
+plays an important role in the militaries of many smaller nations. The base
+LCT-1V was once estimated to account for more than 75% of all Locusts in
+existence at the end of the Succession Wars, though these numbers have dropped
+with the reappearance of more advanced technology. Still, it remains common in
+every military worth note.
 
-(defun make-element (&key name pv kind size role
-                       prime-move prime-distance secondary-move secondary-distance
-                       attack-list ov
-                       current-armor max-armor
-                       current-structure max-structure
-                       specials crits)
-  "Make an element, checking for values typically missing such as current-armor and setting them to reasonable defaults."
-  (if (eq current-armor nil)
-       (setf current-armor max-armor))
-   (if (eq current-structure nil)
-       (setf current-structure max-structure))
-   (make-instance 'element
-                 :name name
-                 :pv pv
-                 :kind kind
-                 :size size
-                 :prime-move prime-move
-                 :prime-distance prime-distance
-                 :secondary-move secondary-move
-                 :secondary-distance secondary-distance
-                 :role role
-                 :attack-list attack-list
-                 :ov ov
-                 :current-armor current-armor
-                 :max-armor max-armor
-                 :current-structure current-structure
-                 :max-structure max-structure
-                 :specials specials
-                 :crits crits))
+systemmanufacturer:CHASSIS:Bergan
+systemmode:CHASSIS:VII
+systemmanufacturer:ENGINE:LTV
+systemmode:ENGINE:160
+systemmanufacturer:ARMOR:StarSlab
+systemmode:ARMOR:/1
+systemmanufacturer:COMMUNICATIONS:Garrett
+systemmode:COMMUNICATIONS:T10-B
+systemmanufacturer:TARGETING:O/P
+systemmode:TARGETING:911 "
+))
 
-(defun make-combat-unit (&key id pilot unit loc)
-  (if (eq id nil)
-      (setf id (random-uuid::make-uuid)))
-  (if (eq pilot nil)
-      (setf pilot (make-instance 'pilot :skill 4 :name "Shooty McPilotFace")))
-  (make-instance 'combat-unit
-                :id id
-                :pilot pilot
-                :element unit
-                :loc loc))
 
-(defmethod take-damage ((unit combat-unit))
-  (let ((elem (cu-element unit)))
-    (if (eq 0 (current-armor elem))
-        (decf (current-struct elem))
-        (decf (current-armor elem)))))
+(define-system log-all-entities ((entity))
+  (print (location/q entity)))
 
-(defmethod unit-tmm ((unit combat-unit))
-  "This will return the TMM of a unit based on it's current mv-status."
-  1)
+(defun format-move-assoc (stream m colonp atsignp)
+  (format stream "~a~a" (cdr m) (cdr (assoc (car m) *mv-designators*))))
 
-;; (cond
-;;   ((>= 2 *test-num*) (format t "branch 1"))
-;;   ((>= 4 *test-num*) (format t "branch 2"))
-;;   ((>= 6 *test-num*) (format t "branch 3"))
-;;   ((>= 8 *test-num*) (format t "branch 4")))
+(defmethod format-move ((m moveable))
+  (format nil "~{~/alphastrike::format-move-assoc/~^/~}" (moveable/move-alist m)))
 
-(defun format-move (element)
-  (let ((mv-string ""))
-    (when (eq (prime-move element) :walk)
-        (setf mv-string (concatenate 'string mv-string (format nil "~a" (prime-distance element)))))
-    (when (eq (secondary-move element) :jump)
-        (setf mv-string (concatenate 'string mv-string (format nil "/~aJ" (secondary-distance element)))))
-    mv-string))
+(defmethod unit-tmm ((m moveable))
+  (if (not (moveable/move-used m))
+      (setf (moveable/move-used m) (car (car (moveable/move-alist m)))))
+  (let ((mv (cdr (assoc (moveable/move-used m) (moveable/move-alist m))))
+        (mv-type (car (assoc (moveable/move-used m) (moveable/move-alist m)))))
+    (if (eq mv-type :jump)
+        (cond
+          ((>= 2 mv)  1)
+          ((>= 4 mv)  2)
+          ((>= 6 mv)  3)
+          ((>= 9 mv)  4)
+          ((>= 17 mv) 5)
+          ((t)        6))
+        (cond
+          ((>= 2 mv)  0)
+          ((>= 4 mv)  1)
+          ((>= 6 mv)  2)
+          ((>= 9 mv)  3)
+          ((>= 17 mv) 4)
+          ((t)        5)))))
 
-(defun element->json (element)
-  (with-output-to-string (str)
-    (cl-json:with-object (str)
-      (cl-json:encode-object-member "name" (name element) str)
-      (cl-json:encode-object-member "pv"   (pv element) str)
-      (cl-json:encode-object-member "kind" (kind element) str)
-      (cl-json:encode-object-member "size" (size element) str)
-      (cl-json:encode-object-member "prime-move" (prime-move element) str)
-      (cl-json:encode-object-member "prime-distance" (prime-distance element) str)
-      (cl-json:encode-object-member "secondary-move" (secondary-move element) str)
-      (cl-json:encode-object-member "secondary-distance" (secondary-distance element) str)
-      (cl-json:encode-object-member "role" (role element) str)
-      (cl-json:encode-object-member "attack-list" (attack-list element) str)
-      (cl-json:encode-object-member "ov" (overheat element) str)
-      (cl-json:encode-object-member "current-armor" (current-armor element) str)
-      (cl-json:encode-object-member "max-armor" (armor element) str)
-      (cl-json:encode-object-member "current-structure" (current-struct element) str)
-      (cl-json:encode-object-member "max-structure" (struct element) str)
-      (cl-json:encode-object-member "specials" (specials element) str)
-      (cl-json:encode-object-member "crits" (crits element) str))
-    str))
-
-(defun json->element (input)
-  "Turns a string of valid `json-data' into an element ."
-  (let ((json-data (cl-json:decode-json-from-string input)))
-    (make-element :name (cdr (assoc :name json-data))
-                  :pv (cdr (assoc :pv json-data))
-                  :kind (cdr (assoc :kind json-data))
-                  :size (cdr (assoc :size json-data))
-                  :prime-move (cdr (assoc :prime-move json-data))
-                  :prime-distance (cdr (assoc :prime-distance json-data))
-                  :secondary-move (cdr (assoc :secondary-move json-data))
-                  :secondary-distance (cdr (assoc :secondary-distance json-data))
-                  :role (cdr (assoc :role json-data))
-                  :attack-list (cdr (assoc :attack-list json-data))
-                  :ov (cdr (assoc :ov json-data))
-                  :current-armor (cdr (assoc :current-armor json-data))
-                  :max-armor (cdr (assoc :max-armor json-data))
-                  :current-structure (cdr (assoc :current-struct json-data))
-                  :max-structure (cdr (assoc :max-structure json-data))
-                  :specials (cdr (assoc :specials json-data))
-                  :crits (cdr (assoc :crits json-data)))))
+(defmethod take-damage ((u damageable))
+  (if (eq 0 (damageable/cur-armor u))
+      (decf (damageable/cur-struct u))
+      (decf (damageable/cur-armor u))))

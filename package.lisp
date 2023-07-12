@@ -1,7 +1,7 @@
 ;;;; package.lisp
 
 (defpackage #:alphastrike
-  (:use #:clim #:clim-lisp)
+  (:use #:clim #:clim-lisp #:beast)
   )
 
 (defgeneric display (obj)
