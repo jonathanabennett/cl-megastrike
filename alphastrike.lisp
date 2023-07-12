@@ -11,6 +11,11 @@
                               :x-origin 10
                               :y-origin 10))
 
+(defvar *locust*)
+(defvar *phawk*)
+
+(defvar *test-map* (make-instance 'grid))
+
 (defun load-data ()
   "Load the contents of the data directory in prepration for execution."
   (uiop:chdir *here*)
@@ -21,8 +26,6 @@
   (load "data/units/marauder-mad-3r.lisp")
   (load "data/units/longbow-lgb-0w.lisp")
   )
-
-(defvar *locust*)
 
 (define-application-frame alphastrike ()
   ()
@@ -40,10 +43,8 @@
       (:fill
        (horizontally ()
          (:fill world)
-         (4/9 record-sheet)))
+         (1/3 record-sheet)))
       (1/8 int)))))
-
-(defvar *test-map* (make-instance 'grid))
 
 (defmethod display-map ((frame alphastrike) stream)
   (maphash (lambda (k v)
@@ -54,35 +55,19 @@
   )
 
 (defmethod display-element ((frame alphastrike) stream)
-  (let ((pane (get-frame-pane frame 'record-sheet)))
-    (with-text-style (stream (make-text-style :serif :bold :large))
-      (format stream "~a: ~a~%" (entity-id *locust*) (info/full-name *locust*)))
-    (formatting-table (stream)
-      (formatting-row (stream)
-        (formatting-cell (stream)
-          (general-info-block stream *locust*)))
-      (formatting-row (stream)
-          (formatting-cell (stream)
-            (attack-info-block stream *locust*)))
-      (formatting-row (stream)
-          (formatting-cell (stream)
-            (damage-info-block stream *locust*)))
-      (formatting-row (stream)
-        (formatting-cell (stream)
-          (format stream "Specials: "))
-        (formatting-cell (stream)
-          (format stream "~{~A ~}" (specials/special-list *locust*))))
-      (formatting-row (stream)
-        (formatting-cell (stream)
-          (format stream "Critical Hits: "))
-        (formatting-cell (stream)
-          (format stream "~{~A ~}" (damageable/crit-list *locust*)))))
-    (terpri stream)
-    (quickstats-block stream *locust*)))
+  (unit-detail stream *locust*)
+  (terpri stream)
+  (unit-detail stream *phawk*)
+  (terpri stream)
+  (quickstats-block stream *locust*))
 
 (define-alphastrike-command (com-damage-unit :name "Damage")
-  ()
-  (take-damage *locust*))
+  ((target 'combat-unit
+           :prompt "Target: ")
+   (damage 'integer
+           :default 1
+           :prompt "Amount: "))
+  (take-damage target damage))
 
 (define-alphastrike-command (com-reset :name "Reset")
   ()
@@ -91,6 +76,11 @@
 
 (define-presentation-to-command-translator tile-selector
     (tile com-inspect-tile alphastrike :gesture :select)
+    (object)
+  (list object))
+
+(define-presentation-to-command-translator unit-selector
+    (combat-unit com-select-combat-unit alphastrike :gesture :select)
     (object)
   (list object))
 
@@ -104,6 +94,12 @@
   (setf (damageable/crit-list *locust*) '())
   (setf (pilot/name *locust*) "Shooty McPilotface")
   (setf (pilot/skill *locust*) 4)
+  (setf *phawk* (phoenix-hawk-pxh-1d))
+  (setf (location/q *phawk*) 8)
+  (setf (location/r *phawk*) 5)
+  (setf (damageable/crit-list *phawk*) '())
+  (setf (pilot/name *phawk*) "Drivey McShooterface")
+  (setf (pilot/skill *phawk*) 4)
   (run-frame-top-level
    (make-application-frame 'alphastrike
                            :width 800

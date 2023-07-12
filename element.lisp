@@ -6,8 +6,8 @@
 (deftype move-type ()
   "This defines the valid ways an element can move in the game."
   '(member walk jump))
-(defvar *mv-designators* '(('walk . "")
-                           ('jump . "j")))
+(defvar *mv-designators* '((walk . "")
+                           (jump . "j")))
 (deftype crit ()
   "This defines the possible critical hits an element can take in the game."
   '(member 'ENGINE 'FIRE-CONTROL 'MP 'WEAPONS))
@@ -77,6 +77,16 @@
                    :pilot/name pilot
                    :pilot/skill skill)))
 
+(define-presentation-method present (combat-unit
+                                     (type entity)
+                                     stream
+                                     (view textual-view) &key)
+  (draw-text (find-pane-named *application-frame* 'world)
+             (format nil "~a" (info/short-name combat-unit))
+             (hex-to-pixel (new-hexagon :q (location/q combat-unit)
+                                        :r (location/r combat-unit)) *layout*)
+             :align-x :center))
+
 (defun format-move-assoc (stream m colonp atsignp)
   (format stream "~a~a" (cdr m) (cdr (assoc (car m) *mv-designators*))))
 
@@ -104,10 +114,11 @@
           ((>= 17 mv) 4)
           ((t)        5)))))
 
-(defmethod take-damage ((u damageable))
-  (if (eq 0 (damageable/cur-armor u))
-      (decf (damageable/cur-struct u))
-      (decf (damageable/cur-armor u))))
+(defmethod take-damage ((u damageable) damage)
+  (dotimes (x damage)
+    (if (eq 0 (damageable/cur-armor u))
+        (decf (damageable/cur-struct u))
+        (decf (damageable/cur-armor u)))))
 
 ;;; Systems operating on Elements
 
@@ -115,9 +126,4 @@
   (print (location/q entity)))
 
 (define-system draw-units ((entity display location))
-  (draw-text (find-pane-named *application-frame* 'world)
-             (format nil "~a" (info/short-name entity))
-             (hex-to-pixel (new-hexagon :q (location/q entity)
-                                        :r (location/r entity)) *layout*)
-             :align-x :center))
-
+  (present entity 'combat-unit))
