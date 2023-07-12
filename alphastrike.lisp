@@ -49,14 +49,8 @@
   (maphash (lambda (k v)
              (present v 'tile))
            (tiles *test-map*))
-  ;; (maphash (lambda (k v)
-  ;;            (let ((q (first  (cu-loc v)))
-  ;;                  (r (second (cu-loc v)))
-  ;;                  (s (third  (cu-loc v))))
-  ;;              (draw-text stream (format nil "~a" (kind (cu-element v)))
-  ;;                         (hex-to-pixel (new-hexagon :q q :r r :s s) *layout*)
-  ;;                         :align-x :center)))
-  ;;          (units *test-map*))
+  (let ((stream stream))
+    (run-draw-units))
   )
 
 (defmethod display-element ((frame alphastrike) stream)
@@ -94,11 +88,6 @@
   ()
   (setf (damageable/cur-armor *locust*) (damageable/max-armor *locust*))
   (setf (damageable/cur-struct *locust*) (damageable/max-struct *locust*)))
-
-;; (define-alphastrike-command (com-inspect-tile :name "Inspect")
-;;   ((item 'tile))
-;;   (ql:quickload :clouseau)
-;;   (clouseau:inspect item))
 
 (define-presentation-to-command-translator tile-selector
     (tile com-inspect-tile alphastrike :gesture :select)
