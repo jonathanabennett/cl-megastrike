@@ -32,6 +32,7 @@
   (:panes
      (world
       :application
+      :default-view +graphical-view+
       :display-function #'display-map)
      (record-sheet
       :application
@@ -43,8 +44,8 @@
       (:fill
        (horizontally ()
          (:fill world)
-         (1/3 record-sheet)))
-      (1/8 int)))))
+         (1/4 record-sheet)))
+      (1/10 int)))))
 
 (defmethod display-map ((frame alphastrike) stream)
   (maphash (lambda (k v)
@@ -59,7 +60,9 @@
   (terpri stream)
   (unit-detail stream *phawk*)
   (terpri stream)
-  (quickstats-block stream *locust*))
+  (quickstats-block stream *locust*)
+  (terpri stream)
+  (quickstats-block stream *phawk*))
 
 (define-alphastrike-command (com-damage-unit :name "Damage")
   ((target 'combat-unit
@@ -70,19 +73,33 @@
   (take-damage target damage))
 
 (define-alphastrike-command (com-reset :name "Reset")
-  ()
-  (setf (damageable/cur-armor *locust*) (damageable/max-armor *locust*))
-  (setf (damageable/cur-struct *locust*) (damageable/max-struct *locust*)))
+  ((target 'combat-unit
+           :prompt "Target: "))
+  (setf (damageable/cur-armor target) (damageable/max-armor target))
+  (setf (damageable/cur-struct target) (damageable/max-struct target)))
 
-(define-presentation-to-command-translator tile-selector
-    (tile com-inspect-tile alphastrike :gesture :select)
-    (object)
-  (list object))
+(define-alphastrike-command (com-measure-range :name "Measure Range")
+  ((origin 'combat-unit)
+   (target 'tile))
+  (notify-user *application-frame*
+               (format nil "Range: ~d" (hex-distance (new-hexagon :q (location/q origin) :r (location/r origin))
+                                                     (tile-hexagon target)))))
 
-(define-presentation-to-command-translator unit-selector
-    (combat-unit com-select-combat-unit alphastrike :gesture :select)
-    (object)
-  (list object))
+(define-alphastrike-command (com-move-unit :name "Move")
+  ((unit 'combat-unit)
+   (destination 'tile))
+  (setf (location/q unit) (hexagon-q (tile-hexagon destination)))
+  (setf (location/r unit) (hexagon-r (tile-hexagon destination)))
+  )
+;; (define-presentation-to-command-translator tile-selector
+;;     (tile com-inspect-tile alphastrike :gesture :select)
+;;     (object)
+;;   (list object))
+
+;; (define-presentation-to-command-translator unit-selector
+;;     (combat-unit com-select-combat-unit alphastrike :gesture :select)
+;;     (object)
+;;   (list object))
 
 (defun main ()
   ;;(load-data)

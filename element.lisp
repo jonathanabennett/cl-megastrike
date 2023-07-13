@@ -1,17 +1,5 @@
 (in-package :alphastrike)
 
-(deftype elements-type ()
-  "This defines the valid list of element types in the game."
-  '(member BM DS))
-(deftype move-type ()
-  "This defines the valid ways an element can move in the game."
-  '(member walk jump))
-(defvar *mv-designators* '((walk . "")
-                           (jump . "j")))
-(deftype crit ()
-  "This defines the possible critical hits an element can take in the game."
-  '(member 'ENGINE 'FIRE-CONTROL 'MP 'WEAPONS))
-
 ;;; Aspects for Elements
 
 (define-aspect info short-name full-name unit-type role pv size tro)
@@ -80,12 +68,18 @@
 (define-presentation-method present (combat-unit
                                      (type entity)
                                      stream
-                                     (view textual-view) &key)
+                                     (view graphical-view) &key)
   (draw-text (find-pane-named *application-frame* 'world)
              (format nil "~a" (info/short-name combat-unit))
              (hex-to-pixel (new-hexagon :q (location/q combat-unit)
                                         :r (location/r combat-unit)) *layout*)
              :align-x :center))
+
+(define-presentation-method present (combat-unit
+                                     (type entity)
+                                     stream
+                                     (view textual-view) &key)
+  (format stream "~a" (info/short-name combat-unit)))
 
 (defun format-move-assoc (stream m colonp atsignp)
   (format stream "~a~a" (cdr m) (cdr (assoc (car m) *mv-designators*))))

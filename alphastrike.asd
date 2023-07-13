@@ -8,6 +8,7 @@
   :serial t
   :depends-on (#:random-uuid #:cl-json #:beast #:cl-ppcre #:mcclim)
   :components ((:file "package")
+               (:file "utils")
                (:file "hexagon")
                ;; (:file "crew")
                ;; (:file "element" :depends-on ("crew"))
