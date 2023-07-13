@@ -1,12 +1,12 @@
 ;;;; alphastrike.asd
 
 (asdf:defsystem #:alphastrike
-  :description "Describe alphastrike here"
-  :author "Your Name <your.name@example.com>"
+  :description "A port of the Alphastrike Board game to Computer using Common Lisp and McCLIM."
+  :author "Jonathan A. Bennett <doulos05@gmail.com>"
   :license  "Specify license here"
   :version "0.0.1"
   :serial t
-  :depends-on (#:random-uuid #:cl-json #:beast #:cl-ppcre #:mcclim)
+  :depends-on (#:beast #:mcclim)
   :components ((:file "package")
                (:file "utils")
                (:file "random")
