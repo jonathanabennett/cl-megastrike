@@ -45,20 +45,18 @@
 (defmethod hex-addition ((hex1 hexagon) (hex2 hexagon))
   "Uses Cartesian addition to add two hexagons together."
   (new-hexagon :q (+ (hexagon-q hex1) (hexagon-q hex2))
-                :r (+ (hexagon-r hex1) (hexagon-r hex2))
-                :s (+ (hexagon-s hex1) (hexagon-s hex2))))
+                :r (+ (hexagon-r hex1) (hexagon-r hex2))))
 
 (defmethod hex-subtract ((hex1 hexagon) (hex2 hexagon))
   "Uses Cartesian subtraction to subtract hexagon b from hexagon a."
   (new-hexagon :q (- (hexagon-q hex1) (hexagon-q hex2))
-                :r (- (hexagon-r hex1) (hexagon-r hex2))
-                :s (- (hexagon-s hex1) (hexagon-s hex2))))
+                :r (- (hexagon-r hex1) (hexagon-r hex2))))
 
 (defmethod hex-multiply ((hex hexagon) x)
   "Uses Cartesian multiplication to multiply a hex by a value x together."
   (new-hexagon :q (* (hexagon-q hex) x)
-                :r (* (hexagon-r hex) x)
-                :s (* (hexagon-s hex) x)))
+                :r (* (hexagon-r hex) x)))
+
 
 (defmethod hex-distance ((hex1 hexagon) (hex2 hexagon))
   "The length of the distance between two hexagons is calculated similarly to
