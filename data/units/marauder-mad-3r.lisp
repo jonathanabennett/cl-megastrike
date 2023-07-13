@@ -17,9 +17,7 @@
    :medium 3
    :long 3 ;; Enter 0.5 for 0*
    :ov 1
-   :cur-heat 0
    :special-list '('SRCH 'SOA)
-   :crit-list '()
    :img #P"data/images/units/mechs/Marauder.png"
    :tro
 ""

@@ -20,12 +20,9 @@
   "Load the contents of the data directory in prepration for execution."
   (uiop:chdir *here*)
 
-  ;; Needs a way to load the full directory
-  (load "data/units/locust-lct-1v.lisp")
-  (load "data/units/phoenix-hawk-pxh-1d.lisp")
-  (load "data/units/marauder-mad-3r.lisp")
-  (load "data/units/longbow-lgb-0w.lisp")
-  )
+  (let ((mech-files (uiop:directory-files (uiop:merge-pathnames* #p"data/units/" *here*))))
+    (dolist (file mech-files)
+      (if (string= (pathname-type file) "lisp") (load file)))))
 
 (define-application-frame alphastrike ()
   ()
@@ -90,13 +87,16 @@
 (define-alphastrike-command (com-command-move-unit :name "Move")
   ((unit 'combat-unit)
    (destination 'tile))
-  (move-unit unit destination 'walk))
+  (move-unit unit destination))
 
 (define-alphastrike-command (com-command-attack :name "Attack")
   ((attacker 'combat-unit)
    (target 'combat-unit))
   (make-attack attacker target))
 
+(define-alphastrike-command (com-roll :name "Roll")
+  ()
+  (notify-user *application-frame* (format nil "Rolled a ~d on 2D6." (roll2d))))
 ;; (define-presentation-to-command-translator tile-selector
 ;;     (tile com-inspect-tile alphastrike :gesture :select)
 ;;     (object)
