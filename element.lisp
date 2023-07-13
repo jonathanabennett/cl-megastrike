@@ -127,11 +127,45 @@
           ((>= 17 mv) 4)
           ((t)        5)))))
 
+;;; Attack and Damage
+
+(defmethod calculate-to-hit ((attacker combat-unit) (target combat-unit))
+  (let ((range (hex-distance (new-hexagon :q (location/q attacker)
+                                          :r (location/r attacker)
+                                          :s (location/s attacker))
+                             (new-hexagon :q (location/q target)
+                                          :r (location/r target)
+                                          :s (location/s target)))))
+    (cond
+      ((>= 3 range) (+ (pilot/skill attacker) (unit-tmm target)))
+      ((>= 12 range) (+ (pilot/skill attacker) (unit-tmm target) 2))
+      ((>= 21 range) (+ (pilot/skill attacker) (unit-tmm target) 4)))))
+
+(defmethod calculate-damage ((attacker combat-unit) (target combat-unit))
+  (let ((range (hex-distance (new-hexagon :q (location/q attacker)
+                                          :r (location/r attacker)
+                                          :s (location/s attacker))
+                             (new-hexagon :q (location/q target)
+                                          :r (location/r target)
+                                          :s (location/s target)))))
+    (cond
+      ((>= 3 range) (attacks/short attacker))
+      ((>= 12 range) (attacks/medium attacker))
+      ((>= 21 range) (attacks/long attacker)))))
+
+(defmethod make-attack ((attacker combat-unit) (target combat-unit))
+  (let ((target-num (calculate-to-hit attacker target))
+        (to-hit (roll2d)))
+    (if (<= target-num to-hit)
+        (take-damage target (calculate-damage attacker target)))))
+
 (defmethod take-damage ((u damageable) damage)
   (dotimes (x damage)
     (if (eq 0 (damageable/cur-armor u))
         (decf (damageable/cur-struct u))
-        (decf (damageable/cur-armor u)))))
+        (decf (damageable/cur-armor u))))
+  (if (>= 0 (damageable/cur-struct u))
+      (destroy-entity u)))
 
 ;;; Systems operating on Elements
 

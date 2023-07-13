@@ -90,8 +90,13 @@
 (define-alphastrike-command (com-command-move-unit :name "Move")
   ((unit 'combat-unit)
    (destination 'tile))
-  (move-unit unit destination 'walk)
-  )
+  (move-unit unit destination 'walk))
+
+(define-alphastrike-command (com-command-attack :name "Attack")
+  ((attacker 'combat-unit)
+   (target 'combat-unit))
+  (make-attack attacker target))
+
 ;; (define-presentation-to-command-translator tile-selector
 ;;     (tile com-inspect-tile alphastrike :gesture :select)
 ;;     (object)
