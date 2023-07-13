@@ -14,7 +14,8 @@
 
 (define-aspect location
   (q :initform nil)
-  (r :initform nil))
+  (r :initform nil)
+  (s :initform nil))
 
 (define-aspect pilot
     (name :initform nil) (skill :initform nil))
@@ -34,7 +35,7 @@
 (defun new-element (&key short-name full-name unit-type role pv size
                       cur-armor max-armor cur-struct max-struct
                       move-list short medium long ov (cur-heat 0)
-                      special-list (crit-list '()) img tro q r
+                      special-list (crit-list '()) img tro q r s
                       (pilot "Shooty McGee") (skill 4))
   (let ((arm    (if (eq cur-armor nil) max-armor cur-armor))
         (struct (if (eq cur-struct nil) max-armor cur-armor)))
@@ -62,6 +63,7 @@
                    :info/tro tro
                    :location/q q
                    :location/r r
+                   :location/s s
                    :pilot/name pilot
                    :pilot/skill skill)))
 
@@ -72,7 +74,8 @@
   (draw-text (find-pane-named *application-frame* 'world)
              (format nil "~a" (info/short-name combat-unit))
              (hex-to-pixel (new-hexagon :q (location/q combat-unit)
-                                        :r (location/r combat-unit)) *layout*)
+                                        :r (location/r combat-unit)
+                                        :s (location/s combat-unit)) *layout*)
              :align-x :center))
 
 (define-presentation-method present (combat-unit
@@ -86,6 +89,22 @@
 
 (defmethod format-move ((m moveable))
   (format nil "~{~/alphastrike::format-move-assoc/~^/~}" (moveable/move-alist m)))
+
+(defmethod move-lookup ((m moveable) (mv-type symbol))
+  (cdr (assoc mv-type (moveable/move-alist m))))
+
+(defmethod move-unit ((unit combat-unit) (destination tile) type)
+  (if (>= (move-lookup unit type)
+          (hex-distance (new-hexagon :q (location/q unit)
+                                     :r (location/r unit)
+                                     :s (location/s unit))
+                        (tile-hexagon destination)))
+      (set-location unit (tile-hexagon destination))))
+
+(defmethod set-location ((unit combat-unit) (loc hexagon))
+  (setf (location/q unit) (hexagon-q loc))
+  (setf (location/r unit) (hexagon-r loc))
+  (setf (location/s unit) (hexagon-s loc)))
 
 (defmethod unit-tmm ((m moveable))
   (if (not (moveable/move-used m))

@@ -12,13 +12,15 @@
     :accessor hexagon-q)
    (r
     :initarg :r
-    :accessor hexagon-r)))
+    :accessor hexagon-r)
+   (s
+    :initarg :s
+    :accessor hexagon-s)))
 
-(defmethod hexagon-s ((h hexagon))
-  (* (+ (hexagon-q h) (hexagon-r h)) -1))
-
-(defun new-hexagon (&key q r)
-  (make-instance 'hexagon :q q :r r))
+(defun new-hexagon (&key q r s)
+  (if (eq 0 (+ q r s))
+      (make-instance 'hexagon :q q :r r :s s)
+      (make-instance 'hexagon :q q :r r :s (* (+ q r) -1))))
 
 ;; Code to convert from qrs to xy and back again.
 (defun hex-from-offset (&key col row)
@@ -27,7 +29,7 @@
          (r (- row (floor (/ (+ col (* (mod (abs col) 2) -1)) 2))))
          (s (* (+ q r) -1)))
     (if (eq (+ q r s) 0)
-        (new-hexagon :q q :r r))))
+        (new-hexagon :q q :r r :s s))))
 
 
 (defmethod offset-from-hex ((hex hexagon))
@@ -45,17 +47,20 @@
 (defmethod hex-addition ((hex1 hexagon) (hex2 hexagon))
   "Uses Cartesian addition to add two hexagons together."
   (new-hexagon :q (+ (hexagon-q hex1) (hexagon-q hex2))
-                :r (+ (hexagon-r hex1) (hexagon-r hex2))))
+               :r (+ (hexagon-r hex1) (hexagon-r hex2))
+               :s (+ (hexagon-s hex1) (hexagon-s hex2))))
 
 (defmethod hex-subtract ((hex1 hexagon) (hex2 hexagon))
   "Uses Cartesian subtraction to subtract hexagon b from hexagon a."
   (new-hexagon :q (- (hexagon-q hex1) (hexagon-q hex2))
-                :r (- (hexagon-r hex1) (hexagon-r hex2))))
+               :r (- (hexagon-r hex1) (hexagon-r hex2))
+               :s (- (hexagon-s hex1) (hexagon-s hex2))))
 
 (defmethod hex-multiply ((hex hexagon) x)
   "Uses Cartesian multiplication to multiply a hex by a value x together."
   (new-hexagon :q (* (hexagon-q hex) x)
-                :r (* (hexagon-r hex) x)))
+               :r (* (hexagon-r hex) x)
+               :s (* (hexagon-s hex) x)))
 
 
 (defmethod hex-distance ((hex1 hexagon) (hex2 hexagon))
@@ -65,12 +70,12 @@ distance."
   (let ((hex-length (hex-subtract hex1 hex2)))
     (/ (+ (abs (hexagon-q hex-length)) (abs (hexagon-r hex-length)) (abs (hexagon-s hex-length))) 2)))
 
-(defvar *hex-directions* (vector (new-hexagon :q 1  :r 0)
-                                 (new-hexagon :q 1  :r -1)
-                                 (new-hexagon :q 0  :r -1)
-                                 (new-hexagon :q -1 :r 0)
-                                 (new-hexagon :q -1 :r 1)
-                                 (new-hexagon :q 0  :r 1))
+(defvar *hex-directions* (vector (new-hexagon :q  1  :r  0 :s -1)
+                                 (new-hexagon :q  1  :r -1 :s  0)
+                                 (new-hexagon :q  0  :r -1 :s  1)
+                                 (new-hexagon :q -1  :r  0 :s  1)
+                                 (new-hexagon :q -1  :r  1 :s  0)
+                                 (new-hexagon :q  0  :r  1 :s -1))
   "This vector describes the offsets to calculate neighbors.")
 
 (defun hex-direction (direction)
