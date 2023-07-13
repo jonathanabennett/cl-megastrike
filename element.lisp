@@ -84,6 +84,8 @@
                                      (view textual-view) &key)
   (format stream "~a" (info/short-name combat-unit)))
 
+;;; Movement methods
+
 (defun format-move-assoc (stream m colonp atsignp)
   (format stream "~a~a" (cdr m) (cdr (assoc (car m) *mv-designators*))))
 
