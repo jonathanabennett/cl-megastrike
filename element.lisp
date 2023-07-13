@@ -95,8 +95,8 @@
 (defmethod move-lookup ((m moveable) (mv-type symbol))
   (cdr (assoc mv-type (moveable/move-alist m))))
 
-(defmethod move-unit ((unit combat-unit) (destination tile) type)
-  (if (>= (move-lookup unit type)
+(defmethod move-unit ((unit combat-unit) (destination tile))
+  (if (>= (move-lookup unit (moveable/move-used unit))
           (hex-distance (new-hexagon :q (location/q unit)
                                      :r (location/r unit)
                                      :s (location/s unit))
