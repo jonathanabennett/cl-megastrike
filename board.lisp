@@ -29,16 +29,25 @@
                    :terrain (nth 2 tile-list)
                    :terrain-palette (nth 3 tile-list))))
 
-(define-presentation-method present (tile
-                                     (type tile)
-                                     stream
-                                     (view textual-view) &key)
+(defun draw-tile (tile stream)
   (draw-polygon stream (draw-hex (tile-hexagon tile) *layout*) :filled t :ink +light-green+)
   (draw-polygon stream (draw-hex (tile-hexagon tile) *layout*) :filled nil :line-thickness 2)
   (let ((x (first (offset-from-hex (tile-hexagon tile))))
         (y (second (offset-from-hex (tile-hexagon tile)))))
     (draw-text stream (format nil "~2,'0D~2,'0D" x y) (nth 3 (draw-hex (tile-hexagon tile) *layout*)))))
 
+
+(define-presentation-method present (tile
+                                     (type tile)
+                                     stream
+                                     (view graphical-view) &key)
+  (draw-tile tile stream))
+
+(define-presentation-method present (tile
+                                     (type tile)
+                                     stream
+                                     (view textual-view) &key)
+  (format stream "~a" (offset-from-hex (tile-hexagon tile))))
 ;;; Grid class
 
 (defclass grid ()
