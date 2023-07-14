@@ -21,3 +21,9 @@
   ())
 
 (defparameter +graphical-view+ (make-instance 'graphical-view))
+
+(defvar *phases* '(+initiative+
+                   +deployment+
+                   +movement+
+                   +combat+
+                   +end+))

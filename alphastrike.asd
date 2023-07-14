@@ -9,6 +9,7 @@
   :depends-on (#:beast #:mcclim)
   :components ((:file "package")
                (:file "utils")
+               (:file "initiative")
                (:file "random")
                (:file "hexagon")
                (:file "tiles")

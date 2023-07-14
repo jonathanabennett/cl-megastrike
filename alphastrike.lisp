@@ -16,6 +16,8 @@
 
 (defvar *test-map* (make-instance 'grid))
 
+(defvar *teams* '(red-team blue-team))
+
 (defun load-data ()
   "Load the contents of the data directory in prepration for execution."
   (uiop:chdir *here*)
@@ -27,7 +29,17 @@
 (define-application-frame alphastrike ()
   ((active-unit
     :initform nil
-    :accessor active-unit))
+    :accessor active-unit)
+   (current-phase
+    :initform 0
+    :accessor current-phase)
+   (turn-number
+    :initform 0
+    :accessor turn-number)
+   (initiative-list
+    :initform '()
+    :accessor initiative-list)
+   )
   (:menu-bar nil)
   (:panes
      (world
@@ -36,6 +48,7 @@
       :display-function #'display-map)
      (record-sheet
       :application
+      :min-width 350
       :display-function #'display-element)
      (menu :command-menu)
      ;;(int :interactor)
@@ -46,7 +59,7 @@
       (:fill
        (horizontally ()
          (:fill world)
-         (1/4 record-sheet)))
+         record-sheet))
       (1/10 (vertically () menu))))))
 
 (defmethod display-map ((frame alphastrike) stream)
@@ -58,6 +71,9 @@
   )
 
 (defmethod display-element ((frame alphastrike) stream)
+  (with-text-style (stream (make-text-style :serif :bold :large))
+     (format stream "Turn: ~8a Phase: ~a~%"
+             (turn-number frame) (nth (current-phase frame) *phases*)))
   (unit-detail stream *locust*)
   (terpri stream)
   (unit-detail stream *phawk*)
@@ -79,6 +95,11 @@
            :prompt "Target: "))
   (setf (damageable/cur-armor target) (damageable/max-armor target))
   (setf (damageable/cur-struct target) (damageable/max-struct target)))
+
+(define-alphastrike-command (com-roll-initiative :name "Roll Initiative" :menu t)
+  ()
+  (notify-user *application-frame*
+               (format nil "~a" (roll-initiative))))
 
 (define-alphastrike-command (com-measure-range :name "Measure Range" :menu t)
   ((origin 'combat-unit)
@@ -107,6 +128,12 @@
   ((selected 'combat-unit))
   (setf (active-unit *application-frame*) selected))
 
+(define-alphastrike-command (com-advance-phase :name "Next Phase" :menu t)
+  ()
+  (if (eq (nth (current-phase *application-frame*) *phases*) '+end-phase+)
+      (setf (current-phase *application-frame*) 0)
+      (incf (current-phase *application-frame*))))
+
 (define-alphastrike-command (com-quit-game :name "Quit Game" :menu t)
   ()
   (frame-exit *application-frame*))
@@ -130,6 +157,7 @@
   (setf (location/q *locust*) 1)
   (setf (location/r *locust*) 1)
   (setf (location/s *locust*) -2)
+  (setf (info/team *locust*) (first *teams*))
   (setf (damageable/crit-list *locust*) '())
   (setf (pilot/name *locust*) "Shooty McPilotface")
   (setf (pilot/skill *locust*) 4)
@@ -137,6 +165,7 @@
   (setf (location/q *phawk*) 8)
   (setf (location/r *phawk*) 5)
   (setf (location/s *phawk*) -13)
+  (setf (info/team *phawk*) (second *teams*))
   (setf (damageable/crit-list *phawk*) '())
   (setf (pilot/name *phawk*) "Drivey McShooterface")
   (setf (pilot/skill *phawk*) 4)
