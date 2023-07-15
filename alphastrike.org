@@ -36,19 +36,18 @@ q, r, s
 name, skill
 ** Entities
 Elements default Location and Pilot values to nil to begin with
+** Teams, Initiative, and Unit Lists
+Move unit drawing looping logic out to teams since they're the ones that hold color and initiative information.
+*** Who knows what?
+The elements can't know their initiative because it's based on the team
+Teams are
 * Point Release plan
 ** 0.1.0
 *** Next Steps
 **** Map
-Highlight on mouse over, info on click.
-
-Zooming.
+Zooming
 
 Refactor code so it makes better sense (similar to how we did unit cards).
-**** Units
-Add units to the map.
-
-Make the units presentation types.
 **** Movement
 Calculate movement as simple straight-line distance (I can use this calculation for range later).
 **** Attack

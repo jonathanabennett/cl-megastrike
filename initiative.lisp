@@ -8,3 +8,12 @@
     ;;   ((> red-init blue-init) '(red blue))
     ;;   ((> blue-init red-init) '(blue red))
     ;;   (t                       (roll-initiative)))))
+
+(defun do-end-phase (frame)
+  (setf (current-phase frame) 0)
+  (incf (turn-number frame))
+  (run-end-phase))
+
+(defun do-phase (frame)
+  (incf (current-phase *application-frame*))
+  (notify-user frame (format nil "Phase number: ~a" (current-phase frame))))
