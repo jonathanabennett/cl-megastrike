@@ -11,12 +11,7 @@
                               :x-origin 10
                               :y-origin 10))
 
-(defvar *locust*)
-(defvar *phawk*)
-
 (defvar *test-map* (make-instance 'grid))
-
-(defvar *teams* '(red-team blue-team))
 
 (defun load-data ()
   "Load the contents of the data directory in prepration for execution."
@@ -48,8 +43,14 @@
       :display-function #'display-map)
      (record-sheet
       :application
-      :min-width 350
+      :min-width 375
+      :scroll-bars nil
       :display-function #'display-element)
+     (quickstats
+      :application
+      :scroll-bars nil
+      :min-width 375
+      :display-function #'display-quickstats)
      (menu :command-menu)
      ;;(int :interactor)
      )
@@ -59,28 +60,27 @@
       (:fill
        (horizontally ()
          (:fill world)
-         record-sheet))
-      (1/10 (vertically () menu))))))
+         (vertically ()
+           record-sheet
+           quickstats)))
+      (1/10 menu)))))
 
 (defmethod display-map ((frame alphastrike) stream)
   (maphash (lambda (k v)
              (present v 'tile))
            (tiles *test-map*))
-  (let ((stream stream))
-    (run-draw-units))
+  (dolist (a *armies*)
+    (draw-units stream a))
   )
 
 (defmethod display-element ((frame alphastrike) stream)
   (with-text-style (stream (make-text-style :serif :bold :large))
      (format stream "Turn: ~8a Phase: ~a~%"
-             (turn-number frame) (nth (current-phase frame) *phases*)))
-  (unit-detail stream *locust*)
-  (terpri stream)
-  (unit-detail stream *phawk*)
-  (terpri stream)
-  (quickstats-block stream *locust*)
-  (terpri stream)
-  (quickstats-block stream *phawk*))
+             (turn-number frame) (nth (current-phase frame) *phase-order*)))
+  (run-show-unit-stats))
+
+(defmethod display-quickstats ((frame alphastrike) stream)
+  (run-show-quickstats))
 
 (define-alphastrike-command (com-damage-unit :name "Damage")
   ((target 'combat-unit
@@ -126,13 +126,16 @@
 
 (define-alphastrike-command (com-select-unit :name "Select")
   ((selected 'combat-unit))
-  (setf (active-unit *application-frame*) selected))
+  (map-entities #'(lambda(e) (if (eq (entity-id selected) (entity-id e))
+                                 (setf (can-activate/selectedp e) t)
+                                 (setf (can-activate/selectedp e) nil)))))
 
 (define-alphastrike-command (com-advance-phase :name "Next Phase" :menu t)
   ()
-  (if (eq (nth (current-phase *application-frame*) *phases*) '+end-phase+)
-      (setf (current-phase *application-frame*) 0)
-      (incf (current-phase *application-frame*))))
+  (let ((phase (nth (current-phase *application-frame*) *phase-order*)))
+    (cond
+       ((eql phase :end) (do-end-phase *application-frame*))
+       (t                (do-phase *application-frame*)))))
 
 (define-alphastrike-command (com-quit-game :name "Quit Game" :menu t)
   ()
@@ -153,22 +156,24 @@
   ;;(load-data)
   (load-board-file #P"data/boards/16x17 Grassland 1.board" *test-map*)
   (load-data)
-  (setf *locust* (locust-lct-1v))
-  (setf (location/q *locust*) 1)
-  (setf (location/r *locust*) 1)
-  (setf (location/s *locust*) -2)
-  (setf (info/team *locust*) (first *teams*))
-  (setf (damageable/crit-list *locust*) '())
-  (setf (pilot/name *locust*) "Shooty McPilotface")
-  (setf (pilot/skill *locust*) 4)
-  (setf *phawk* (phoenix-hawk-pxh-1d))
-  (setf (location/q *phawk*) 8)
-  (setf (location/r *phawk*) 5)
-  (setf (location/s *phawk*) -13)
-  (setf (info/team *phawk*) (second *teams*))
-  (setf (damageable/crit-list *phawk*) '())
-  (setf (pilot/name *phawk*) "Drivey McShooterface")
-  (setf (pilot/skill *phawk*) 4)
+  (new-army "Draconis Combine" +red+)
+  (new-army "Lyran Alliance" +blue+)
+  (let ((mek (locust-lct-1v)))
+    (setf (location/q mek) 1)
+    (setf (location/r mek) 1)
+    (setf (location/s mek) -2)
+    (setf (damageable/crit-list mek) '())
+    (setf (pilot/name mek) "Shooty McPilotface")
+    (setf (pilot/skill mek) 4)
+    (add-unit (car *armies*) mek))
+  (let ((mek (phoenix-hawk-pxh-1d)))
+    (setf (location/q mek) 8)
+    (setf (location/r mek) 5)
+    (setf (location/s mek) -13)
+    (setf (damageable/crit-list mek) '())
+    (setf (pilot/name mek) "Drivey McShooterface")
+    (setf (pilot/skill mek) 0)
+    (add-unit (car (cdr *armies*)) mek))
   (run-frame-top-level
    (make-application-frame 'alphastrike
                            :width 800

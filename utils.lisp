@@ -22,8 +22,7 @@
 
 (defparameter +graphical-view+ (make-instance 'graphical-view))
 
-(defvar *phases* '(+initiative+
-                   +deployment+
-                   +movement+
-                   +combat+
-                   +end+))
+(deftype phase-type ()
+  '(member initiative deployment movement combat end))
+
+(defvar *phase-order* '(:initiative :deployment :movement :combat :end))

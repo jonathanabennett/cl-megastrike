@@ -3,7 +3,10 @@
 ;;; Aspects for Elements
 
 (define-aspect info short-name full-name unit-type role pv size tro)
-(define-aspect damageable cur-armor max-armor cur-struct max-struct crit-list)
+(define-aspect damageable cur-armor max-armor cur-struct max-struct crit-list destroyedp)
+(define-aspect can-activate
+  (selectedp :initform nil)
+  (has-acted :initform nil))
 (define-aspect moveable move-alist move-used)
 (define-aspect attacks short medium long)
 (define-aspect heat ov cur-heat)
@@ -23,6 +26,7 @@
 ;;; Element definition and Constructor
 
 (define-entity combat-unit (info
+                            can-activate
                             damageable
                             moveable
                             attacks
@@ -46,10 +50,12 @@
                    :info/role role
                    :info/pv pv
                    :info/size size
+                   :can-activate/selectedp nil
                    :damageable/cur-armor arm
                    :damageable/max-armor max-armor
                    :damageable/cur-struct struct
                    :damageable/max-struct max-struct
+                   :damageable/destroyedp nil
                    :moveable/move-alist move-list
                    :moveable/move-used (car (car move-list))
                    :attacks/short short
@@ -71,12 +77,23 @@
                                      (type entity)
                                      stream
                                      (view graphical-view) &key)
-  (draw-text (find-pane-named *application-frame* 'world)
-             (format nil "~a" (info/short-name combat-unit))
-             (hex-to-pixel (new-hexagon :q (location/q combat-unit)
-                                        :r (location/r combat-unit)
-                                        :s (location/s combat-unit)) *layout*)
-             :align-x :center))
+  (let ((selected-style (make-text-style :serif :bold :normal)))
+    (if (and (active-unit *application-frame*)
+             (eq (entity-id (active-unit *application-frame*)) (entity-id combat-unit)))
+        (with-text-style (stream selected-style)
+          (draw-text (find-pane-named *application-frame* 'world)
+                     (format nil "~a" (info/short-name combat-unit))
+                     (hex-to-pixel (new-hexagon :q (location/q combat-unit)
+                                                :r (location/r combat-unit)
+                                                :s (location/s combat-unit)) *layout*)
+                     :align-x :center))
+        (draw-text (find-pane-named *application-frame* 'world)
+                   (format nil "~a" (info/short-name combat-unit))
+                   (hex-to-pixel (new-hexagon :q (location/q combat-unit)
+                                              :r (location/r combat-unit)
+                                              :s (location/s combat-unit)) *layout*)
+                   :align-x :center))))
+
 
 (define-presentation-method present (combat-unit
                                      (type entity)
@@ -167,12 +184,21 @@
         (decf (damageable/cur-struct u))
         (decf (damageable/cur-armor u))))
   (if (>= 0 (damageable/cur-struct u))
-      (destroy-entity u)))
+      (setf (damageable/destroyedp u) t)))
 
 ;;; Systems operating on Elements
 
-(define-system log-all-entities ((entity))
-  (print (location/q entity)))
+(define-system show-unit-stats ((entity))
+  (let ((stream (find-pane-named *application-frame* 'record-sheet)))
+    (if (can-activate/selectedp entity)
+        (unit-detail stream entity))))
 
-(define-system draw-units ((entity display location))
-  (present entity 'combat-unit))
+(define-system show-quickstats ((entity))
+  (let ((stream (find-pane-named *application-frame* 'quickstats)))
+    (if (not (can-activate/selectedp entity))
+        (quickstats-block stream entity))
+    (terpri stream)))
+
+(define-system end-phase ((entity))
+  (if (damageable/destroyedp entity)
+      (destroy-entity entity)))

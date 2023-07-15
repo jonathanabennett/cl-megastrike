@@ -5,20 +5,7 @@
     :initarg :tiles
     :accessor tiles
     :initform (make-hash-table :test 'equalp)
-    :documentation "The hash of the Tile objects which make up the map, stored by xy coordinates.")
-   (units
-    :initarg :units
-    :accessor units
-    :initform (make-hash-table :test 'equalp)
-    :documentation "A hash of the Unit objects on the map, stored by xy coordinates.")))
-
-(defmethod add-unit ((g grid) (u combat-unit))
-  (if (not (gethash (cu-id u) (units g)))
-      (setf (gethash (cu-id u) (units g)) u)))
-
-;; (defmethod move-unit ((u combat-unit) (ti tile))
-;;   (setf (location/q u) (hexagon-q (tile-hexagon ti)))
-;;   (setf (location/r u) (hexagon-r (tile-hexagon ti))))
+    :documentation "The hash of the Tile objects which make up the map, stored by xy coordinates.")))
 
 (defmethod insert-tile ((g grid) (ti tile))
   "Insert tile `ti' into the `tile-hash' of grid `g'."
