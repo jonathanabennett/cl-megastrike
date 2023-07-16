@@ -2,6 +2,12 @@
 
 (define-megastrike-command (com-select-unit :name "Select")
   ((selected 'combat-unit))
+  (if (or (not (initiative-list *application-frame*))
+          (< (length (initiative-list *application-frame*) (initiative-place *application-frame*))))
+      (progn(setf (active-unit *application-frame*) selected)
+            (map-entities #'(lambda(e) (if (eq (entity-id selected) (entity-id e))
+                                           (setf (can-activate/selectedp e) t)
+                                           (setf (can-activate/selectedp e) nil))))))
   (if (and (not (can-activate/has-acted selected))
            (same-army (info/army selected) (nth (initiative-place *application-frame*)
                                                 (initiative-list *application-frame*))))
