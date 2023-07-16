@@ -8,15 +8,35 @@ This is an implementation of Alpha Strike on the computer.
 
 This project depends on the McCLIM graphics library, and beast. These will be installed when you quickload the project in Common Lisp. All of these are known to work on MacOS (MacOS does require xQuartz to run as well, which must be configured the section below) and Linux. I lack a means of testing on Windows.
 
-It also requires a functioning Common Lisp installation (I use [sbcl](http://www.sbcl.org "SBCL")) and [Quicklisp](https://www.quicklisp.org/beta/ "Quicklisp"). Please see the documentation on their websites to install them.
+It also requires a functioning Common Lisp installation. The simplest way to have such an installation is to install Roswell, those instructions are below. If you prefer to manage your Common Lisp installation manually, then see the manual install.
+
+### Roswell
+
+[Roswell](https://github.com/roswell/roswell) is a way to manage Common Lisp systems (programs and libraries) on your computer. This page has either pre-built binaries or instructions for how to install it on your computer. Once you have installed Roswell, simply do the following:
+
+1. Open a terminal and run `ros install sbcl`. This will download a good Common Lisp.
+2. Run `ros install jonathanabennett/megastrike` This will download Megastrike and all its dependencies.
+3. When you want to play, simply open a terminal and type `ros exec megastrike`. This should launch Megastrike on your computer to play.
+
+### Installing Manually
+
+This assumes you have a functional Common Lisp environment with Quicklisp installed.
 
 To run:
 
-1. Clone this repository into `~/quicklisp/local-projects/megastrike`
-2. Open Common lisp (run `sbcl`)
-3. Run `(ql:quickload :megastrike)`
-4. Run `(in-package :megastrike)`
-5. Run `(main)` to launch the program.
+1. Clone this repository somewhere ASDF can see it (`~/common-lisp` and `quicklisp/local-projects` are the two most common places).
+2. Open Common lisp (run `sbcl`).
+3. Run `(ql:quickload :megastrike)`.
+4. Run `(megastrike:main)` to launch.
+
+### MacOS
+
+McCLIM, the Graphics library I am using, requires an X Windows system. This means you will need to install [xQuartz](https://www.xquartz.org). See their website for installation instructions. You need to open xQuartz before launching MegaStrike. If it does not open, please follow the following steps:
+
+1. Open xQuartz
+2. Go to the xQuartz preferences -> Security and Allow networked connections
+3. Open xTerm in xQuartz and run `xhosts +localhost`
+4. Restart xQuartz
 
 ## What works
 
