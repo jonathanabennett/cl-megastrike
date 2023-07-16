@@ -17,4 +17,5 @@
                (:file "army" :depends-on ("element" "random"))
                (:file "unitcard" :depends-on ("element"))
                (:file "board" :depends-on ("element" "hexagon" "tiles"))
+               (:file "game-setup" :depends-on ("element" "board" "army"))
                (:file "alphastrike" :depends-on ("element" "unitcard" "army" "board"))))

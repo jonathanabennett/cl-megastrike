@@ -13,18 +13,13 @@
 
 (defvar *test-map* (make-instance 'grid))
 
-(defun load-data ()
-  "Load the contents of the data directory in prepration for execution."
-  (uiop:chdir *here*)
-
-  (let ((mech-files (uiop:directory-files (uiop:merge-pathnames* #p"data/units/" *here*))))
-    (dolist (file mech-files)
-      (if (string= (pathname-type file) "lisp") (load file)))))
-
 (define-application-frame alphastrike ()
   ((active-unit
     :initform nil
     :accessor active-unit)
+   (game-board
+    :initform (make-instance 'grid)
+    :accessor game-board)
    (current-phase
     :initform 0
     :accessor current-phase)
@@ -70,8 +65,7 @@
              (present v 'tile))
            (tiles *test-map*))
   (dolist (a *armies*)
-    (draw-units stream a))
-  )
+    (draw-units stream a)))
 
 (defmethod display-element ((frame alphastrike) stream)
   (with-text-style (stream (make-text-style :serif :bold :large))
@@ -162,30 +156,10 @@
   (load-data)
   (new-army "Draconis Combine" +red+)
   (new-army "Lyran Alliance" +blue+)
-  (let ((mek (locust-lct-1v)))
-    (setf (location/q mek) 1)
-    (setf (location/r mek) 1)
-    (setf (location/s mek) -2)
-    (setf (damageable/crit-list mek) '())
-    (setf (pilot/name mek) "Shooty McPilotface")
-    (setf (pilot/skill mek) 4)
-    (add-unit (first *armies*) mek))
-  (let ((mek (phoenix-hawk-pxh-1d)))
-    (setf (location/q mek) 8)
-    (setf (location/r mek) 5)
-    (setf (location/s mek) -13)
-    (setf (damageable/crit-list mek) '())
-    (setf (pilot/name mek) "Drivey McShooterface")
-    (setf (pilot/skill mek) 0)
-    (add-unit (second *armies*) mek))
-  (let ((mek (longbow-lgb-0w)))
-    (setf (location/q mek) 8)
-    (setf (location/r mek) 7)
-    (setf (location/s mek) -15)
-    (setf (damageable/crit-list mek) '())
-    (setf (pilot/name mek) "")
-    (setf (pilot/skill mek) 0)
-    (add-unit (second *armies*) mek))
+  (make-combat-unit 'locust-lct-1v (list 1 1) "Takashi Ujiro" 4 (first *armies*))
+  (make-combat-unit 'phoenix-hawk-pxh-1d (list 7 4) "Peter Steele" 4 (second *armies*))
+  (make-combat-unit 'marauder-mad-3r (list 2 2) "Sven Stevensen" 4 (first *armies*))
+  (make-combat-unit 'longbow-lgb-0w (list 10 14) "Jaime Foxx" 4 (second *armies*))
   (run-frame-top-level
    (make-application-frame 'alphastrike
                            :width 800
