@@ -66,6 +66,7 @@
 
 (defmethod display-map ((frame megastrike) stream)
   (maphash (lambda (k v)
+             (declare (ignorable k))
              (present v 'tile))
            (tiles *test-map*))
   (run-draw-units))

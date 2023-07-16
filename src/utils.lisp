@@ -4,6 +4,9 @@
 ;;;
 
 
+;; (defgeneric display (obj)
+;;   (:documentation "Pretty print an object for display in the GUI"))
+
 (deftype elements-type ()
   "This defines the valid list of element types in the game."
   '(member BM DS))
@@ -37,4 +40,4 @@
     ret))
 
 (defun roll2d (&optional (mods 0))
-  (roll 2 0))
+  (roll 2 mods))

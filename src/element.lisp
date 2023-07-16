@@ -115,6 +115,7 @@
 ;;; Movement methods
 
 (defun format-move-assoc (stream m colonp atsignp)
+  (declare (ignorable colonp atsignp))
   (format stream "~a~a" (cdr m) (cdr (assoc (car m) *mv-designators*))))
 
 (defmethod format-move ((m moveable))
@@ -150,14 +151,14 @@
           ((>= 6 mv)  3)
           ((>= 9 mv)  4)
           ((>= 17 mv) 5)
-          ((t)        6))
+          (t          6))
         (cond
           ((>= 2 mv)  0)
           ((>= 4 mv)  1)
           ((>= 6 mv)  2)
           ((>= 9 mv)  3)
           ((>= 17 mv) 4)
-          ((t)        5)))))
+          (t          5)))))
 
 ;;; Attack and Damage
 
