@@ -6,11 +6,9 @@
   (run-end-phase))
 
 (defun do-phase (frame)
-  (incf (current-phase *application-frame*))
-  (notify-user frame (format nil "Phase number: ~a" (current-phase frame))))
+  (incf (current-phase *application-frame*)))
 
 (defun roll-initiative (army-list)
-  (format *debug-io* "Preparing to roll initiative.")
   (mapcar #'(lambda (a) (setf (army/initiative a) (roll2d))) army-list)
   (format *debug-io* "~a rolled ~a, ~a rolled ~a" (army/name (first army-list))
                                                   (army/initiative (first army-list))
@@ -24,7 +22,6 @@
   )
 
 (defun build-initiative-order (army-list)
-  (format *debug-io* "Building initiative order")
   (let* ((army-order (sort army-list #'(lambda (a b) (< (army/initiative a)
                                                        (army/initiative b))))))
 
@@ -32,7 +29,6 @@
                      (turn-order-list (second army-order)))))
 
 (defun make-turn-order (losing-army-list winning-army-list)
-  (format *debug-io* "Making turn order")
   (let ((turn-order '()))
     (if (< (length losing-army-list) (length winning-army-list))
         (progn
