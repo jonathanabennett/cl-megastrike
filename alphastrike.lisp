@@ -77,7 +77,9 @@
   (with-text-style (stream (make-text-style :serif :bold :large))
      (format stream "Turn: ~8a Phase: ~a~%"
              (turn-number frame) (nth (current-phase frame) *phase-order*)))
-  (run-show-unit-stats))
+  (run-show-unit-stats)
+  (terpri stream)
+  (format stream "~a" (initiative-list *application-frame*)))
 
 (defmethod display-quickstats ((frame alphastrike) stream)
   (run-show-quickstats))
@@ -98,8 +100,8 @@
 
 (define-alphastrike-command (com-roll-initiative :name "Roll Initiative" :menu t)
   ()
-  (notify-user *application-frame*
-               (format nil "~a" (roll-initiative))))
+  (format *debug-io* "Rolling initiative.")
+  (setf (initiative-list *application-frame*) (roll-initiative *armies*)))
 
 (define-alphastrike-command (com-measure-range :name "Measure Range" :menu t)
   ((origin 'combat-unit)
@@ -139,6 +141,8 @@
 
 (define-alphastrike-command (com-quit-game :name "Quit Game" :menu t)
   ()
+  (clear-entities)
+  (setf *armies* '())
   (frame-exit *application-frame*))
 
 ;; (define-presentation-to-command-translator tile-selector
@@ -165,7 +169,7 @@
     (setf (damageable/crit-list mek) '())
     (setf (pilot/name mek) "Shooty McPilotface")
     (setf (pilot/skill mek) 4)
-    (add-unit (car *armies*) mek))
+    (add-unit (first *armies*) mek))
   (let ((mek (phoenix-hawk-pxh-1d)))
     (setf (location/q mek) 8)
     (setf (location/r mek) 5)
@@ -173,7 +177,15 @@
     (setf (damageable/crit-list mek) '())
     (setf (pilot/name mek) "Drivey McShooterface")
     (setf (pilot/skill mek) 0)
-    (add-unit (car (cdr *armies*)) mek))
+    (add-unit (second *armies*) mek))
+  (let ((mek (longbow-lgb-0w)))
+    (setf (location/q mek) 8)
+    (setf (location/r mek) 7)
+    (setf (location/s mek) -15)
+    (setf (damageable/crit-list mek) '())
+    (setf (pilot/name mek) "")
+    (setf (pilot/skill mek) 0)
+    (add-unit (second *armies*) mek))
   (run-frame-top-level
    (make-application-frame 'alphastrike
                            :width 800
