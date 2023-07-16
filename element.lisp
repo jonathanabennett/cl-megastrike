@@ -42,7 +42,7 @@
                       special-list (crit-list '()) img tro q r s
                       (pilot "Shooty McGee") (skill 4))
   (let ((arm    (if (eq cur-armor nil) max-armor cur-armor))
-        (struct (if (eq cur-struct nil) max-armor cur-armor)))
+        (struct (if (eq cur-struct nil) max-struct cur-struct)))
     (create-entity 'combat-unit
                    :info/short-name short-name
                    :info/full-name full-name
@@ -78,8 +78,7 @@
                                      stream
                                      (view graphical-view) &key)
   (let ((selected-style (make-text-style :serif :bold :normal)))
-    (if (and (active-unit *application-frame*)
-             (eq (entity-id (active-unit *application-frame*)) (entity-id combat-unit)))
+    (if (can-activate/selectedp combat-unit)
         (with-text-style (stream selected-style)
           (draw-text (find-pane-named *application-frame* 'world)
                      (format nil "~a" (info/short-name combat-unit))
@@ -87,12 +86,12 @@
                                                 :r (location/r combat-unit)
                                                 :s (location/s combat-unit)) *layout*)
                      :align-x :center))
-        (draw-text (find-pane-named *application-frame* 'world)
-                   (format nil "~a" (info/short-name combat-unit))
-                   (hex-to-pixel (new-hexagon :q (location/q combat-unit)
-                                              :r (location/r combat-unit)
-                                              :s (location/s combat-unit)) *layout*)
-                   :align-x :center))))
+          (draw-text (find-pane-named *application-frame* 'world)
+                     (format nil "~a" (info/short-name combat-unit))
+                     (hex-to-pixel (new-hexagon :q (location/q combat-unit)
+                                                :r (location/r combat-unit)
+                                                :s (location/s combat-unit)) *layout*)
+                     :align-x :center))))
 
 
 (define-presentation-method present (combat-unit
