@@ -17,7 +17,7 @@
    :medium 2
    :long 0 ;; Enter 0.5 for 0*
    :ov 0
-   :special-list '('SRCH 'SOA 'ENE)
+   :special-list '(SRCH SOA ENE)
    :img #P"data/images/units/mechs/Phoenixhawk_1D.png"
    :tro
 ""

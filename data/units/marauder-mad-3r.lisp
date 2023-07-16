@@ -17,7 +17,7 @@
    :medium 3
    :long 3 ;; Enter 0.5 for 0*
    :ov 1
-   :special-list '('SRCH 'SOA)
+   :special-list '(SRCH SOA)
    :img #P"data/images/units/mechs/Marauder.png"
    :tro
 ""

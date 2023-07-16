@@ -17,7 +17,7 @@
    :medium 2
    :long 1 ;; Enter 0.5 for 0*
    :ov 0
-   :special-list '('SRCH 'SOA 'IF1)
+   :special-list '(SRCH SOA IF1)
    :img #P"data/images/units/mechs/Locust_1M.png"
    :tro
 "Overview: The Locust is undoubtedly one of the most popular and prevalent

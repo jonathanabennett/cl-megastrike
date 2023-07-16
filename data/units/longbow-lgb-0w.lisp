@@ -17,7 +17,7 @@
    :medium 3
    :long 3 ;; Enter 0.5 for 0*
    :ov 0
-   :special-list '('SRCH 'SOA 'IF3 'LRM1/3/3/)
+   :special-list '(SRCH SOA IF3 LRM1/3/3/)
    :img #P"data/images/units/mechs/Longbow.png"
    :tro
 ""

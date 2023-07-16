@@ -52,11 +52,11 @@ Technically speaking, order does not matter. But for simplicity's sake, please f
    :ov 0
 #+end_src
 
-The specials list is a list of Lisp symbols (like ='BM= and ='scout= above). Each symbol should match the code in table at the end of Alphastrike exactly.
+The specials list is a list of Lisp symbols (like ='BM= and ='scout= above). Each symbol should match the code in table at the end of Alphastrike exactly. Battlemechs automatically have ='(SRCH SOA)= so just add them after =SOA=, put a space between each one and don't forget the leading ='=.
 
 Images don't work yet, but when they're added this is where they will be. You can enter the path, just changing the mech's name.
 #+begin_src lisp
-   :special-list '('SRCH 'SOA)
+   :special-list '(SRCH SOA)
    :img #P"data/images/units/mechs/Locust.png"
 #+ end_src
 
@@ -105,10 +105,12 @@ systemmode:TARGETING:911 "
 
 Balanced parentheses is important, ensure that there are 2 "extra" closing parentheses on the crits line: One to close =new-element= and one to close the =defun= at the top.
 
-When you open megastrike, it scans the =data= folder and all its subfolders for lisp files and loads them, so the unit should appear immediately when you restart megastrike. To use them, you'll need to edit the function called =main= in the =megastrike.lisp= file, replacing the function call for =*locust*= or =*phawk*= with your new function. If you rolled up a Marauder MAD-3R and wanted to pit it against the Phoenix Hawk, it would look like this:
+When you open megastrike, it scans the =data= folder and all its subfolders for lisp files and loads them, so the unit should appear immediately when you restart megastrike. To use them, you'll need to edit the function called =main= in the =megastrike.lisp= file.
+
+Imagine you have a Skill 4 pilot named Bob Bobbington who will be starting in hex 4,4, piloting a Shadow Hawk SHD-2H for the Lyrans. You would write this after the call to =new-army=:
 
 #+begin_src lisp
-(setf *locust* (marauder-mad-3r))
+(make-combat-unit 'shadow-hawk-shd-2h (list 4 4) "Bob Bobbington" 4 (second *armies*)
 #+end_src
 
 If it does not work or there is an error, there is probably an error in the file. Contact me and I'll be happy to try to help!
