@@ -1,6 +1,6 @@
 (in-package :alphastrike)
 
-(defun longbow-lbg-0w ()
+(defun longbow-lgb-0w ()
   (new-element
    :short-name "LGB-0W"
    :full-name "Longbow LGB-0W"
