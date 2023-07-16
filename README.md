@@ -36,7 +36,7 @@ Feedback is welcome on the specific layout and how to make it look better, but I
 
 ## What's coming
 
-### 0.1.1
+### 0.1.0
 
 This, the first "functional" release, is a very primitive implementation of the rules, allowing a hot-seat 2v2. The map is a featureless plain. The pilots will all be skill 4. Selecting new units requires programming. Facing will not be calculated. Critical hits will not be applied. Only standard attack types will work. Only walking and jumping will be allowed (nothing but Mechs). Basically, you will be able to move, shoot, and lose armor/structure until your mech dies.
 
