@@ -20,7 +20,11 @@
 (defclass graphical-view (view)
   ())
 
+(defclass quickstats-view (view)
+  ())
+
 (defparameter +graphical-view+ (make-instance 'graphical-view))
+(defparameter +quickstats-view+ (make-instance 'quickstats-view))
 
 (deftype phase-type ()
   '(member initiative deployment movement combat end))

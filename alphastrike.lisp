@@ -45,6 +45,7 @@
       :application
       :scroll-bars nil
       :min-width 375
+      :default-view +quickstats-view+
       :display-function #'display-quickstats)
      (menu :command-menu)
      ;;(int :interactor)

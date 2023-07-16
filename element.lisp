@@ -97,9 +97,14 @@
 (define-presentation-method present (combat-unit
                                      (type entity)
                                      stream
-                                     (view textual-view) &key)
-  (format stream "~a" (info/short-name combat-unit)))
+                                     (view quickstats-view) &key)
+  (quickstats-block stream combat-unit))
 
+(define-presentation-method present (combat-unit
+                                     (type entity)
+                                     stream
+                                     (view textual-view) &key)
+  (format stream "~a #~a" (info/full-name combat-unit) (entity-id combat-unit)))
 ;;; Movement methods
 
 (defun format-move-assoc (stream m colonp atsignp)
@@ -194,8 +199,7 @@
 
 (define-system show-quickstats ((entity))
   (let ((stream (find-pane-named *application-frame* 'quickstats)))
-    (if (not (can-activate/selectedp entity))
-        (quickstats-block stream entity))
+    (present entity 'combat-unit :stream stream )
     (terpri stream)))
 
 (define-system end-phase ((entity))
