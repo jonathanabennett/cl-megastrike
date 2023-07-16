@@ -23,7 +23,7 @@
 (define-aspect pilot
     (name :initform nil) (skill :initform nil))
 
-;;; Element definition and Constructor
+;;; Element definition, Constructor, and Deconstructor
 
 (define-entity combat-unit (info
                             can-activate
@@ -73,25 +73,32 @@
                    :pilot/name pilot
                    :pilot/skill skill)))
 
+(defmethod same-entity ((e entity) (o entity))
+  (eq (entity-id e) (entity-id o)))
+
 (define-presentation-method present (combat-unit
                                      (type entity)
                                      stream
                                      (view graphical-view) &key)
-  (let ((selected-style (make-text-style :serif :bold :normal)))
-    (if (can-activate/selectedp combat-unit)
+  (if (can-activate/selectedp combat-unit)
+    (let ((selected-style (make-text-style :serif :bold :normal)))
         (with-text-style (stream selected-style)
-          (draw-text (find-pane-named *application-frame* 'world)
-                     (format nil "~a" (info/short-name combat-unit))
-                     (hex-to-pixel (new-hexagon :q (location/q combat-unit)
-                                                :r (location/r combat-unit)
-                                                :s (location/s combat-unit)) *layout*)
-                     :align-x :center))
-          (draw-text (find-pane-named *application-frame* 'world)
-                     (format nil "~a" (info/short-name combat-unit))
-                     (hex-to-pixel (new-hexagon :q (location/q combat-unit)
-                                                :r (location/r combat-unit)
-                                                :s (location/s combat-unit)) *layout*)
-                     :align-x :center))))
+          (surrounding-output-with-border
+              (stream :ink (army/color (info/army combat-unit)) :filled t :shape :rectangle)
+            (draw-text (find-pane-named *application-frame* 'world)
+                       (format nil "~a" (info/short-name combat-unit))
+                       (hex-to-pixel (new-hexagon :q (location/q combat-unit)
+                                                  :r (location/r combat-unit)
+                                                  :s (location/s combat-unit)) *layout*)
+                       :align-x :center))))
+    (surrounding-output-with-border
+        (stream :ink (army/color (info/army combat-unit)) :filled t :shape :rectangle)
+      (draw-text (find-pane-named *application-frame* 'world)
+                 (format nil "~a" (info/short-name combat-unit))
+                 (hex-to-pixel (new-hexagon :q (location/q combat-unit)
+                                            :r (location/r combat-unit)
+                                            :s (location/s combat-unit)) *layout*)
+                 :align-x :center))))
 
 
 (define-presentation-method present (combat-unit
@@ -111,7 +118,7 @@
   (format stream "~a~a" (cdr m) (cdr (assoc (car m) *mv-designators*))))
 
 (defmethod format-move ((m moveable))
-  (format nil "~{~/alphastrike::format-move-assoc/~^/~}" (moveable/move-alist m)))
+  (format nil "~{~/megastrike::format-move-assoc/~^/~}" (moveable/move-alist m)))
 
 (defmethod move-lookup ((m moveable) (mv-type symbol))
   (cdr (assoc mv-type (moveable/move-alist m))))
@@ -122,7 +129,9 @@
                                      :r (location/r unit)
                                      :s (location/s unit))
                         (tile-hexagon destination)))
-      (set-location unit (tile-hexagon destination))))
+      (progn (set-location unit (tile-hexagon destination))
+             (incf (initiative-place *application-frame*))
+             (setf (can-activate/has-acted unit) t))))
 
 (defmethod set-location ((unit combat-unit) (loc hexagon))
   (setf (location/q unit) (hexagon-q loc))
@@ -180,7 +189,9 @@
   (let ((target-num (calculate-to-hit attacker target))
         (to-hit (roll2d)))
     (if (<= target-num to-hit)
-        (take-damage target (calculate-damage attacker target)))))
+        (take-damage target (calculate-damage attacker target))))
+  (incf (initiative-place *application-frame*))
+  (setf (can-activate/has-acted attacker) t))
 
 (defmethod take-damage ((u damageable) damage)
   (dotimes (x damage)
@@ -190,12 +201,17 @@
   (if (>= 0 (damageable/cur-struct u))
       (setf (damageable/destroyedp u) t)))
 
+
 ;;; Systems operating on Elements
 
-(define-system show-unit-stats ((entity))
-  (let ((stream (find-pane-named *application-frame* 'record-sheet)))
-    (if (can-activate/selectedp entity)
-        (unit-detail stream entity))))
+;; (define-system show-unit-stats ((entity))
+;;   (let ((stream (find-pane-named *application-frame* 'record-sheet)))
+;;     (if (can-activate/selectedp entity)
+;;         (unit-detail stream entity))))
+
+(define-system draw-units ((entity location))
+  (let ((frame (find-pane-named *application-frame* 'world)))
+    (present entity 'combat-unit :stream frame)))
 
 (define-system show-quickstats ((entity))
   (let ((stream (find-pane-named *application-frame* 'quickstats)))
@@ -205,3 +221,7 @@
 (define-system end-phase ((entity))
   (if (damageable/destroyedp entity)
       (destroy-entity entity)))
+
+(define-system advance-phase ((entity))
+  (setf (can-activate/selectedp entity) nil)
+  (setf (can-activate/has-acted entity) nil))

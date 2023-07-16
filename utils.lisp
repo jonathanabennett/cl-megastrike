@@ -30,3 +30,11 @@
   '(member initiative deployment movement combat end))
 
 (defvar *phase-order* '(:initiative :deployment :movement :combat :end))
+
+(defun roll (dice &optional (mods 0))
+  (let ((ret mods))
+    (dotimes (x dice) (incf ret (+ (random 6) 1)))
+    ret))
+
+(defun roll2d (&optional (mods 0))
+  (roll 2 0))

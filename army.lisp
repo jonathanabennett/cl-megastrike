@@ -23,16 +23,19 @@
                        :units unit-list)
         *armies*))
 
+(defmethod same-army ((a army) (o army))
+  (string= (army/name a) (army/name o)))
+
+(defmethod same-army ((a army) (s string))
+  (string= (army/name a) s))
+
 (defmethod add-unit ((a army) (u combat-unit))
-  (push u (army/units a)))
+  (setf (info/army u) a))
 
 (defmethod count-units ((a army))
-  (length (army/units a)))
-
-(defmethod draw-units (stream (a army))
-  (with-drawing-options (stream :ink (army/color a))
-    (dolist (u (army/units a))
-      (present u 'combat-unit :stream stream))))
+  (let ((count 0))
+    (map-entities #'(lambda (e) (if (same-army (info/army e) a) (incf count))))
+    count))
 
 (defmethod turn-order-list ((a army))
   (let ((army-string (army/name a))
