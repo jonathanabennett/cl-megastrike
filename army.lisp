@@ -1,4 +1,4 @@
-(in-package :alphastrike)
+(in-package :megastrike)
 
 (defvar *armies* '())
 

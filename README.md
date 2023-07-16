@@ -1,4 +1,4 @@
-# alphastrike
+# Megastrike
 
 ### _Jonathan Bennett <doulos05@gmail.com>_
 
@@ -8,14 +8,14 @@ This is an implementation of Alpha Strike on the computer.
 
 This project depends on the McCLIM graphics library, and beast. These will be installed when you quickload the project in Common Lisp. All of these are known to work on MacOS (MacOS does require xQuartz to run as well, which must be configured the section below) and Linux. I lack a means of testing on Windows.
 
-It also requires a functioning Common Lisp installation (I use sbcl) and Quicklisp. Please see the doucmentation on their websites to install them.
+It also requires a functioning Common Lisp installation (I use [sbcl](http://www.sbcl.org "SBCL")) and [Quicklisp](https://www.quicklisp.org/beta/ "Quicklisp"). Please see the documentation on their websites to install them.
 
 To run:
 
-1. Clone this repository into `~/quicklisp/local-projects/alphastrike`
+1. Clone this repository into `~/quicklisp/local-projects/megastrike`
 2. Open Common lisp (run `sbcl`)
-3. Run `(ql:quickload :alphastrike)`
-4. Run `(in-package :alphastrike)`
+3. Run `(ql:quickload :megastrike)`
+4. Run `(in-package :megastrike)`
 5. Run `(main)` to launch the program.
 
 ## What works

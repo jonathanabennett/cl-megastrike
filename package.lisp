@@ -1,6 +1,6 @@
 ;;;; package.lisp
 
-(defpackage #:alphastrike
+(defpackage #:megastrike
   (:use #:clim #:clim-lisp #:beast)
   )
 

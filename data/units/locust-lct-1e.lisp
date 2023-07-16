@@ -1,4 +1,4 @@
-(in-package :alphastrike)
+(in-package :megastrike)
 
 (defun locust-lct-1e ()
   (new-element

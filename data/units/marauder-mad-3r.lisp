@@ -1,4 +1,4 @@
-(in-package :alphastrike)
+(in-package :megastrike)
 
 (defun marauder-mad-3r ()
   (new-element

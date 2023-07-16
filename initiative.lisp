@@ -1,12 +1,17 @@
-(in-package :alphastrike)
+(in-package :megastrike)
 
 (defun do-end-phase (frame)
+  (setf (initiative-place *application-frame*) 0)
+  (setf (active-unit *application-frame*) nil)
   (setf (current-phase frame) 0)
   (incf (turn-number frame))
   (run-end-phase))
 
 (defun do-phase (frame)
-  (incf (current-phase *application-frame*)))
+  (setf (initiative-place *application-frame*) 0)
+  (setf (active-unit *application-frame*) nil)
+  (incf (current-phase frame))
+  (run-advance-phase))
 
 (defun roll-initiative (army-list)
   (mapcar #'(lambda (a) (setf (army/initiative a) (roll2d))) army-list)

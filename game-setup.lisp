@@ -1,4 +1,4 @@
-(in-package :alphastrike)
+(in-package :megastrike)
 
 (defun load-data ()
   "Load the contents of the data directory in prepration for execution."

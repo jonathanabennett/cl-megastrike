@@ -1,4 +1,4 @@
-(in-package #:alphastrike)
+(in-package #:megastrike)
 
 (defclass grid ()
   ((tile-hash

@@ -1,7 +1,7 @@
 #+TITLE: Readme
 
-* Units in Alphastrike
-Units in Alphastrike are built using lisp functions. If you don't know lisp,
+* Units in megastrike
+Units in megastrike are built using lisp functions. If you don't know lisp,
 that's OK. It isn't too difficult to create your own.
 * The Unit file
 Units are placed in files named with the full unit name (=locust-lct-1v.lisp=). Variants on a design should be placed in their own files. They can be created by copying an existing variant and changing the numbers. Below is an example entry, taken from the =locust-lct-1v.lisp= file, with additional annotations.
@@ -9,7 +9,7 @@ Units are placed in files named with the full unit name (=locust-lct-1v.lisp=). 
 The first line should not be changed. Without it, the function which creates the unit cannot find the correct class and helper functions.
 
 #+begin_src lisp
-(in-package :alphastrike)
+(in-package :megastrike)
 
 #+end_src
 
@@ -105,7 +105,7 @@ systemmode:TARGETING:911 "
 
 Balanced parentheses is important, ensure that there are 2 "extra" closing parentheses on the crits line: One to close =new-element= and one to close the =defun= at the top.
 
-When you open alphastrike, it scans the =data= folder and all its subfolders for lisp files and loads them, so the unit should appear immediately when you restart alphastrike. To use them, you'll need to edit the function called =main= in the =alphastrike.lisp= file, replacing the function call for =*locust*= or =*phawk*= with your new function. If you rolled up a Marauder MAD-3R and wanted to pit it against the Phoenix Hawk, it would look like this:
+When you open megastrike, it scans the =data= folder and all its subfolders for lisp files and loads them, so the unit should appear immediately when you restart megastrike. To use them, you'll need to edit the function called =main= in the =megastrike.lisp= file, replacing the function call for =*locust*= or =*phawk*= with your new function. If you rolled up a Marauder MAD-3R and wanted to pit it against the Phoenix Hawk, it would look like this:
 
 #+begin_src lisp
 (setf *locust* (marauder-mad-3r))

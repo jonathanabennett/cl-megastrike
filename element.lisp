@@ -1,14 +1,14 @@
-(in-package :alphastrike)
+(in-package :megastrike)
 
 ;;; Aspects for Elements
 
-(define-aspect info short-name full-name unit-type role pv size tro)
+(define-aspect info short-name full-name unit-type role pv size tro (army :initform nil))
 (define-aspect damageable cur-armor max-armor cur-struct max-struct crit-list destroyedp)
 (define-aspect can-activate
   (selectedp :initform nil)
   (has-acted :initform nil))
-(define-aspect moveable move-alist move-used)
-(define-aspect attacks short medium long)
+(define-aspect moveable move-alist move-used (destination-tile :initform nil))
+(define-aspect attacks short medium long (target :initform nil))
 (define-aspect heat ov cur-heat)
 (define-aspect specials special-list)
 

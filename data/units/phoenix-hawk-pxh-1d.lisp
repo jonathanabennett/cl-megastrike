@@ -1,4 +1,4 @@
-(in-package :alphastrike)
+(in-package :megastrike)
 
 (defun phoenix-hawk-pxh-1d ()
   (new-element

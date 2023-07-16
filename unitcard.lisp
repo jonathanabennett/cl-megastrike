@@ -1,4 +1,4 @@
-(in-package :alphastrike)
+(in-package :megastrike)
 
 
 (defun quickstats-block (stream combat-unit)

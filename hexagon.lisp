@@ -1,4 +1,4 @@
-(in-package :alphastrike)
+(in-package :megastrike)
 
 ;; Begin by defining a Hexagon class. We are using the Cubic constructor and
 ;; storage method described by Amin at Red Blob Games.
