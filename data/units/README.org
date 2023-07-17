@@ -110,7 +110,7 @@ When you open megastrike, it scans the =data= folder and all its subfolders for 
 Imagine you have a Skill 4 pilot named Bob Bobbington who will be starting in hex 4,4, piloting a Shadow Hawk SHD-2H for the Lyrans. You would write this after the call to =new-army=:
 
 #+begin_src lisp
-(make-combat-unit 'shadow-hawk-shd-2h (list 4 4) "Bob Bobbington" 4 (second *armies*)
+(make-combat-unit 'shadow-hawk-shd-2h (list 4 4) "Bob Bobbington" 4 la)
 #+end_src
 
 If it does not work or there is an error, there is probably an error in the file. Contact me and I'll be happy to try to help!

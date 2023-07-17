@@ -21,6 +21,17 @@
     (object)
   (list object))
 
+(define-megastrike-command (com-launch-game :name "Launch Game" :menu t)
+  ()
+  (load-board-file (merge-pathnames #P"data/boards/16x17 Grassland 1.board" *here*) *test-map*)
+  (let ((dc (new-army "Draconis Combine" +red+))
+        (la (new-army "Lyran Alliance" +blue+)))
+    (make-combat-unit 'locust-lct-1v (list 1 1) "Takashi Ujiro" 4 dc)
+    (make-combat-unit 'marauder-mad-3r (list 2 2) "Sven Stevensen" 4 dc)
+    (make-combat-unit 'phoenix-hawk-pxh-1d (list 7 4) "Peter Steele" 4 la)
+    (make-combat-unit 'longbow-lgb-0w (list 10 14) "Jaime Foxx" 4 la))
+  (setf (frame-current-layout *application-frame*) :game-round))
+
 (define-megastrike-command (com-measure-range
                  :name "Range"
                  :menu t)
@@ -37,7 +48,8 @@
                  :menu t)
   ()
   (format *debug-io* "Rolling initiative.")
-  (setf (initiative-list *application-frame*) (roll-initiative *armies*)))
+  (setf (initiative-list *application-frame*)
+        (roll-initiative (frame/armies *application-frame*))))
 
 (define-megastrike-command (com-command-move-unit
                  :name "Move"
@@ -70,5 +82,5 @@
 (define-megastrike-command (com-quit-game :name "Quit Game" :menu t :command-table common-actions)
   ()
   (clear-entities)
-  (setf *armies* '())
+  (setf (frame/armies *application-frame*)'())
   (frame-exit *application-frame*))

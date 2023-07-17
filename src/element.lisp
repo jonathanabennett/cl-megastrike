@@ -93,7 +93,7 @@
                        :align-x :center))))
     (surrounding-output-with-border
         (stream :ink (army/color (info/army combat-unit)) :filled t :shape :rectangle)
-      (draw-text (find-pane-named *application-frame* 'world)
+      (draw-text (find-pane-named *application-frame* 'game-world)
                  (format nil "~a" (info/short-name combat-unit))
                  (hex-to-pixel (new-hexagon :q (location/q combat-unit)
                                             :r (location/r combat-unit)
@@ -211,11 +211,11 @@
 ;;         (unit-detail stream entity))))
 
 (define-system draw-units ((entity location))
-  (let ((frame (find-pane-named *application-frame* 'world)))
+  (let ((frame (find-pane-named *application-frame* 'game-world)))
     (present entity 'combat-unit :stream frame)))
 
 (define-system show-quickstats ((entity))
-  (let ((stream (find-pane-named *application-frame* 'quickstats)))
+  (let ((stream (find-pane-named *application-frame* 'game-quickstats)))
     (present entity 'combat-unit :stream stream )
     (terpri stream)))
 

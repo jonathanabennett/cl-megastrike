@@ -1,7 +1,5 @@
 (in-package :megastrike)
 
-(defvar *armies* '())
-
 (defclass army ()
   ((name
     :initarg :name
@@ -17,11 +15,12 @@
     :accessor army/initiative)))
 
 (defun new-army (name color &optional (unit-list '()))
-  (push (make-instance 'army
+  (let ((a (make-instance 'army
                        :name name
                        :color color
-                       :units unit-list)
-        *armies*))
+                       :units unit-list)))
+    (push a (frame/armies *application-frame*))
+    a))
 
 (defmethod same-army ((a army) (o army))
   (string= (army/name a) (army/name o)))

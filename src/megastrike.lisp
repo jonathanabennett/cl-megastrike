@@ -17,9 +17,13 @@
   ((active-unit
     :initform nil
     :accessor active-unit)
+   (armies
+    :initform '()
+    :accessor frame/armies)
    (game-board
+    :initarg :game/board
     :initform (make-instance 'grid)
-    :accessor game-board)
+    :accessor frame/game-board)
    (current-phase
     :initform 0
     :accessor current-phase)
@@ -32,37 +36,76 @@
    (initiative-place
     :initform 0
     :accessor initiative-place)
+   (layout
+    :accessor frame/layout
+    :initarg :layout
+    :initform (make-layout :hex-to-pixel-matrix (vector (/ 3.0 2.0) 0 (/ (sqrt 3.0) 2.0) (sqrt 3.0))
+                           :pixel-to-hex-matrix (vector (/ 2.0 3.0) 0 (/ 1.0 3.0) (/ (sqrt 3.0) 3.0))
+                           :start-angle 0
+                           :x-size 35
+                           :y-size 35
+                           :x-origin 10
+                           :y-origin 10))
    )
   (:menu-bar nil)
   (:panes
-     (world
+     (game-world
       :application
       :default-view +graphical-view+
       :display-function #'display-map)
-     (record-sheet
+     (game-record-sheet
       :application
       :min-width 375
       :scroll-bars nil
       :display-function #'display-record-sheet)
-     (quickstats
+     (game-quickstats
       :application
       :scroll-bars nil
       :min-width 375
       :default-view +quickstats-view+
       :display-function #'display-quickstats)
      (menu :command-menu)
-     ;;(int :interactor)
+     (lobby-overview
+      :application
+      :scroll-bars nil
+      :display-function #'display-overview)
+     (lobby-army-list
+      :application
+      :display-function #'display-lobby-army-list)
+     (lobby-record-sheet
+      :application
+      :min-width 375
+      :scroll-bars nil
+      :display-function #'display-lobby-record-sheet)
      )
   (:layouts
    (:default
     (vertically ()
       (:fill
        (horizontally ()
-         (:fill world)
+         lobby-overview
          (vertically ()
-           record-sheet
-           quickstats)))
+           lobby-record-sheet
+           lobby-army-list)))
+      menu))
+   (:game-round
+    (vertically ()
+      (:fill
+       (horizontally ()
+         (:fill game-world)
+         (vertically ()
+           game-record-sheet
+           game-quickstats)))
       (1/10 menu)))))
+
+(defmethod display-overview ((frame megastrike) stream)
+  (format stream "In Overview pane."))
+
+(defmethod display-lobby-army-list((frame megastrike) stream)
+  (format stream "In Army List pane."))
+
+(defmethod display-lobby-record-sheet ((frame megastrike) stream)
+  (format stream "In Record sheet pane."))
 
 (defmethod display-map ((frame megastrike) stream)
   (maphash (lambda (k v)
@@ -84,15 +127,9 @@
 
 (defun main ()
   ;;(load-data)
-  (load-board-file (merge-pathnames #P"data/boards/16x17 Grassland 1.board" *here*) *test-map*)
   (load-data)
-  (new-army "Draconis Combine" +red+)
-  (new-army "Lyran Alliance" +blue+)
-  (make-combat-unit 'locust-lct-1v (list 1 1) "Takashi Ujiro" 4 (first *armies*))
-  (make-combat-unit 'phoenix-hawk-pxh-1d (list 7 4) "Peter Steele" 4 (second *armies*))
-  (make-combat-unit 'marauder-mad-3r (list 2 2) "Sven Stevensen" 4 (first *armies*))
-  (make-combat-unit 'longbow-lgb-0w (list 10 14) "Jaime Foxx" 4 (second *armies*))
   (run-frame-top-level
    (make-application-frame 'megastrike
-                           :width 800
-                           :height 800)))
+                           :min-width 800
+                           :min-height 800
+                           :game-board *test-map*)))
