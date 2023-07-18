@@ -42,7 +42,8 @@
                       special-list (crit-list '()) img tro q r s
                       (pilot "Shooty McGee") (skill 4))
   (let ((arm    (if (eq cur-armor nil) max-armor cur-armor))
-        (struct (if (eq cur-struct nil) max-struct cur-struct)))
+        (struct (if (eq cur-struct nil) max-struct cur-struct))
+        (asset-path (merge-pathnames img *here*)))
     (create-entity 'combat-unit
                    :info/short-name short-name
                    :info/full-name full-name
@@ -65,7 +66,7 @@
                    :heat/cur-heat cur-heat
                    :specials/special-list special-list
                    :damageable/crit-list crit-list
-                   :display/image-path img
+                   :display/image-path (make-pattern-from-bitmap-file asset-path)
                    :info/tro tro
                    :location/q q
                    :location/r r
@@ -80,25 +81,23 @@
                                      (type entity)
                                      stream
                                      (view graphical-view) &key)
-  (if (can-activate/selectedp combat-unit)
-    (let ((selected-style (make-text-style :serif :bold :normal)))
-        (with-text-style (stream selected-style)
-          (surrounding-output-with-border
-              (stream :ink (army/color (info/army combat-unit)) :filled t :shape :rectangle)
-            (draw-text (find-pane-named *application-frame* 'world)
-                       (format nil "~a" (info/short-name combat-unit))
-                       (hex-to-pixel (new-hexagon :q (location/q combat-unit)
-                                                  :r (location/r combat-unit)
-                                                  :s (location/s combat-unit)) *layout*)
-                       :align-x :center))))
-    (surrounding-output-with-border
-        (stream :ink (army/color (info/army combat-unit)) :filled t :shape :rectangle)
-      (draw-text (find-pane-named *application-frame* 'game-world)
-                 (format nil "~a" (info/short-name combat-unit))
-                 (hex-to-pixel (new-hexagon :q (location/q combat-unit)
-                                            :r (location/r combat-unit)
-                                            :s (location/s combat-unit)) *layout*)
-                 :align-x :center))))
+  (let ((origin (hex-to-pixel (new-hexagon :q (location/q combat-unit)
+                                           :r (location/r combat-unit)
+                                           :s (location/s combat-unit))
+                              (frame/layout *application-frame*)))
+        (color (army/color (info/army combat-unit))))
+    (with-translation (stream (* (layout-x-size (frame/layout *application-frame*)) -0.9)
+                              (* (layout-y-size (frame/layout *application-frame*)) -0.8))
+      (draw-pattern* stream (display/image-path combat-unit)
+                     (point-x origin) (point-y origin)))
+    (with-translation (stream 0 (* (layout-y-size (frame/layout *application-frame*)) -0.8))
+      (surrounding-output-with-border (stream :ink color :filled t :shape :rectangle)
+        (if (can-activate/selectedp combat-unit)
+            (with-text-style (stream *selected-text-style*)
+              (draw-text stream (format nil "~a" (info/short-name combat-unit))
+                         origin :align-x :center :align-y :top))
+            (draw-text stream (format nil "~a" (info/short-name combat-unit))
+                       origin :align-x :center :align-y :top))))))
 
 
 (define-presentation-method present (combat-unit

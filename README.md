@@ -100,3 +100,13 @@ Fantastic, pull requests are welcome to help me with whatever catches your fancy
 ### Common lisp? No, I speak just fine. But I do know my Battletech!
 
 There are a bunch of elements (like... thousands) in the Battletech universe which will need to be created. The README in `data/units` explains the data format, just copy an existing file, rename it, and replace the data as appropriate. Also playtesting is greatly appreciated. Submit issues to Github and I'll do my best to address them, but please expect if it's a rules thing that I'm going to postpone implementation until I get to the point release covering that section of the rules.
+
+# Credits
+
+The images found in the data/images folder are used with permissino from Megamek [Megamek](https://github.com/MegaMek/megamek).
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+_MechWarrior, BattleMech, ‘Mech and AeroTech are registered trademarks of The Topps Company, Inc. Original BattleTech material Copyright by Catalyst Game Labs All Rights Reserved. Used without permission._

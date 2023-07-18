@@ -4,7 +4,7 @@
 (defun quickstats-block (stream combat-unit)
   "Draws the quick-stats block for a unit."
   (if (can-activate/selectedp combat-unit)
-      (surrounding-output-with-border (stream :ink +grey30+ :filled t :shape :rounded)
+      (surrounding-output-with-border (stream :ink +grey60+ :filled t :shape :rounded)
         (with-text-style (stream (make-text-style :serif :bold :normal))
           (format stream "~a ~a" (info/full-name combat-unit) (info/short-name combat-unit)))
         (format stream "#~a " (entity-id combat-unit))
@@ -13,7 +13,7 @@
                 (damageable/cur-struct combat-unit))
         (format stream "  MV: ~a" (format-move combat-unit))
         (format stream "  TMM: ~a~%" (unit-tmm combat-unit)))
-      (surrounding-output-with-border (stream :ink +grey60+ :filled t :shape :rounded)
+      (surrounding-output-with-border (stream :ink +grey90+ :filled t :shape :rounded)
         (with-text-style (stream (make-text-style :serif :bold :normal))
           (format stream "~a ~a" (info/full-name combat-unit) (info/short-name combat-unit)))
         (format stream "#~a " (entity-id combat-unit))

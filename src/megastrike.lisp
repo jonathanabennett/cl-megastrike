@@ -2,16 +2,7 @@
 
 (in-package #:megastrike)
 (defparameter *here* (asdf:system-source-directory :megastrike))
-
-(defvar *layout* (make-layout :hex-to-pixel-matrix (vector (/ 3.0 2.0) 0 (/ (sqrt 3.0) 2.0) (sqrt 3.0))
-                              :pixel-to-hex-matrix (vector (/ 2.0 3.0) 0 (/ 1.0 3.0) (/ (sqrt 3.0) 3.0))
-                              :start-angle 0
-                              :x-size 35
-                              :y-size 35
-                              :x-origin 10
-                              :y-origin 10))
-
-(defvar *test-map* (make-instance 'grid))
+(defparameter *selected-text-style* (make-text-style :serif :bold :normal))
 
 (define-application-frame megastrike ()
   ((active-unit
@@ -21,7 +12,7 @@
     :initform '()
     :accessor frame/armies)
    (game-board
-    :initarg :game/board
+    :initarg :frame/game-board
     :initform (make-instance 'grid)
     :accessor frame/game-board)
    (current-phase
@@ -42,11 +33,10 @@
     :initform (make-layout :hex-to-pixel-matrix (vector (/ 3.0 2.0) 0 (/ (sqrt 3.0) 2.0) (sqrt 3.0))
                            :pixel-to-hex-matrix (vector (/ 2.0 3.0) 0 (/ 1.0 3.0) (/ (sqrt 3.0) 3.0))
                            :start-angle 0
-                           :x-size 35
-                           :y-size 35
+                           :x-size 45
+                           :y-size 45
                            :x-origin 10
-                           :y-origin 10))
-   )
+                           :y-origin 10)))
   (:menu-bar nil)
   (:panes
      (game-world
@@ -111,7 +101,7 @@
   (maphash (lambda (k v)
              (declare (ignorable k))
              (present v 'tile))
-           (tiles *test-map*))
+           (tiles (frame/game-board *application-frame*)))
   (run-draw-units))
 
 (defmethod display-record-sheet ((frame megastrike) stream)
@@ -131,5 +121,4 @@
   (run-frame-top-level
    (make-application-frame 'megastrike
                            :min-width 800
-                           :min-height 800
-                           :game-board *test-map*)))
+                           :min-height 800)))

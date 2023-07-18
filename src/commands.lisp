@@ -23,7 +23,8 @@
 
 (define-megastrike-command (com-launch-game :name "Launch Game" :menu t)
   ()
-  (load-board-file (merge-pathnames #P"data/boards/16x17 Grassland 1.board" *here*) *test-map*)
+  (load-board-file (merge-pathnames #P"data/boards/16x17 Grassland 1.board" *here*)
+                   (frame/game-board *application-frame*))
   (let ((dc (new-army "Draconis Combine" +red+))
         (la (new-army "Lyran Alliance" +blue+)))
     (make-combat-unit 'locust-lct-1v (list 1 1) "Takashi Ujiro" 4 dc)
