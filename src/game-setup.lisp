@@ -1,12 +1,14 @@
 (in-package :megastrike)
 
+(defvar *master-unit-list* '())
+
 (defun load-data ()
   "Load the contents of the data directory in prepration for execution."
   (uiop:chdir *here*)
-
   (let ((mech-files (uiop:directory-files (uiop:merge-pathnames* #p"data/units/" *here*))))
     (dolist (file mech-files)
-      (if (string= (pathname-type file) "lisp") (load file)))))
+      (if (string= (pathname-type file) "lisp")
+          (progn (load file) (push (pathname-name file) *master-unit-list*))))))
 
 (defun make-combat-unit (unit-fn offset-hex-addr pilot skill army
                          &optional (struct nil) (armor nil) (crits '()) (heat 0))
