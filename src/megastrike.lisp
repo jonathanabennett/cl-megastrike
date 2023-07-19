@@ -4,15 +4,22 @@
 (defparameter *here* (asdf:system-source-directory :megastrike))
 (defparameter *selected-text-style* (make-text-style :serif :bold :normal))
 
+(defparameter +color-list+ '(("Red" +red+)
+                             ("Blue" +blue+)
+                             ("Purple" +purple+)
+                             ("Green" +light-green+)
+                             ("Gold" +gold+)))
+
 (define-application-frame megastrike ()
   ((active-unit
     :initform nil
     :accessor active-unit)
    (armies
+    :initarg :armies
     :initform '()
     :accessor frame/armies)
    (game-board
-    :initarg :frame/game-board
+    :initarg :game-board
     :initform (make-instance 'grid)
     :accessor frame/game-board)
    (current-phase
@@ -89,7 +96,30 @@
       (1/10 menu)))))
 
 (defmethod display-overview ((frame megastrike) stream)
-  (format stream "In Overview pane."))
+  (new-army "Draconis Combine" +red+)
+  (new-army "Lyran Commonwealth" +blue+)
+  (format stream "Current Army List~%")
+  (if (frame/armies frame)
+      (format stream "~{~a~%~}" (mapcar #'army/name (frame/armies *application-frame*))))
+  (with-output-as-gadget (stream)
+    (let ((new-army-button (make-pane 'push-button
+                                      :label "New Army"
+                                      :activate-callback 'new-army-callback)))
+      new-army-button))
+  )
+
+(defun new-army-callback (button)
+  (let (name color)
+    (let ((stream (frame-standard-input *application-frame*)))
+      (accepting-values (stream :own-window t :label "New Army Dialog")
+        (setq name (accept 'string :stream stream :prompt "Army Name"))
+        (setq color (accept `((completion ,+color-list+ :value-key cadr)
+                              :name-key car)
+                            :view `(list-pane-view :visible-items 10)
+                            :stream stream
+                            :prompt "Color"))
+        (format *debug-io* "~a ~a" name color)
+        (new-army name color)))))
 
 (defmethod display-lobby-army-list((frame megastrike) stream)
   (format stream "In Army List pane."))
