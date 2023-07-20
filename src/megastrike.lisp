@@ -1,8 +1,6 @@
 ;;;; megastrike.lisp
 
 (in-package #:megastrike)
-(defparameter *here* (asdf:system-source-directory :megastrike))
-(defparameter *selected-text-style* (make-text-style :serif :bold :normal))
 
 (defparameter +color-list+ `(("Red" . ,+red+)
                              ("Blue" . ,+blue+)
@@ -18,6 +16,12 @@
     :initarg :armies
     :initform '()
     :accessor frame/armies)
+   (selected-army
+    :initform nil
+    :accessor lobby/selected-army)
+   (detail-unit
+    :initform nil
+    :accessor lobby/detail-unit)
    (game-board
     :initarg :game-board
     :initform (make-instance 'grid)
@@ -69,11 +73,11 @@
      (lobby-army-list
       :application
       :display-function #'display-lobby-army-list)
-     (lobby-record-sheet
+     (lobby-detail-view
       :application
       :min-width 375
       :scroll-bars nil
-      :display-function #'display-lobby-record-sheet)
+      :display-function #'display-lobby-detail-view)
      )
   (:layouts
    (:default
@@ -126,13 +130,12 @@
                                                                (new-army (gadget-value army-text)
                                                                        (cdr (assoc (gadget-value army-color) +color-list+)))
                                                                (redisplay-frame-panes *application-frame*)))))
-        new-army-button)))
-  )
+        new-army-button))))
 
 (defmethod display-lobby-army-list((frame megastrike) stream)
   (format stream "In Army List pane."))
 
-(defmethod display-lobby-record-sheet ((frame megastrike) stream)
+(defmethod display-lobby-detail-view ((frame megastrike) stream)
   (format stream "In Record sheet pane."))
 
 (defmethod display-map ((frame megastrike) stream)

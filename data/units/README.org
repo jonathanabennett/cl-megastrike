@@ -19,50 +19,41 @@ After the defun should be the unit's name and designation.
 
 Notice that for short-name and long-name, there is a colon in front. That is ncessarly to make the function work, make sure not to remove any of those.
 #+begin_src lisp
-(defun locust-lct-1v ()
-  (new-element
-   :short-name "LCT-1V"
-   :full-name "Locust LCT-1V"
-#+end_src
+(add-or-update-mek
+ :short-name "LCT-1V"
+ :long-name "Locust LCT-1V"
+ :unit-type "BM"
+ :role "Scout"
+ :pv 18
+ :size 1
+ :armor 2
+ :structure 2
+ :mv-string "8"
+ #+end_src
 
-Notice that the unit-type and role both have a single quote in front of them ='BM= and ='scout=. These are keywords, I'm using them kind of like Enums in other languages. Valid values are the values for those found on the MUL or in Alphastrike. Capitalization is not important, internally, Common Lisp converts them to all uppercase automatically.
-#+begin_src lisp
-   :unit-type 'BM
-   :role 'scout
-   :pv 18
-   :size 1
-   :max-armor 2
-   :max-struct 2
-#+end_src
+Moves should be entered as a string and in Hexes, not inches (so a mech like the locust, with 16" move should be "8"). If it can jump, like the Phoenix hawk, it should be "6j", note the lowercase. If it has two (For mech like the Shadow Hawk, which has 5 walk / 3 jump), then it would be "5/3j".
 
-Moves are the first tricky thing to define. If a unit only has one move type, then you can just replace ='walk= with whatever that movement type is and type in the move in *hexes*.
-
-If it has two (For mech like the Shadow Hawk, which has 5 walk / 3 jump), then copy the line that starts =cons= and paste it *BELOW* the first one. The default movement method MUST be the first one in the list.
-#+begin_src lisp
-   :move-list (list
-               (cons 'walk 8)
-              )
+ #+begin_src lisp
+ :short 1
+ :medium 1
+ :long 0 ;; Enter 0.5 for 0*
+ :ov 0
 #+end_src
 
 Technically speaking, order does not matter. But for simplicity's sake, please follow this order. Note for units which have the 0* damage code, you should enter 0.5. The program will detect that and handle it appropriately (rolling to see if you do 0 or 1 damage).
-#+begin_src lisp
-   :short 1
-   :medium 1
-   :long 0 ;; Enter 0.5 for 0*
-   :ov 0
-#+end_src
 
-The specials list is a list of Lisp symbols (like ='BM= and ='scout= above). Each symbol should match the code in table at the end of Alphastrike exactly. Battlemechs automatically have ='(SRCH SOA)= so just add them after =SOA=, put a space between each one and don't forget the leading ='=.
+The specials is just a string listing all the specials separated by spaces. Each special should match the code in table at the end of Alphastrike exactly (including capitalization). All Battlemechs should have "SRCH SOA", add any other specials after those two (For example "SRCH SOA AC2/2/0").
 
-Images don't work yet, but when they're added this is where they will be. You can enter the path, just changing the mech's name.
+The images I am using are the same images (in the same directory structure) as Megamek. Check the =data/images/units/*= folder of your Megamek install for the file name. Also, please copy the image into the same location in Megastrike as Megamek has kindly given permission for me to use their images.
+
 #+begin_src lisp
-   :special-list '(SRCH SOA)
-   :img #P"data/images/units/mechs/Locust.png"
+ :specials "SRCH SOA"
+ :display "data/images/units/mechs/Locust.png"
 #+ end_src
 
 Finally,the TRO entry. I grabbed this from the MTF file in my Megamek installation, but there are other sources as well. If you don't have it, just put an empty string: =""=
 #+begin_src lisp
-   :tro
+ :tro
 "Overview: The Locust is undoubtedly one of the most popular and prevalent
 light BattleMechs ever made. First produced in 2499, the almost dozen distinct
 factories manufacturing the design quickly spread the design to every power in
@@ -100,17 +91,11 @@ systemmanufacturer:COMMUNICATIONS:Garrett
 systemmode:COMMUNICATIONS:T10-B
 systemmanufacturer:TARGETING:O/P
 systemmode:TARGETING:911 "
-))
+)
 #+end_src
 
-Balanced parentheses is important, ensure that there are 2 "extra" closing parentheses on the crits line: One to close =new-element= and one to close the =defun= at the top.
+Balanced parentheses is important, ensure that there is a parentheses after the TRO string to close the whole expression.
 
-When you open megastrike, it scans the =data= folder and all its subfolders for lisp files and loads them, so the unit should appear immediately when you restart megastrike. To use them, you'll need to edit the function called =main= in the =megastrike.lisp= file.
-
-Imagine you have a Skill 4 pilot named Bob Bobbington who will be starting in hex 4,4, piloting a Shadow Hawk SHD-2H for the Lyrans. You would write this after the call to =new-army=:
-
-#+begin_src lisp
-(make-combat-unit 'shadow-hawk-shd-2h (list 4 4) "Bob Bobbington" 4 la)
-#+end_src
+When you open megastrike, it scans the =data= folder and all its subfolders for lisp files and loads them, so the unit should appear immediately when you restart megastrike. To use them, you can add them in the army builder.
 
 If it does not work or there is an error, there is probably an error in the file. Contact me and I'll be happy to try to help!

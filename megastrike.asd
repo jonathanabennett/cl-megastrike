@@ -6,11 +6,12 @@
   :license  "GPL3"
   :version "0.1.0"
   :serial t
-  :depends-on (#:beast #:mcclim)
+  :depends-on (#:beast #:mcclim #:mito #:cl-ppcre #:str)
   :components ((:module "src"
                 :components
                 ((:file "package")
                  (:file "utils")
+                 (:file "db")
                  (:file "hexagon")
                  (:file "tiles")
                  (:file "element" :depends-on ("utils"))
