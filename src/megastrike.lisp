@@ -76,7 +76,7 @@
      (lobby-detail-view
       :application
       :min-width 375
-      :scroll-bars nil
+      :scroll-bars t
       :display-function #'display-lobby-detail-view)
      )
   (:layouts
@@ -86,7 +86,7 @@
        (horizontally ()
          lobby-overview
          (vertically ()
-           lobby-record-sheet
+           lobby-detail-view
            lobby-army-list)))
       menu))
    (:game-round
@@ -132,11 +132,13 @@
                                                                (redisplay-frame-panes *application-frame*)))))
         new-army-button))))
 
-(defmethod display-lobby-army-list((frame megastrike) stream)
+(defmethod display-lobby-army-list ((frame megastrike) stream)
   (format stream "In Army List pane."))
 
 (defmethod display-lobby-detail-view ((frame megastrike) stream)
-  (format stream "In Record sheet pane."))
+  (let ((meks (mito:retrieve-dao 'mek)))
+    (dolist (m meks)
+      (present m 'mek))))
 
 (defmethod display-map ((frame megastrike) stream)
   (maphash (lambda (k v)

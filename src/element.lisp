@@ -72,6 +72,24 @@
     (setf (slot-value m 'specials-str) specials)
     (mito:save-dao m)))
 
+(define-presentation-method present (mek
+                                     (type mek)
+                                     stream
+                                     (view textual-view) &key)
+  (format stream "~a~%" (mek/long-name mek))
+  (format *debug-io* "~a~%" (mek/long-name mek)))
+  ;; (format stream "~8a~8a~8a~8a~8a~8a~8a~8a~8a~8a"
+  ;;         (mek/long-name mek)
+  ;;         (mek/pv mek)
+  ;;         (mek/size mek)
+  ;;         (mek/short mek)
+  ;;         (mek/medium mek)
+  ;;         (mek/long mek)
+  ;;         (mek/ov mek)
+  ;;         (mek/armor mek)
+  ;;         (mek/struct mek)
+  ;;         (mek/specials mek)))
+
 (define-aspect info short-name full-name unit-type role pv size tro (army :initform nil))
 (define-aspect damageable cur-armor max-armor cur-struct max-struct crit-list destroyedp)
 (define-aspect can-activate
