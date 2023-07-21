@@ -42,3 +42,9 @@
   (dotimes (i (count-units a))
     (push army-string order))
     order))
+
+(define-presentation-method present (army
+                                   (type army)
+                                   stream
+                                   (view textual-view) &key)
+  (format stream "~a" (army/name army) (army/color army)))

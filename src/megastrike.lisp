@@ -69,6 +69,7 @@
      (lobby-overview
       :application
       :scroll-bars nil
+      :incremental-redisplay t
       :display-function #'display-overview)
      (lobby-army-list
       :application
@@ -118,11 +119,14 @@
         (army-color (make-pane 'list-pane
                                :items (mapcar #'car +color-list+))))
     (format stream "Army Name:    ")
-    (with-output-as-gadget (stream)
-      army-text)
+    (with-drawing-options (stream :foreground +black+)
+      (with-output-as-gadget (stream)
+        army-text))
     (terpri stream)
-    (with-output-as-gadget (stream)
-      army-color)
+    (surrounding-output-with-border (stream :ink +grey30+ :shape :rounded)
+      (with-output-as-gadget (stream)
+        army-color))
+    (terpri stream)
     (with-output-as-gadget (stream)
       (let ((new-army-button (make-pane 'push-button
                                         :label "New Army"
@@ -132,18 +136,29 @@
                                                                (redisplay-frame-panes *application-frame*)))))
         new-army-button))))
 
+
 (defmethod display-lobby-army-list ((frame megastrike) stream)
   (format stream "In Army List pane."))
 
 (defmethod display-lobby-detail-view ((frame megastrike) stream)
   (let ((meks (mito:retrieve-dao 'mek)))
+    (formatting-table (stream)
+      (formatting-row (stream)
+        (formatting-cell (stream) (write-string "Unit name" stream))
+        (formatting-cell (stream) (write-string "PV" stream))
+        (formatting-cell (stream) (write-string "Size" stream))
+        (formatting-cell (stream) (write-string "Move" stream))
+        (formatting-cell (stream) (write-string "S/M/L" stream))
+        (formatting-cell (stream) (write-string "OV" stream))
+        (formatting-cell (stream) (write-string "A/S" stream))
+        (formatting-cell (stream) (write-string "Specials" stream)))
     (dolist (m meks)
-      (present m 'mek))))
+      (present m 'mek :stream stream)))))
 
 (defmethod display-map ((frame megastrike) stream)
   (maphash (lambda (k v)
              (declare (ignorable k))
-             (present v 'tile))
+             (present v 'tile :stream stream))
            (tiles (frame/game-board *application-frame*)))
   (run-draw-units))
 

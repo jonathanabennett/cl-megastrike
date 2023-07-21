@@ -1,5 +1,6 @@
 (in-package :megastrike)
 
+
 (define-megastrike-command (com-select-unit :name "Select")
   ((selected 'combat-unit))
   (if (or (not (initiative-list *application-frame*))
@@ -32,6 +33,18 @@
     (make-combat-unit 'phoenix-hawk-pxh-1d (list 7 4) "Peter Steele" 4 la)
     (make-combat-unit 'longbow-lgb-0w (list 10 14) "Jaime Foxx" 4 la))
   (setf (frame-current-layout *application-frame*) :game-round))
+
+(define-megastrike-command (com-create-army :name "Create army" :menu t)
+  ()
+  (accepting-values (*query-io*)
+    (let (name color)
+      (setf name (accept 'string :stream *query-io* :prompt "Army Name"))
+      (setf color (menu-choose '(("Red" :value +red+)
+                                 ("Blue" :value +blue+)
+                                 ("Green" :value +green+)
+                                 ("Gold" :value +gold+)
+                                 ("Purple" :value +purple+))))
+      (new-army name color))))
 
 (define-megastrike-command (com-measure-range
                  :name "Range"
