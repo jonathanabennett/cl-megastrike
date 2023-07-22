@@ -142,8 +142,34 @@
                                                                (new-army (gadget-value army-text)
                                                                        (cdr (assoc (gadget-value army-color) +color-list+)))
                                                                (redisplay-frame-panes *application-frame*)))))
-        new-army-button))))
-
+        new-army-button)))
+  (terpri stream)
+  (terpri stream)
+  (terpri stream)
+  (let ((width 16)
+        (height 17)
+        (width-gadget (make-pane 'text-field :width 50
+                                 :value "16"
+                                 :value-changed-callback #'(lambda (g v) (setf width (parse-integer v)))))
+        (height-gadget (make-pane 'text-field :width 50
+                                  :value "17"
+                                  :value-changed-callback #'(lambda (g v) (setf height (parse-integer v))))))
+    (write-string "Map Settings" stream)
+    (terpri stream)
+    (write-string "Width: ")
+    (with-output-as-gadget (stream)
+      width-gadget)
+    (terpri stream)
+    (write-string "Height: ")
+    (with-output-as-gadget (stream)
+      height-gadget)
+    (with-output-as-gadget (stream)
+      (let ((update-map-button (make-pane 'push-button
+                                          :label "Update Map Size"
+                                          :activate-callback #'(lambda (gadget)
+                                                                 (setf (frame/game-board *application-frame*)
+                                                                       (make-grid width height))))))
+        update-map-button))))
 
 (defmethod display-lobby-army-list ((frame megastrike) stream)
   (if (= 0 (length (beast:all-entities)))

@@ -40,3 +40,10 @@
     (dolist (l file-lines)
       (if (search "hex" l)
            (insert-tile grid (new-tile l))))))
+
+(defun make-grid (width height)
+  (let ((g (make-instance 'grid)))
+    (dotimes (x width)
+      (dotimes (y height)
+        (insert-tile g (new-tile x y))))
+    g))
