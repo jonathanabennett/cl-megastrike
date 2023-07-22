@@ -1,6 +1,5 @@
 (in-package :megastrike)
 
-
 (define-megastrike-command (com-select-unit :name "Select")
   ((selected 'combat-unit))
   (if (or (not (initiative-list *application-frame*))
@@ -22,6 +21,15 @@
     (object)
   (list object))
 
+(define-megastrike-command (com-select-army :name "Select Army")
+  ((selected 'army))
+  (setf (lobby/selected-army *application-frame*) selected))
+
+(define-presentation-to-command-translator army-selector
+    (army com-select-army megastrike :gesture :select)
+    (object)
+  (list object))
+
 (define-megastrike-command (com-launch-game :name "Launch Game" :menu t)
   ()
   (load-board-file (merge-pathnames #P"data/boards/16x17 Grassland 1.board" *here*)
@@ -33,18 +41,6 @@
     (make-combat-unit 'phoenix-hawk-pxh-1d (list 7 4) "Peter Steele" 4 la)
     (make-combat-unit 'longbow-lgb-0w (list 10 14) "Jaime Foxx" 4 la))
   (setf (frame-current-layout *application-frame*) :game-round))
-
-(define-megastrike-command (com-create-army :name "Create army" :menu t)
-  ()
-  (accepting-values (*query-io*)
-    (let (name color)
-      (setf name (accept 'string :stream *query-io* :prompt "Army Name"))
-      (setf color (menu-choose '(("Red" :value +red+)
-                                 ("Blue" :value +blue+)
-                                 ("Green" :value +green+)
-                                 ("Gold" :value +gold+)
-                                 ("Purple" :value +purple+))))
-      (new-army name color))))
 
 (define-megastrike-command (com-measure-range
                  :name "Range"

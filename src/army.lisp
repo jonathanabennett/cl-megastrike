@@ -28,6 +28,9 @@
 (defmethod same-army ((a army) (s string))
   (string= (army/name a) s))
 
+(defmethod same-army ((a army) o)
+  nil)
+
 (defmethod add-unit ((a army) (u combat-unit))
   (setf (info/army u) a))
 
@@ -47,4 +50,7 @@
                                    (type army)
                                    stream
                                    (view textual-view) &key)
-  (format stream "~a" (army/name army) (army/color army)))
+  (if (same-army army (lobby/selected-army *application-frame*))
+      (with-text-style (stream *selected-text-style*)
+        (format stream "~a" (army/name army)))
+      (format stream "~a" (army/name army))))

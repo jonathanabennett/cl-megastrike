@@ -79,6 +79,7 @@
       :min-width 375
       :scroll-bars t
       :display-function #'display-lobby-detail-view)
+     (int :interactor)
      )
   (:layouts
    (:default
@@ -89,7 +90,9 @@
          (vertically ()
            lobby-detail-view
            lobby-army-list)))
-      menu))
+      int
+      (1/10 menu)
+      ))
    (:game-round
     (vertically ()
       (:fill
@@ -111,17 +114,19 @@
     (dolist (a (frame/armies *application-frame*))
       (formatting-row (stream)
         (formatting-cell (stream)
-          (format stream "~a" (army/name a)))
+          (present a 'army :stream stream))
       (formatting-cell (stream)
         (draw-rectangle* stream 0 0 30 30 :ink (army/color a))))))
   (terpri stream)
-  (let ((army-text (make-pane 'text-field :width 200))
+  (let ((army-text (make-pane 'text-field :width 200
+                                          :foreground +black+
+                                          :background +white+
+                                          :value "Enter Army name"))
         (army-color (make-pane 'list-pane
                                :items (mapcar #'car +color-list+))))
     (format stream "Army Name:    ")
-    (with-drawing-options (stream :foreground +black+)
       (with-output-as-gadget (stream)
-        army-text))
+        army-text)
     (terpri stream)
     (surrounding-output-with-border (stream :ink +grey30+ :shape :rounded)
       (with-output-as-gadget (stream)
