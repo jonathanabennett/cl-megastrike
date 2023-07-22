@@ -152,10 +152,10 @@
     (dolist (str mv-strings)
       (multiple-value-bind (dist type) (parse-integer str :junk-allowed t)
         (if (= (length str) type)
-            (acons :walk dist mv-alist)
+            (setf mv-alist (acons :walk dist mv-alist))
             (cond
-              ((string= "j" (subseq str type)) (acons :jump dist mv-alist))
-              (t                               (acons :walk dist mv-alist))))))
+              ((string= "j" (subseq str type)) (setf mv-alist (acons :jump dist mv-alist)))
+              (t                               (setf mv-alist (acons :walk dist mv-alist)))))))
     mv-alist))
 
 (defun construct-spec-list (specials-str)
@@ -353,3 +353,8 @@
 (define-system advance-phase ((entity))
   (setf (can-activate/selectedp entity) nil)
   (setf (can-activate/has-acted entity) nil))
+
+(define-system list-army ((entity))
+  (let ((stream (find-pane-named *application-frame* 'lobby-army-list)))
+    (if (same-army (info/army entity) (lobby/selected-army *application-frame*))
+        (format stream "~16aPilot Skill: ~4a" (info/full-name entity) (pilot/skill entity)))))

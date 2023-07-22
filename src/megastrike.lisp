@@ -150,10 +150,16 @@
         (height 17)
         (width-gadget (make-pane 'text-field :width 50
                                  :value "16"
-                                 :value-changed-callback #'(lambda (g v) (setf width (parse-integer v)))))
+                                 :value-changed-callback
+                                 #'(lambda (g v)
+                                     (if (not (string= "" v)
+                                              (setf width (parse-integer v)))))))
         (height-gadget (make-pane 'text-field :width 50
                                   :value "17"
-                                  :value-changed-callback #'(lambda (g v) (setf height (parse-integer v))))))
+                                  :value-changed-callback
+                                  #'(lambda (g v)
+                                      (if (not (string= "" v)
+                                               (setf height (parse-integer v))))))))
     (write-string "Map Settings" stream)
     (terpri stream)
     (write-string "Width: ")
@@ -169,14 +175,26 @@
                                           :activate-callback #'(lambda (gadget)
                                                                  (setf (frame/game-board *application-frame*)
                                                                        (make-grid width height))))))
-        update-map-button))))
+        update-map-button)))
+  (terpri stream)
+  (with-output-as-gadget (stream)
+    (let ((armies-ready (> (length (frame/armies *application-frame*)) 1))
+          (map-ready (> (hash-table-count (tiles (frame/game-board *application-frame*))) 1))
+          (launch-game-button (make-pane
+                               'push-button
+                               :label "Launch Game"
+                               :activate-callback
+                               #'(lambda (g)
+                                   (setf (frame-current-layout *application-frame*) :game-round)))))
+      (if (and armies-ready map-ready)
+          (activate-gadget launch-game-button)
+          (deactivate-gadget launch-game-button))
+      launch-game-button)))
 
 (defmethod display-lobby-army-list ((frame megastrike) stream)
   (if (= 0 (length (beast:all-entities)))
       (write-string "Army has no units yet." stream)
-      (dolist (e (beast:all-entities))
-        (if (same-army (info/army e) (lobby/selected-army *application-frame*))
-            (format stream "~a~%" (info/full-name e))))))
+      (run-list-army)))
 
 (defmethod display-lobby-detail-view ((frame megastrike) stream)
   (let* ((pname "Test Pilot")
@@ -189,19 +207,22 @@
                          'text-field
                          :width 50 :value "4"
                          :value-changed-callback #'(lambda (g v)
-                                                     (setf pskill (parse-integer v)))))
+                                                     (if (not (string= "" v))
+                                                         (setf pskill (parse-integer v))))))
          (xpos 1)
          (xpos-gadget   (make-pane
                          'text-field
                          :width 20 :value "4"
                          :value-changed-callback #'(lambda (g v)
-                                                     (setf xpos (parse-integer v)))))
+                                                     (if (not (string= "" v))
+                                                         (setf xpos (parse-integer v))))))
          (ypos 1)
          (ypos-gadget   (make-pane
                          'text-field
                          :width 20 :value "4"
                          :value-changed-callback #'(lambda (g v)
-                                                     (setf ypos (parse-integer v))))))
+                                                     (if (not (string= "" v))
+                                                         (setf ypos (parse-integer v)))))))
     (formatting-table (stream)
       (formatting-row (stream)
         (formatting-cell (stream) (format stream "Pilot name: "))
