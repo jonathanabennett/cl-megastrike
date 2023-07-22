@@ -19,6 +19,9 @@
    (selected-army
     :initform nil
     :accessor lobby/selected-army)
+   (selected-mek
+    :initform nil
+    :accessor lobby/selected-mek)
    (detail-unit
     :initform nil
     :accessor lobby/detail-unit)
@@ -86,9 +89,9 @@
     (vertically ()
       (:fill
        (horizontally ()
-         lobby-overview
+         lobby-detail-view
          (vertically ()
-           lobby-detail-view
+           lobby-overview
            lobby-army-list)))
       int
       (1/10 menu)
@@ -143,9 +146,62 @@
 
 
 (defmethod display-lobby-army-list ((frame megastrike) stream)
-  (format stream "In Army List pane."))
+  (if (= 0 (length (beast:all-entities)))
+      (write-string "Army has no units yet." stream)
+      (dolist (e (beast:all-entities))
+        (if (same-army (info/army e) (lobby/selected-army *application-frame*))
+            (format stream "~a~%" (info/full-name e))))))
 
 (defmethod display-lobby-detail-view ((frame megastrike) stream)
+  (let* ((pname "Test Pilot")
+         (pname-gadget  (make-pane
+                         'text-field :width 200 :value "Test Pilot"
+                                   :value-changed-callback #'(lambda (g v)
+                                                               (setf pname v))))
+         (pskill 4)
+         (pskill-gadget (make-pane
+                         'text-field
+                         :width 50 :value "4"
+                         :value-changed-callback #'(lambda (g v)
+                                                     (setf pskill (parse-integer v)))))
+         (xpos 1)
+         (xpos-gadget   (make-pane
+                         'text-field
+                         :width 20 :value "4"
+                         :value-changed-callback #'(lambda (g v)
+                                                     (setf xpos (parse-integer v)))))
+         (ypos 1)
+         (ypos-gadget   (make-pane
+                         'text-field
+                         :width 20 :value "4"
+                         :value-changed-callback #'(lambda (g v)
+                                                     (setf ypos (parse-integer v))))))
+    (formatting-table (stream)
+      (formatting-row (stream)
+        (formatting-cell (stream) (format stream "Pilot name: "))
+        (formatting-cell (stream) (with-output-as-gadget (stream) pname-gadget))
+        (formatting-cell (stream) (format stream "Pilot skill: "))
+        (formatting-cell (stream) (with-output-as-gadget (stream) pskill-gadget)))
+    (formatting-row (stream)
+      (formatting-cell (stream) (write-string "Deployment Location" stream)))
+    (formatting-row (stream)
+      (formatting-cell (stream) (write-string "X: " stream))
+    (formatting-cell (stream) (with-output-as-gadget (stream) xpos-gadget))
+    (formatting-cell (stream) (write-string "Y: " stream))
+    (formatting-cell (stream) (with-output-as-gadget (stream) ypos-gadget))))
+    (with-output-as-gadget (stream)
+      (let ((add-unit-button
+              (make-pane 'push-button
+                         :label "Add Unit"
+                         :activate-callback
+                         #'(lambda (g)
+                             (add-unit (lobby/selected-army *application-frame*)
+                                       (new-element-from-mul
+                                        (lobby/selected-mek *application-frame*)
+                                        :pname pname :pskill pskill :x xpos :y ypos))
+                             (redisplay-frame-panes *application-frame*)))))
+      add-unit-button)))
+  (terpri stream)
   (let ((meks (mito:retrieve-dao 'mek)))
     (formatting-table (stream)
       (formatting-row (stream)
@@ -158,7 +214,12 @@
         (formatting-cell (stream) (write-string "A/S" stream))
         (formatting-cell (stream) (write-string "Specials" stream)))
     (dolist (m meks)
-      (present m 'mek :stream stream)))))
+      (if (and (lobby/selected-mek *application-frame*)
+               (string= (mek/short-name m)
+                        (mek/short-name (lobby/selected-mek *application-frame*))))
+          (with-text-style (stream *selected-text-style*)
+            (present m 'mek :stream stream))
+          (present m 'mek :stream stream))))))
 
 (defmethod display-map ((frame megastrike) stream)
   (maphash (lambda (k v)

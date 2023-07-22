@@ -132,17 +132,18 @@
                             location
                             pilot))
 
-(defun new-element-from-mul (m)
+(defun new-element-from-mul (m &key pname pskill x y)
   (with-slots (short-name long-name unit-type role pv size armor struct mv-string short
                          medium long ov display specials-str tro) m
-    (let* ((mv-cons (construct-mv-alist mv-string))
-           (spec-list (construct-spec-list specials-str))
-           (e (new-element :short-name short-name :full-name long-name :unit-type unit-type
+    (let ((mv-cons (construct-mv-alist mv-string))
+          (spec-list (construct-spec-list specials-str))
+          (u-hex (hex-from-offset :col x :row y)))
+      (new-element :short-name short-name :full-name long-name :unit-type unit-type
                    :role role :pv pv :size size :cur-armor armor :max-armor armor
                    :cur-struct struct :max-struct struct :move-list mv-cons
+                   :q (hexagon-q u-hex) :r (hexagon-r u-hex) :s (hexagon-s u-hex)
                    :short short :medium medium :long long :ov ov :special-list spec-list
-                   :img display :tro tro)))
-      e)))
+                   :img display :tro tro :pilot pname :skill pskill))))
 
 (defun construct-mv-alist (mv-string)
   (let ((mv-alist '())
