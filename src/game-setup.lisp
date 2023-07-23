@@ -10,6 +10,9 @@
       (if (string= (pathname-type file) "lisp")
           (progn (load file) (push (pathname-name file) *master-unit-list*))))))
 
+(defun build-mul ()
+  (setf *master-unit-list* (load-database)))
+
 (defun make-combat-unit (unit-fn offset-hex-addr pilot skill army
                          &optional (struct nil) (armor nil) (crits '()) (heat 0))
   (let ((u (funcall unit-fn))

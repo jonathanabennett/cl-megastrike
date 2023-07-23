@@ -250,7 +250,7 @@
                              (redisplay-frame-panes *application-frame*)))))
       add-unit-button)))
   (terpri stream)
-  (let ((meks (mito:retrieve-dao 'mek)))
+  (let ((meks *master-unit-list*))
     (formatting-table (stream)
       (formatting-row (stream)
         (formatting-cell (stream) (write-string "Unit name" stream))

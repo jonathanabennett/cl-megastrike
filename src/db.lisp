@@ -1,7 +1,7 @@
 (in-package :megastrike)
 
-(defparameter *db* (merge-pathnames #P"data/units/units.db" *here*))
 
+(mito:connect-toplevel :sqlite3 :database-name ":memory:")
 
-
-(mito:connect-toplevel :sqlite3 :database-name *db*)
+(defun load-database ()
+  (mito:retrieve-dao 'mek))
