@@ -3,21 +3,13 @@
 ;;; Tile class
 
 (defclass tile ()
-  ((hexagon
-    :initarg :hexagon
-    :accessor tile-hexagon
+  ((hexagon :initarg :hexagon :accessor tile-hexagon
     :documentation "The hexagon where this tile is located.")
-   (elevation
-    :initarg :elevation
-    :accessor tile-elevation
+   (elevation :initarg :elevation :accessor tile-elevation
     :documentation "The elevation of the tile.")
-   (terrain
-    :initarg :terrain
-    :accessor tile-terrain
+   (terrain :initarg :terrain :accessor tile-terrain
     :documentation "The terrain string from the .board file for this tile.")
-   (terrain-palette
-    :initarg :terrain-palette
-    :accessor tile-terrain-palette
+   (terrain-palette :initarg :terrain-palette :accessor tile-terrain-palette
     :documentation "The color palette and design to color the tile.")))
 
 (defun new-tile-from-board (line)
@@ -59,4 +51,3 @@
                                      stream
                                      (view textual-view) &key)
   (format stream "~a" (offset-from-hex (tile-hexagon tile))))
-;;; Grid class

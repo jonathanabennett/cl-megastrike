@@ -8,9 +8,10 @@
   (let ((mech-files (uiop:directory-files (uiop:merge-pathnames* #p"data/units/" *here*))))
     (dolist (file mech-files)
       (if (string= (pathname-type file) "lisp")
-          (progn (load file) (push (pathname-name file) *master-unit-list*))))))
+          (load file)))))
 
 (defun build-mul ()
+  (load-data)
   (setf *master-unit-list* (load-database)))
 
 (defun make-combat-unit (unit-fn offset-hex-addr pilot skill army

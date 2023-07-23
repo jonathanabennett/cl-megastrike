@@ -3,10 +3,6 @@
 ;;; Define globals and major variables
 ;;;
 
-
-;; (defgeneric display (obj)
-;;   (:documentation "Pretty print an object for display in the GUI"))
-
 (deftype elements-type ()
   "This defines the valid list of element types in the game."
   '(member BM DS))

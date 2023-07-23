@@ -19,7 +19,10 @@
 
 (define-system list-army ((entity))
   (let ((stream (find-pane-named *application-frame* 'lobby-army-list))
-        (hex (new-hexagon :q (location/q entity) :r (location/r entity) :s (location/s entity))))
+        (hex (new-hexagon
+              :q (location/q entity)
+              :r (location/r entity)
+              :s (location/s entity))))
     (if (same-army (info/army entity) (lobby/selected-army *application-frame*))
         (formatting-row (stream)
           (formatting-cell (stream) (write-string (info/full-name entity) stream))

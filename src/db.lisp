@@ -4,43 +4,28 @@
 (mito:connect-toplevel :sqlite3 :database-name ":memory:")
 
 (mito:deftable mek ()
-  ((short-name    :col-type (:varchar 16)
-                  :accessor mek/short-name)
-   (long-name     :col-type (:varchar 64)
-                  :accessor mek/long-name)
-   (unit-type     :col-type (:varchar 4)
-                  :accessor mek/unit-type)
-   (role          :col-type (:varchar 20)
-                  :accessor mek/role)
-   (pv            :col-type :int
-                  :accessor mek/pv)
-   (size          :col-type :int
-                  :accessor mek/size)
-   (tro           :col-type :text
-                  :accessor mek/tro)
-   (armor         :col-type :int
-                  :accessor mek/armor)
-   (struct        :col-type :int
-                  :accessor mek/struct)
-   (mv-string     :col-type (:varchar 16)
-                  :accessor mek/mv-string)
-   (short         :col-type :real
-                  :accessor mek/short)
-   (medium        :col-type :real
-                  :accessor mek/medium)
-   (long          :col-type :real
-                  :accessor mek/long)
-   (ov            :col-type :int
-                  :accessor mek/ov)
-   (display       :col-type :text
-                  :accessor mek/display)
-   (specials-str  :col-type :text
-                  :accessor mek/specials)))
+  ((short-name    :col-type (:varchar 16) :accessor mek/short-name)
+   (long-name     :col-type (:varchar 64) :accessor mek/long-name)
+   (unit-type     :col-type (:varchar 4)  :accessor mek/unit-type)
+   (role          :col-type (:varchar 20) :accessor mek/role)
+   (pv            :col-type :int          :accessor mek/pv)
+   (size          :col-type :int          :accessor mek/size)
+   (tro           :col-type :text         :accessor mek/tro)
+   (armor         :col-type :int          :accessor mek/armor)
+   (struct        :col-type :int          :accessor mek/struct)
+   (mv-string     :col-type (:varchar 16) :accessor mek/mv-string)
+   (short         :col-type :real         :accessor mek/short)
+   (medium        :col-type :real         :accessor mek/medium)
+   (long          :col-type :real         :accessor mek/long)
+   (ov            :col-type :int          :accessor mek/ov)
+   (display       :col-type :text         :accessor mek/display)
+   (specials-str  :col-type :text         :accessor mek/specials)))
 
 (mito:ensure-table-exists 'mek)
 
-(defun add-or-update-mek (&rest rest &key short-name long-name unit-type role pv size (tro "")
-                         armor structure mv-string short medium long ov display specials)
+(defun add-or-update-mek (&rest rest &key short-name long-name unit-type role pv
+                                       size (tro "") armor structure mv-string
+                                       short medium long ov display specials)
   (if (mito:find-dao 'mek :short-name short-name)
       (apply #'update-mek-in-mul rest)
       (apply #'add-mek-to-mul rest)))

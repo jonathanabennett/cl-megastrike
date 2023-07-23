@@ -1,27 +1,30 @@
 (in-package :megastrike)
 
-(define-megastrike-command (com-select-unit :name "Select")
+(define-megastrike-command (com-select-unit :name "Select" :echo nil)
   ((selected 'combat-unit))
-  (if (or (not (initiative-list *application-frame*))
-          (< (length (initiative-list *application-frame*)) (initiative-place *application-frame*)))
-      (progn(setf (active-unit *application-frame*) selected)
-            (map-entities #'(lambda(e) (if (eq (entity-id selected) (entity-id e))
-                                           (setf (can-activate/selectedp e) t)
-                                           (setf (can-activate/selectedp e) nil)))))
-      (if (and (not (can-activate/has-acted selected))
-               (same-army (info/army selected) (nth (initiative-place *application-frame*)
-                                                    (initiative-list *application-frame*))))
-          (progn(setf (active-unit *application-frame*) selected)
-                (map-entities #'(lambda(e) (if (eq (entity-id selected) (entity-id e))
-                                               (setf (can-activate/selectedp e) t)
-                                               (setf (can-activate/selectedp e) nil))))))))
+  (let ((app *application-frame*))
+    (if (or (not (initiative-list app))
+            (< (length (initiative-list app)) (initiative-place app)))
+        (progn
+          (setf (active-unit app) selected)
+          (map-entities #'(lambda(e) (if (eq (entity-id selected) (entity-id e))
+                                         (setf (can-activate/selectedp e) t)
+                                         (setf (can-activate/selectedp e) nil)))))
+        (if (and (not (can-activate/has-acted selected))
+                 (same-army (info/army selected) (nth (initiative-place app)
+                                                      (initiative-list app))))
+            (progn
+              (setf (active-unit app) selected)
+              (map-entities #'(lambda(e) (if (eq (entity-id selected) (entity-id e))
+                                             (setf (can-activate/selectedp e) t)
+                                             (setf (can-activate/selectedp e) nil)))))))))
 
 (define-presentation-to-command-translator unit-selector
     (combat-unit com-select-unit megastrike :gesture :select :echo nil)
     (object)
   (list object))
 
-(define-megastrike-command (com-select-army :name "Select Army")
+(define-megastrike-command (com-select-army :name "Select Army" :echo nil)
   ((selected 'army))
   (setf (lobby/selected-army *application-frame*) selected))
 
@@ -30,7 +33,7 @@
     (object)
   (list object))
 
-(define-megastrike-command (com-select-mek :name "Select Mek")
+(define-megastrike-command (com-select-mek :name "Select Mek" :echo nil)
   ((selected 'mek))
   (setf (lobby/selected-mek *application-frame*) selected))
 
@@ -39,21 +42,7 @@
     (object)
   (list object))
 
-(define-megastrike-command (com-launch-game :name "Launch Game" :menu t)
-  ()
-  (load-board-file (merge-pathnames #P"data/boards/16x17 Grassland 1.board" *here*)
-                   (frame/game-board *application-frame*))
-  (let ((dc (new-army "Draconis Combine" +red+))
-        (la (new-army "Lyran Alliance" +blue+)))
-    (make-combat-unit 'locust-lct-1v (list 1 1) "Takashi Ujiro" 4 dc)
-    (make-combat-unit 'marauder-mad-3r (list 2 2) "Sven Stevensen" 4 dc)
-    (make-combat-unit 'phoenix-hawk-pxh-1d (list 7 4) "Peter Steele" 4 la)
-    (make-combat-unit 'longbow-lgb-0w (list 10 14) "Jaime Foxx" 4 la))
-  (setf (frame-current-layout *application-frame*) :game-round))
-
-(define-megastrike-command (com-measure-range
-                 :name "Range"
-                 :menu t)
+(define-megastrike-command (com-measure-range :name "Range" :menu t)
   ((origin 'combat-unit)
    (target 'tile))
   (notify-user *application-frame*
@@ -98,7 +87,7 @@
        ((eql phase :end) (do-end-phase *application-frame*))
        (t                (do-phase *application-frame*)))))
 
-(define-megastrike-command (com-quit-game :name "Quit Game" :menu t :command-table common-actions)
+(define-megastrike-command (com-quit-game :name "Quit Game" :menu t)
   ()
   (clear-entities)
   (setf (frame/armies *application-frame*)'())

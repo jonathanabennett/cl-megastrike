@@ -36,8 +36,8 @@
                             pilot))
 
 (defun new-element-from-mul (m &key pname pskill x y)
-  (with-slots (short-name long-name unit-type role pv size armor struct mv-string short
-                         medium long ov display specials-str tro) m
+  (with-slots (short-name long-name unit-type role pv size armor struct mv-string
+               short medium long ov display specials-str tro) m
     (let ((mv-cons (construct-mv-alist mv-string))
           (spec-list (construct-spec-list specials-str))
           (u-hex (hex-from-offset :col x :row y)))
@@ -57,8 +57,11 @@
         (if (= (length str) type)
             (setf mv-alist (acons :walk dist mv-alist))
             (cond
-              ((string= "j" (subseq str type)) (setf mv-alist (acons :jump dist mv-alist)))
-              (t                               (setf mv-alist (acons :walk dist mv-alist)))))))
+              ((string= "j" (subseq str type))
+               (setf mv-alist (acons :jump dist mv-alist)))
+
+              (t
+               (setf mv-alist (acons :walk dist mv-alist)))))))
     mv-alist))
 
 (defun construct-spec-list (specials-str)
@@ -116,12 +119,13 @@
                                            :r (location/r combat-unit)
                                            :s (location/s combat-unit))
                               (frame/layout *application-frame*)))
-        (color (army/color (info/army combat-unit))))
-    (with-translation (stream (* (layout-x-size (frame/layout *application-frame*)) -0.9)
-                              (* (layout-y-size (frame/layout *application-frame*)) -0.8))
+        (color (army/color (info/army combat-unit)))
+        (layout (frame/layout *application-frame*)))
+    (with-translation (stream (* (layout-x-size layout) -0.9)
+                              (* (layout-y-size layout) -0.8))
       (draw-pattern* stream (display/image-path combat-unit)
                      (point-x origin) (point-y origin)))
-    (with-translation (stream 0 (* (layout-y-size (frame/layout *application-frame*)) -0.8))
+    (with-translation (stream 0 (* (layout-y-size layout) -0.8))
       (surrounding-output-with-border (stream :ink color :filled t :shape :rectangle)
         (if (can-activate/selectedp combat-unit)
             (with-text-style (stream *selected-text-style*)
@@ -145,6 +149,7 @@
 ;;; Movement methods
 
 (defun format-move-assoc (stream m colonp atsignp)
+  "The colonp and atsignp are required for a function called inside `FORMAT'."
   (declare (ignorable colonp atsignp))
   (format stream "~a~a" (cdr m) (cdr (assoc (car m) *mv-designators*))))
 

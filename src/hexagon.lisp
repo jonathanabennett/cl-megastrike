@@ -7,15 +7,9 @@
 ;; Prefix all accessors with `hexagon-'
 ;; Convert defuns to defmethods
 (defclass hexagon ()
-  ((q
-    :initarg :q
-    :accessor hexagon-q)
-   (r
-    :initarg :r
-    :accessor hexagon-r)
-   (s
-    :initarg :s
-    :accessor hexagon-s)))
+  ((q :initarg :q :accessor hexagon-q)
+   (r :initarg :r :accessor hexagon-r)
+   (s :initarg :s :accessor hexagon-s)))
 
 (defun new-hexagon (&key q r s)
   (if (eq 0 (+ q r s))
@@ -24,7 +18,8 @@
 
 ;; Code to convert from qrs to xy and back again.
 (defun hex-from-offset (&key col row)
-  "Creates hexes from the .board files used by MegaMek, which use an offset coordinate system instead of cubic like I do."
+  "Creates hexes from the .board files used by MegaMek,
+which use an offset coordinate system instead of cubic like I do."
   (let* ((q col)
          (r (- row (floor (/ (+ col (* (mod (abs col) 2) -1)) 2))))
          (s (* (+ q r) -1)))
@@ -127,14 +122,3 @@ distance."
     (dotimes (i 6)
       (push (find-hex-corner center i layout) points))
      points))
-
-;; Pretty sure this is unncessary since McCLIM's presentations handle that for me.
-;; (defun pixel-to-hex (mouse-point layout)
-;;   "Converts from an x,y pixel address to a q,r,s hex address. Called to determine which
-;; hex is being clicked on / hovered over."
-;;   (let* ((vec (layout-pixel-to-hex-matrix layout))
-;;          (modified-point (make-point (/ (- (point-x mouse-point) (layout-x-origin layout)) (layout-x-size layout))
-;;                                      (/ (- (point-y mouse-point) (layout-y-origin layout)) (layout-y-size layout))))
-;;          (calc-q (+ (* (elt vec 0) (point-x modified-point)) (* (elt vec 1) (point-y modified-point))))
-;;          (calc-r (+ (* (elt vec 2) (point-x modified-point)) (* (elt vec 3) (point-y modified-point)))))
-;;     (make-hexagon :q calc-q :r calc-r :s (+ (* calc-q -1) (* calc-r -1)))))
