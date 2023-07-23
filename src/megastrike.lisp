@@ -93,7 +93,7 @@
          (vertically ()
            lobby-overview
            lobby-army-list)))
-      int
+      ;;int
       (1/10 menu)
       ))
    (:game-round
@@ -124,12 +124,12 @@
   (let ((army-text (make-pane 'text-field :width 200
                                           :foreground +black+
                                           :background +white+
-                                          :value "Enter Army name"))
+                                          :value "AFFS"))
         (army-color (make-pane 'list-pane
                                :items (mapcar #'car +color-list+))))
     (format stream "Army Name:    ")
-      (with-output-as-gadget (stream)
-        army-text)
+    (with-output-as-gadget (stream)
+      army-text)
     (terpri stream)
     (surrounding-output-with-border (stream :ink +grey30+ :shape :rounded)
       (with-output-as-gadget (stream)
@@ -152,14 +152,14 @@
                                  :value "16"
                                  :value-changed-callback
                                  #'(lambda (g v)
-                                     (if (not (string= "" v)
-                                              (setf width (parse-integer v)))))))
+                                     (if (not (string= "" v))
+                                              (setf width (parse-integer v))))))
         (height-gadget (make-pane 'text-field :width 50
                                   :value "17"
                                   :value-changed-callback
                                   #'(lambda (g v)
-                                      (if (not (string= "" v)
-                                               (setf height (parse-integer v))))))))
+                                      (if (not (string= "" v))
+                                               (setf height (parse-integer v)))))))
     (write-string "Map Settings" stream)
     (terpri stream)
     (write-string "Width: ")
@@ -182,19 +182,20 @@
           (map-ready (> (hash-table-count (tiles (frame/game-board *application-frame*))) 1))
           (launch-game-button (make-pane
                                'push-button
-                               :label "Launch Game"
+                               :label "Game Not Ready"
                                :activate-callback
                                #'(lambda (g)
                                    (setf (frame-current-layout *application-frame*) :game-round)))))
       (if (and armies-ready map-ready)
-          (activate-gadget launch-game-button)
-          (deactivate-gadget launch-game-button))
+          (setf (gadget-label launch-game-button) "Game Ready"))
       launch-game-button)))
 
 (defmethod display-lobby-army-list ((frame megastrike) stream)
   (if (= 0 (length (beast:all-entities)))
       (write-string "Army has no units yet." stream)
-      (run-list-army)))
+      (formatting-table (stream)
+        ;; TODO Add Header Row
+        (run-list-army))))
 
 (defmethod display-lobby-detail-view ((frame megastrike) stream)
   (let* ((pname "Test Pilot")
