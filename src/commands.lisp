@@ -17,7 +17,25 @@
                                                (setf (can-activate/selectedp e) nil))))))))
 
 (define-presentation-to-command-translator unit-selector
-    (combat-unit com-select-unit megastrike :gesture :select)
+    (combat-unit com-select-unit megastrike :gesture :select :echo nil)
+    (object)
+  (list object))
+
+(define-megastrike-command (com-select-army :name "Select Army")
+  ((selected 'army))
+  (setf (lobby/selected-army *application-frame*) selected))
+
+(define-presentation-to-command-translator army-selector
+    (army com-select-army megastrike :gesture :select)
+    (object)
+  (list object))
+
+(define-megastrike-command (com-select-mek :name "Select Mek")
+  ((selected 'mek))
+  (setf (lobby/selected-mek *application-frame*) selected))
+
+(define-presentation-to-command-translator mek-selector
+    (mek com-select-mek megastrike :gesture :select :echo nil)
     (object)
   (list object))
 

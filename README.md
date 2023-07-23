@@ -20,18 +20,18 @@ It also requires a functioning Common Lisp installation. The simplest way to hav
 
 ### Installing Manually
 
-This assumes you have a functional Common Lisp environment with Quicklisp installed.
+This assumes you have a functional Common Lisp environment (I recommend [SBCL](http://www.sbcl.org)) with [Quicklisp](https://www.quicklisp.org/beta/) installed.
 
 To run:
 
-1. Clone this repository somewhere ASDF can see it (`~/common-lisp` and `quicklisp/local-projects` are the two most common places).
-2. Open Common lisp (run `sbcl`).
+1. Clone this repository somewhere ASDF can see it (`~/common-lisp` and `~/quicklisp/local-projects` are the two most common places).
+2. Open Common lisp (run `sbcl` from a terminal).
 3. Run `(ql:quickload :megastrike)`.
 4. Run `(megastrike:main)` to launch.
 
 ### MacOS
 
-McCLIM, the Graphics library I am using, requires an X Windows system. This means you will need to install [xQuartz](https://www.xquartz.org). See their website for installation instructions. You need to open xQuartz before launching MegaStrike. If it does not open, please follow the following steps:
+McCLIM, the Graphics library I am using, requires an X Windows system. This means you will need to install [xQuartz](https://www.xquartz.org). See their website for installation instructions. You should launch Megastrike _from an xQuartz terminal_, not a regular MacOS terminal. If it isn't working, try the steps below.
 
 1. Open xQuartz
 2. Go to the xQuartz preferences -> Security and Allow networked connections
@@ -40,19 +40,61 @@ McCLIM, the Graphics library I am using, requires an X Windows system. This mean
 
 ## What works
 
-Right now (v0.0.1), the game simulates a 2v2 duel between a Lyran Phoenix Hawk-1D and Longbow LGB-0W and a Draconis Combine Locust-1V and Marauder-3R. It displays the units on the screen simply by their designators with a background color matching their team because in the introductory rules, facing is irrelevant.
+Right now (v0.1.1), the game allows you to simulate combat between armies of any size, but those armies can only consist of Phoenix Hawk-1Ds, several variants of the Locust, Marauder-3Rs, and Longbow-0Ws. The combat happens on a featureless plain. It displays the units on the screen simply by their designators with a background color matching their team because in the introductory rules, facing is irrelevant.
 
-To play, first click "Roll Initiative" at the bottom. That will generate an initiative list, which shows up on the right side. Next, click "Next phase" until you get to the Movement phase (Phase advancing is not yet automatic if there are no actions to take, and there is a deployment phase in there).
+## How to Play
+
+### Lobby Screen
+
+When you first launch the game, it will launch into a lobby screen. In this lobby screen, you will see 3 window spaces. These windows are the Unit Selection window, the Game Setup window, and the Army Unit List window.
+
+![Lobby View](https://github.com/jonathanabennett/megastrike/blob/main/documentation/lobby.png)
+
+#### Adding Armies
+
+First, replace AFFS with the name of your army, then click the color you want your army to be. Once finished, click "New Army" and you should see it appear in the list above you.
+
+**NOTE: The game currenly only supports 2 armies in a head to head, do not add more than two armies.**
+
+Once you have added an army, you can select it by clicking on its name.
+
+#### Adding Units
+
+To add a unit, you need to have an army selected. Enter the pilot data and the starting hex number. Then click on the mek you want to assign to that pilot and click the Add Unit button. You should see the unit appear in the Army Unit List window to the bottom right.
+
+You can add as many units as you want, but please be sure to enter a new starting hex number for each unit. Deploying during the deployment phase should come in the next release.
+
+#### Setting Up the Map
+
+Finally, initialize the map by entering the width and height of the map (the default is 16x17). Once you are happy with the map size, click "Update Map Size".
+
+#### Ready to Play
+
+If you have completed all of these steps, you will see the "Game Not Ready" button change to "Game Ready". Click it to begin playing.
+
+### Initiative Phase
+
+To roll initiative, click "Roll Initiative" at the bottom. That will generate an initiative list, which shows up on the right side. Click "Next phase" until you get to the Movement phase (Phase advancing is not yet automatic if there are no actions to take, and there is a deployment phase in there).
+
+### Deployment Phase
+
+The deployment phase is not yet implemented. Simply click "Next Phase"
+
+### Movement Phase
 
 Select a unit on the appropriate side by clicking on them, then click "Move" and then the hex you want to move to. If you cannot reach that hex, nothing will happen. Try again. If your unit moves, then click a unit on the other side and repeat. If a unit is standing still, click them, click move, and then click their hex. When everyone has moved, click "Next Phase"
 
-The Combat phase works the same way. Click a unit on the correct side, click Attack, and then click your target. Check the "Quickstats" blocks on the lower right pane to see if you did damage. Once everyone has fired, click Next Phase twice.
+### Combat Phase
 
-Destroyed units will be removed automatically at the end of the end phase. Roll initiative for your new turn and play on!
+The Combat phase works the same way. Click a unit on the correct side, click Attack, and then click your target. Check the "Quickstats" blocks on the lower right pane to see if you did damage. Once everyone has fired, click Next Phase.
 
-There is no terrain, just a flat, featureless plain, though it is only 16x17. There is no "end game", when you're done, click the "Quit Game" button.
+### End Phase
 
-Feedback is welcome on the specific layout and how to make it look better, but I'll be focusing almost exclusively on rules and features to begin with.
+Destroyed units will be removed automatically at the end of the end phase. Click "Next Phase" to start the next round.
+
+### Next round
+
+Roll initiative for your new turn and play on! Play continues until one side is destroyed. When you are finished, click "Quit Game" to exit.
 
 ## What's coming
 
@@ -60,25 +102,29 @@ Feedback is welcome on the specific layout and how to make it look better, but I
 
 This, the first "functional" release, is a very primitive implementation of the rules, allowing a hot-seat 2v2. The map is a featureless plain. The pilots will all be skill 4. Selecting new units requires programming. Facing will not be calculated. Critical hits will not be applied. Only standard attack types will work. Only walking and jumping will be allowed (nothing but Mechs). Basically, you will be able to move, shoot, and lose armor/structure until your mech dies.
 
-### 0.1.1
+### 1.1.0 This release
 
-Allow you to build your armies before battle. Allow you to deploy. Full implementation of introductory rules for maps and movement.
+Allow you to build your armies before battle. Deployment happens via entering the locations (as the instructions above), expect this to change very quickly.
 
-### 0.1.2
+### 1.2.0
+
+Full implementation of introductory rules for maps and movement.
+
+### 1.3.0
 
 Full implementation of introductory rules for attacks and damage (excluding physical attacks).
 
-### 0.1.3
+### 1.4.0
 
 Implementation of physical attacks, heat, and all specials that are part of the Introductory rule set.
 
-### 0.1.4
+### 1.5.0
 
 Full implementation of the introductory rule set for Alphastrike.
 
-### 0.1.5
+### 1.6.0
 
-Add save games and other cleanup before moving on to implement the Standard rules in the 0.2 series.
+Add save games and other cleanup before moving on to implement the Standard rules for the 2.0 series.
 
 ## How to Contribute
 

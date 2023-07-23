@@ -20,14 +20,20 @@
     :accessor tile-terrain-palette
     :documentation "The color palette and design to color the tile.")))
 
-(defun new-tile (line)
+(defun new-tile-from-board (line)
   (let* ((tile-list (parse-hex-line line))
          (hex-addr (parse-hex-address (nth 0 tile-list))))
-    (make-instance 'tile
-                   :hexagon (hex-from-offset :col (first hex-addr) :row (second hex-addr))
-                   :elevation (parse-integer (nth 1 tile-list))
-                   :terrain (nth 2 tile-list)
-                   :terrain-palette (nth 3 tile-list))))
+    (new-tile (first hex-addr) (second hex-addr)
+              (parse-integer (nth 1 tile-list))
+              (nth 2 tile-list)
+              (nth 3 tile-list))))
+
+(defun new-tile (x y &optional (elevation 0) (terrain "clear") (palette "grasslands"))
+  (make-instance 'tile
+                 :hexagon (hex-from-offset :col x :row y)
+                 :elevation elevation
+                 :terrain terrain
+                 :terrain-palette palette))
 
 (defun draw-tile (tile stream)
   (draw-polygon stream (draw-hex (tile-hexagon tile)

@@ -4,13 +4,14 @@
   :description "A port of the Alphastrike Board game to Computer using Common Lisp and McCLIM."
   :author "Jonathan A. Bennett <doulos05@gmail.com>"
   :license  "GPL3"
-  :version "0.1.0"
+  :version "1.1.0"
   :serial t
-  :depends-on (#:beast #:mcclim)
+  :depends-on (#:beast #:mcclim #:mito #:cl-ppcre #:str)
   :components ((:module "src"
                 :components
                 ((:file "package")
                  (:file "utils")
+                 (:file "db")
                  (:file "hexagon")
                  (:file "tiles")
                  (:file "element" :depends-on ("utils"))

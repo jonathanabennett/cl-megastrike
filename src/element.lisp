@@ -2,6 +2,102 @@
 
 ;;; Aspects for Elements
 
+(mito:deftable mek ()
+  ((short-name    :col-type (:varchar 16)
+                  :accessor mek/short-name)
+   (long-name     :col-type (:varchar 64)
+                  :accessor mek/long-name)
+   (unit-type     :col-type (:varchar 4)
+                  :accessor mek/unit-type)
+   (role          :col-type (:varchar 20)
+                  :accessor mek/role)
+   (pv            :col-type :int
+                  :accessor mek/pv)
+   (size          :col-type :int
+                  :accessor mek/size)
+   (tro           :col-type :text
+                  :accessor mek/tro)
+   (armor         :col-type :int
+                  :accessor mek/armor)
+   (struct        :col-type :int
+                  :accessor mek/struct)
+   (mv-string     :col-type (:varchar 16)
+                  :accessor mek/mv-string)
+   (short         :col-type :real
+                  :accessor mek/short)
+   (medium        :col-type :real
+                  :accessor mek/medium)
+   (long          :col-type :real
+                  :accessor mek/long)
+   (ov            :col-type :int
+                  :accessor mek/ov)
+   (display       :col-type :text
+                  :accessor mek/display)
+   (specials-str  :col-type :text
+                  :accessor mek/specials)))
+
+(mito:ensure-table-exists 'mek)
+
+(defun add-or-update-mek (&rest rest &key short-name long-name unit-type role pv size (tro "")
+                         armor structure mv-string short medium long ov display specials)
+  (if (mito:find-dao 'mek :short-name short-name)
+      (apply #'update-mek-in-mul rest)
+      (apply #'add-mek-to-mul rest)))
+
+(defun add-mek-to-mul (&key short-name long-name unit-type role pv size (tro "")
+                       armor structure mv-string short medium long ov display specials)
+  (mito:create-dao 'mek :short-name short-name :long-name long-name :unit-type unit-type
+                   :role role :pv pv :size size :tro tro :armor armor :struct structure
+                   :mv-string mv-string :short short :medium medium :long long :ov ov
+                   :display display :specials-str specials))
+
+(defun update-mek-in-mul (&key short-name long-name unit-type role pv size (tro "")
+                         armor structure mv-string short medium long ov display specials)
+  (let ((m (mito:find-dao 'mek :short-name short-name)))
+    (setf (slot-value m 'short-name)  short-name)
+    (setf (slot-value m 'long-name)   long-name)
+    (setf (slot-value m 'unit-type)   unit-type)
+    (setf (slot-value m 'role)        role)
+    (setf (slot-value m 'pv)          pv)
+    (setf (slot-value m 'size)        size)
+    (setf (slot-value m 'tro)         tro)
+    (setf (slot-value m 'armor)       armor)
+    (setf (slot-value m 'struct)      structure)
+    (setf (slot-value m 'mv-string)   mv-string)
+    (setf (slot-value m 'short)       short)
+    (setf (slot-value m 'medium)      medium)
+    (setf (slot-value m 'long)        long)
+    (setf (slot-value m 'ov)          ov)
+    (setf (slot-value m 'display)     display)
+    (setf (slot-value m 'specials-str) specials)
+    (mito:save-dao m)))
+
+(define-presentation-method present (mek
+                                     (type mek)
+                                     stream
+                                     (view textual-view) &key)
+  (formatting-row (stream)
+    (formatting-cell (stream) (write-string (mek/long-name mek) stream))
+    (formatting-cell (stream) (format stream "~a" (mek/pv mek)))
+    (formatting-cell (stream) (format stream "~a" (mek/size mek)))
+    (formatting-cell (stream) (write-string (mek/mv-string mek) stream))
+    (formatting-cell (stream) (write-string (display-attack-string mek) stream))
+    (formatting-cell (stream) (format stream "~a" (mek/ov mek)))
+    (formatting-cell (stream) (format stream "~d/~d" (mek/armor mek) (mek/struct mek)))
+    (formatting-cell (stream) (write-string (mek/specials mek) stream))))
+
+(defun display-attack-string (mek)
+  (let ((short  (if (> (mek/short mek) 0.9)
+                    (floor (mek/short mek))
+                    (if (= (mek/short mek) 0) "0" "0*")))
+        (medium (if (> (mek/medium mek) 0.9)
+                    (floor (mek/medium mek))
+                    (if (= (mek/medium mek) 0) "0" "0*")))
+        (long   (if (> (mek/long mek) 0.9)
+                    (floor (mek/long mek))
+                    (if (= (mek/long mek) 0) "0" "0*"))))
+    (format nil "~a/~a/~a" short medium long)))
+
 (define-aspect info short-name full-name unit-type role pv size tro (army :initform nil))
 (define-aspect damageable cur-armor max-armor cur-struct max-struct crit-list destroyedp)
 (define-aspect can-activate
@@ -35,6 +131,38 @@
                             display
                             location
                             pilot))
+
+(defun new-element-from-mul (m &key pname pskill x y)
+  (with-slots (short-name long-name unit-type role pv size armor struct mv-string short
+                         medium long ov display specials-str tro) m
+    (let ((mv-cons (construct-mv-alist mv-string))
+          (spec-list (construct-spec-list specials-str))
+          (u-hex (hex-from-offset :col x :row y)))
+      (new-element :short-name short-name :full-name long-name :unit-type unit-type
+                   :role role :pv pv :size size :cur-armor armor :max-armor armor
+                   :cur-struct struct :max-struct struct :move-list mv-cons
+                   :q (hexagon-q u-hex) :r (hexagon-r u-hex) :s (hexagon-s u-hex)
+                   :short short :medium medium :long long :ov ov :special-list spec-list
+                   :img display :tro tro :pilot pname :skill pskill))))
+
+(defun construct-mv-alist (mv-string)
+  (let ((mv-alist '())
+         (mv-strings (ppcre:all-matches-as-strings
+                      (ppcre:create-scanner "\\d+[a-zA-z]?") mv-string)))
+    (dolist (str mv-strings)
+      (multiple-value-bind (dist type) (parse-integer str :junk-allowed t)
+        (if (= (length str) type)
+            (setf mv-alist (acons :walk dist mv-alist))
+            (cond
+              ((string= "j" (subseq str type)) (setf mv-alist (acons :jump dist mv-alist)))
+              (t                               (setf mv-alist (acons :walk dist mv-alist)))))))
+    mv-alist))
+
+(defun construct-spec-list (specials-str)
+  (let ((spec-list '()))
+    (dolist (spec (str:words specials-str))
+      (push (read-from-string spec) spec-list))
+    spec-list))
 
 (defun new-element (&key short-name full-name unit-type role pv size
                       cur-armor max-armor cur-struct max-struct
@@ -225,3 +353,15 @@
 (define-system advance-phase ((entity))
   (setf (can-activate/selectedp entity) nil)
   (setf (can-activate/has-acted entity) nil))
+
+(define-system list-army ((entity))
+  (let ((stream (find-pane-named *application-frame* 'lobby-army-list))
+        (hex (new-hexagon :q (location/q entity) :r (location/r entity) :s (location/s entity))))
+    (if (same-army (info/army entity) (lobby/selected-army *application-frame*))
+        (formatting-row (stream)
+          (formatting-cell (stream) (write-string (info/full-name entity)))
+          (formatting-cell (stream) (format stream "~a" (info/pv entity)))
+          (formatting-cell (stream) (write-string (pilot/name entity)))
+          (formatting-cell (stream) (format stream "~a" (pilot/skill entity)))
+          (formatting-cell (stream) (format stream "~2d~2d" (first (offset-from-hex hex))
+                                                            (second (offset-from-hex hex))))))))

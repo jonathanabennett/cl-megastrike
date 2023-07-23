@@ -1,24 +1,21 @@
 (in-package :megastrike)
 
-(defun marauder-mad-3r ()
-  (new-element
-   :short-name "MAD-3R"
-   :full-name "Marauder MAD-3R"
-   :unit-type 'BM
-   :role 'sniper
-   :pv 35
-   :size 3
-   :max-armor 6
-   :max-struct 6
-   :move-list (list
-               (cons 'walk 4)
-              )
-   :short 2
-   :medium 3
-   :long 3 ;; Enter 0.5 for 0*
-   :ov 1
-   :special-list '(SRCH SOA)
-   :img #P"data/images/units/mechs/Marauder.png"
-   :tro
+(add-or-update-mek
+ :short-name "MAD-3R"
+ :long-name "Marauder MAD-3R"
+ :unit-type "BM"
+ :role "Sniper"
+ :pv 35
+ :size 3
+ :armor 6
+ :structure 6
+ :mv-string "4"
+ :short 2
+ :medium 3
+ :long 3 ;; Enter 0.5 for 0*
+ :ov 1
+ :specials "SRCH SOA"
+ :display "data/images/units/mechs/Marauder.png"
+ :tro
 ""
-))
+)

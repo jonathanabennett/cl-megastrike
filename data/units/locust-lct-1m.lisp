@@ -1,25 +1,22 @@
 (in-package :megastrike)
 
-(defun locust-lct-1m ()
-  (new-element
-   :short-name "LCT-1M"
-   :full-name "Locust LCT-1M"
-   :unit-type 'BM
-   :role 'missile-boat
-   :pv 21
-   :size 1
-   :max-armor 1
-   :max-struct 2
-   :move-list (list
-               (cons 'walk 8)
-              )
-   :short 1
-   :medium 2
-   :long 1 ;; Enter 0.5 for 0*
-   :ov 0
-   :special-list '(SRCH SOA IF1)
-   :img #P"data/images/units/mechs/Locust_1M.png"
-   :tro
+(add-or-update-mek
+ :short-name "LCT-1M"
+ :long-name "Locust LCT-1M"
+ :unit-type "BM"
+ :role "Missile Boat"
+ :pv 21
+ :size 1
+ :armor 1
+ :structure 2
+ :mv-string "8"
+ :short 1
+ :medium 2
+ :long 1 ;; Enter 0.5 for 0*
+ :ov 0
+ :specials "SRCH SOA IF1"
+ :display "data/images/units/mechs/Locust_1M.png"
+ :tro
 "Overview: The Locust is undoubtedly one of the most popular and prevalent
 light BattleMechs ever made. First produced in 2499, the almost dozen distinct
 factories manufacturing the design quickly spread the design to every power in
@@ -57,4 +54,4 @@ systemmanufacturer:COMMUNICATIONS:Garrett
 systemmode:COMMUNICATIONS:T10-B
 systemmanufacturer:TARGETING:O/P
 systemmode:TARGETING:911 "
-))
+)
