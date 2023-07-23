@@ -20,5 +20,6 @@
                  (:file "unitcard" :depends-on ("element"))
                  (:file "board" :depends-on ("element" "hexagon" "tiles"))
                  (:file "game-setup" :depends-on ("element" "board" "army"))
+                 (:file "systems" :depends-on ("element" "army"))
                  (:file "megastrike" :depends-on ("element" "unitcard" "army" "board"))
                  (:file "commands" :depends-on ("megastrike"))))))
