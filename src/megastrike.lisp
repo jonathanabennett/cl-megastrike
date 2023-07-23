@@ -195,6 +195,12 @@
       (write-string "Army has no units yet." stream)
       (formatting-table (stream)
         ;; TODO Add Header Row
+        (formatting-row (stream)
+          (formatting-cell (stream) (write-string "Unit Name" stream))
+          (formatting-cell (stream) (write-string "PV" stream))
+          (formatting-cell (stream) (write-string "Pilot Name" stream))
+          (formatting-cell (stream) (write-string "Skill" stream))
+          (formatting-cell (stream) (write-string "Starting Hex" stream)))
         (run-list-army))))
 
 (defmethod display-lobby-detail-view ((frame megastrike) stream)
@@ -289,7 +295,7 @@
 
 (defun main ()
   ;;(load-data)
-  (load-data)
+  (build-mul)
   (run-frame-top-level
    (make-application-frame 'megastrike
                            :min-width 800
