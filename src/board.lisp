@@ -45,5 +45,5 @@
   (let ((g (make-instance 'grid)))
     (dotimes (x width)
       (dotimes (y height)
-        (insert-tile g (new-tile (+1 x) (+1 y)))))
+        (insert-tile g (new-tile (1+ x) (1+ y)))))
     g))
