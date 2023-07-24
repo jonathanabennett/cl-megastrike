@@ -93,6 +93,17 @@ distance."
   x-origin
   y-origin)
 
+(defparameter +default-layout+ (make-layout
+                                :hex-to-pixel-matrix
+                                  (vector (/ 3.0 2.0) 0 (/ (sqrt 3.0) 2.0) (sqrt 3.0))
+                                :pixel-to-hex-matrix
+                                  (vector (/ 2.0 3.0) 0 (/ 1.0 3.0) (/ (sqrt 3.0) 3.0))
+                                :start-angle 0
+                                :x-size 45
+                                :y-size 45
+                                :x-origin 10
+                                :y-origin 10))
+
 (defmethod hex-to-pixel ((hex hexagon) layout)
   "Converts from a q,r,s address, to an x,y pixel position for the center of the hex."
   (let ((vec (layout-hex-to-pixel-matrix layout)))

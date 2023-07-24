@@ -1,8 +1,6 @@
 (in-package :megastrike)
 
 
-(mito:connect-toplevel :sqlite3 :database-name ":memory:")
-
 (mito:deftable mek ()
   ((short-name    :col-type (:varchar 16) :accessor mek/short-name)
    (long-name     :col-type (:varchar 64) :accessor mek/long-name)
@@ -20,8 +18,6 @@
    (ov            :col-type :int          :accessor mek/ov)
    (display       :col-type :text         :accessor mek/display)
    (specials-str  :col-type :text         :accessor mek/specials)))
-
-(mito:ensure-table-exists 'mek)
 
 (defun add-or-update-mek (&rest rest &key short-name long-name unit-type role pv
                                        size (tro "") armor structure mv-string

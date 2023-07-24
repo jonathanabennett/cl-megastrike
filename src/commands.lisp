@@ -1,6 +1,6 @@
 (in-package :megastrike)
 
-(define-megastrike-command (com-select-unit :name "Select" :echo nil)
+(define-megastrike-command (com-select-unit :name "Select")
   ((selected 'combat-unit))
   (let ((app *application-frame*))
     (if (or (not (initiative-list app))
@@ -24,16 +24,16 @@
     (object)
   (list object))
 
-(define-megastrike-command (com-select-army :name "Select Army" :echo nil)
+(define-megastrike-command (com-select-army :name "Select Army")
   ((selected 'army))
   (setf (lobby/selected-army *application-frame*) selected))
 
 (define-presentation-to-command-translator army-selector
-    (army com-select-army megastrike :gesture :select)
+    (army com-select-army megastrike :gesture :select :echo nil)
     (object)
   (list object))
 
-(define-megastrike-command (com-select-mek :name "Select Mek" :echo nil)
+(define-megastrike-command (com-select-mek :name "Select Mek")
   ((selected 'mek))
   (setf (lobby/selected-mek *application-frame*) selected))
 
@@ -45,17 +45,24 @@
 (define-megastrike-command (com-measure-range :name "Range" :menu t)
   ((origin 'combat-unit)
    (target 'tile))
-  (notify-user *application-frame*
-               (format nil "Range: ~d" (hex-distance (new-hexagon :q (location/q origin)
-                                                                  :r (location/r origin)
-                                                                  :s (location/s origin))
-                                                     (tile-hexagon target)))))
+  (let ((range (hex-distance (new-hexagon :q (location/q origin)
+                                          :r (location/r origin)
+                                          :s (location/s origin))
+                             (tile-hexagon target))))
+    (setf (phase-log *application-frame*)
+          (concatenate 'string phase-log (format nil "Range from ~a to ~a is ~d.~%"
+                                                 (offset-from-hex (new-hexagon
+                                                                   :q (location/q origin)
+                                                                   :r (location/r origin)
+                                                                   :s (location/s origin)))
+                                                 (tile-hexagon target)
+                                                 range)))
+    (notify-user *application-frame* range)))
 
 (define-megastrike-command (com-roll-initiative
                  :name "Roll Initiative"
                  :menu t)
   ()
-  (format *debug-io* "Rolling initiative.")
   (setf (initiative-list *application-frame*)
         (roll-initiative (frame/armies *application-frame*))))
 
@@ -76,7 +83,10 @@
 
 (define-megastrike-command (com-roll :name "Roll" :menu t)
   ()
-  (notify-user *application-frame* (format nil "Rolled a ~d on 2D6." (roll2d))))
+  (let ((roll (format nil "Rolled a ~d on 2D6." (roll2d))))
+    (setf (phase-log *application-frame*)
+          (concatenate 'string (phase-log *application-frame*) roll (format nil "~%")))
+    (notify-user *application-frame* roll)))
 
 (define-megastrike-command (com-advance-phase
                  :name "Next Phase"
@@ -92,3 +102,17 @@
   (clear-entities)
   (setf (frame/armies *application-frame*)'())
   (frame-exit *application-frame*))
+
+(defun main ()
+  (mito:connect-toplevel :sqlite3 :database-name ":memory:")
+  (sleep 1)
+  (mito:ensure-table-exists 'mek)
+  (sleep 1)
+  (load-data)
+  (sleep 1)
+  (build-mul)
+  (run-frame-top-level
+   (make-application-frame 'megastrike
+                           :min-width 800
+                           :min-height 800
+                           :layout +default-layout+)))

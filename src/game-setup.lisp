@@ -11,7 +11,6 @@
           (load file)))))
 
 (defun build-mul ()
-  (load-data)
   (setf *master-unit-list* (load-database)))
 
 (defun make-combat-unit (unit-fn offset-hex-addr pilot skill army
