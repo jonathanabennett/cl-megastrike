@@ -168,7 +168,12 @@
                         (tile-hexagon destination)))
       (progn (set-location unit (tile-hexagon destination))
              (incf (initiative-place *application-frame*))
-             (setf (can-activate/has-acted unit) t))))
+             (setf (can-activate/has-acted unit) t)
+             (setf (phase-log *application-frame*)
+                   (concatenate 'string (phase-log *application-frame*)
+                                (format nil "~a has moved to ~a.~%"
+                                        (info/full-name unit)
+                                        (offset-from-hex (tile-hexagon destination))))))))
 
 (defmethod set-location ((unit combat-unit) (loc hexagon))
   (setf (location/q unit) (hexagon-q loc))
@@ -224,7 +229,14 @@
 
 (defmethod make-attack ((attacker combat-unit) (target combat-unit))
   (let ((target-num (calculate-to-hit attacker target))
-        (to-hit (roll2d)))
+        (to-hit (roll2d))
+        (log-string ""))
+    (setf log-string (concatenate 'string log-string
+                                  (format nil "~a attacking ~a (needs a ~d): Rolled ~d~%"
+                                          (info/full-name attacker)
+                                          (info/full-name target)
+                                          target-num
+                                          to-hit)))
     (if (<= target-num to-hit)
         (take-damage target (calculate-damage attacker target))))
   (incf (initiative-place *application-frame*))
@@ -236,4 +248,10 @@
         (decf (damageable/cur-struct u))
         (decf (damageable/cur-armor u))))
   (if (>= 0 (damageable/cur-struct u))
-      (setf (damageable/destroyedp u) t)))
+      (setf (damageable/destroyedp u) t))
+  (setf (phase-log *application-frame*)
+        (concatenate 'string (phase-log *application-frame*)
+                     (format nil "~a now has ~a armor and ~a structure.~%"
+                             (info/full-name u)
+                             (damageable/cur-armor u)
+                             (damageable/cur-struct u)))))
