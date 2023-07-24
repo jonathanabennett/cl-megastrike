@@ -2,11 +2,12 @@
 
 (defmethod display-round-report ((frame megastrike) stream)
   (write-string (phase-log frame) stream)
+  (terpri stream)
   (let ((done-button (make-pane 'push-button
                                 :label "Done"
-                                :activate-callback #'(lambda (g)
-                                                       (setf (frame-current-layout (*application-frame*))
-                                                             :game-board)))))
+                                :activate-callback
+                                #'(lambda (g)
+                                    (setf (frame-current-layout frame) :game-board)))))
     (with-output-as-gadget (stream)
     done-button)))
 
@@ -18,7 +19,7 @@
         (format stream "Army"))
       (formatting-cell (stream)
         (format stream "Color")))
-    (dolist (a (frame/armies *application-frame*))
+    (dolist (a (frame/armies frame))
       (formatting-row (stream)
         (formatting-cell (stream)
           (present a 'army :stream stream))
@@ -42,63 +43,52 @@
     (with-output-as-gadget (stream)
       (let ((new-army-button (make-pane 'push-button
                                         :label "New Army"
-                                        :activate-callback #'(lambda (gadget)
-                                                               (new-army (gadget-value army-text)
-                                                                       (cdr (assoc (gadget-value army-color) +color-list+)))
-                                                               (redisplay-frame-panes *application-frame*)))))
+                                        :activate-callback
+                                        #'(lambda (gadget)
+                                            (new-army (gadget-value army-text)
+                                                      (cdr (assoc (gadget-value army-color) +color-list+)))
+                                            (redisplay-frame-panes frame)))))
         new-army-button)))
   (terpri stream)
   (terpri stream)
   (terpri stream)
-  (let ((width 16)
-        (height 17)
-        (width-gadget (make-pane 'text-field :width 50
-                                 :value "16"
-                                 :value-changed-callback
-                                 #'(lambda (g v)
-                                     (if (not (string= "" v))
-                                              (setf width (parse-integer v))))))
-        (height-gadget (make-pane 'text-field :width 50
-                                  :value "17"
-                                  :value-changed-callback
-                                  #'(lambda (g v)
-                                      (if (not (string= "" v))
-                                               (setf height (parse-integer v)))))))
+  (let ((width  (make-pane 'text-field :width 50 :value "16"))
+        (height (make-pane 'text-field :width 50 :value "17")))
     (write-string "Map Settings" stream)
     (terpri stream)
     (write-string "Width: ")
     (with-output-as-gadget (stream)
-      width-gadget)
+      width)
     (terpri stream)
     (write-string "Height: ")
     (with-output-as-gadget (stream)
-      height-gadget)
+      height)
     (with-output-as-gadget (stream)
       (let ((update-map-button (make-pane 'push-button
                                           :label "Update Map Size"
-                                          :activate-callback #'(lambda (gadget)
-                                                                 (setf (frame/game-board *application-frame*)
-                                                                       (make-grid width height))))))
+                                          :activate-callback
+                                          #'(lambda (gadget)
+                                              (setf (frame/game-board frame)
+                                                    (make-grid (parse-integer width) (parse-integer height)))
+                                              (redisplay-frame-panes frame)))))
         update-map-button)))
   (terpri stream)
   (with-output-as-gadget (stream)
-    (let ((armies-ready (> (length (frame/armies *application-frame*)) 1))
-          (map-ready (> (hash-table-count (tiles (frame/game-board *application-frame*))) 1))
+    (let ((armies-ready (> (length (frame/armies frame)) 1))
+          (map-ready (> (hash-table-count (tiles (frame/game-board frame))) 1))
           (launch-game-button (make-pane
                                'push-button
-                               :label "Game Not Ready"
+                               :label "Game Ready"
                                :activate-callback
                                #'(lambda (g)
-                                   (setf (frame-current-layout *application-frame*) :game-round)))))
+                                   (setf (frame-current-layout frame) :game-round)))))
       (if (and armies-ready map-ready)
-          (setf (gadget-label launch-game-button) "Game Ready"))
-      launch-game-button)))
+          launch-game-button))))
 
 (defmethod display-lobby-army-list ((frame megastrike) stream)
   (if (= 0 (length (beast:all-entities)))
       (write-string "Army has no units yet." stream)
       (formatting-table (stream)
-        ;; TODO Add Header Row
         (formatting-row (stream)
           (formatting-cell (stream) (write-string "Unit Name" stream))
           (formatting-cell (stream) (write-string "PV" stream))
@@ -108,56 +98,37 @@
         (run-list-army))))
 
 (defmethod display-lobby-detail-view ((frame megastrike) stream)
-  (let* ((pname "Test Pilot")
-         (pname-gadget  (make-pane
-                         'text-field :width 200 :value "Test Pilot"
-                                   :value-changed-callback #'(lambda (g v)
-                                                               (setf pname v))))
-         (pskill 4)
-         (pskill-gadget (make-pane
-                         'text-field
-                         :width 50 :value "4"
-                         :value-changed-callback #'(lambda (g v)
-                                                     (if (not (string= "" v))
-                                                         (setf pskill (parse-integer v))))))
-         (xpos 1)
-         (xpos-gadget   (make-pane
-                         'text-field
-                         :width 20 :value "4"
-                         :value-changed-callback #'(lambda (g v)
-                                                     (if (not (string= "" v))
-                                                         (setf xpos (parse-integer v))))))
-         (ypos 1)
-         (ypos-gadget   (make-pane
-                         'text-field
-                         :width 20 :value "4"
-                         :value-changed-callback #'(lambda (g v)
-                                                     (if (not (string= "" v))
-                                                         (setf ypos (parse-integer v)))))))
+  (let* ((pname  (make-pane 'text-field :width 200 :value "Test Pilot"))
+         (pskill (make-pane 'text-field :width 50 :value "4"))
+         (xpos   (make-pane 'text-field :width 20 :value "4"))
+         (ypos   (make-pane 'text-field :width 20 :value "4")))
     (formatting-table (stream)
       (formatting-row (stream)
         (formatting-cell (stream) (format stream "Pilot name: "))
-        (formatting-cell (stream) (with-output-as-gadget (stream) pname-gadget))
+        (formatting-cell (stream) (with-output-as-gadget (stream) pname))
         (formatting-cell (stream) (format stream "Pilot skill: "))
-        (formatting-cell (stream) (with-output-as-gadget (stream) pskill-gadget)))
+        (formatting-cell (stream) (with-output-as-gadget (stream) pskill)))
     (formatting-row (stream)
       (formatting-cell (stream) (write-string "Deployment Location" stream)))
     (formatting-row (stream)
       (formatting-cell (stream) (write-string "X: " stream))
-    (formatting-cell (stream) (with-output-as-gadget (stream) xpos-gadget))
+    (formatting-cell (stream) (with-output-as-gadget (stream) xpos))
     (formatting-cell (stream) (write-string "Y: " stream))
-    (formatting-cell (stream) (with-output-as-gadget (stream) ypos-gadget))))
+    (formatting-cell (stream) (with-output-as-gadget (stream) ypos))))
     (with-output-as-gadget (stream)
       (let ((add-unit-button
               (make-pane 'push-button
                          :label "Add Unit"
                          :activate-callback
                          #'(lambda (g)
-                             (add-unit (lobby/selected-army *application-frame*)
+                             (add-unit (lobby/selected-army frame)
                                        (new-element-from-mul
-                                        (lobby/selected-mek *application-frame*)
-                                        :pname pname :pskill pskill :x xpos :y ypos))
-                             (redisplay-frame-panes *application-frame*)))))
+                                        (lobby/selected-mek frame)
+                                        :pname (gadget-value pname)
+                                        :pskill (parse-integer (gadget-value pskill))
+                                        :x (parse-integer (gadget-value xpos))
+                                        :y (parse-integer (gadget-value ypos))))
+                             (redisplay-frame-panes frame)))))
       add-unit-button)))
   (terpri stream)
   (let ((meks *master-unit-list*))
@@ -172,9 +143,9 @@
         (formatting-cell (stream) (write-string "A/S" stream))
         (formatting-cell (stream) (write-string "Specials" stream)))
     (dolist (m meks)
-      (if (and (lobby/selected-mek *application-frame*)
+      (if (and (lobby/selected-mek frame)
                (string= (mek/short-name m)
-                        (mek/short-name (lobby/selected-mek *application-frame*))))
+                        (mek/short-name (lobby/selected-mek frame))))
           (with-text-style (stream *selected-text-style*)
             (present m 'mek :stream stream))
           (present m 'mek :stream stream))))))
@@ -183,7 +154,7 @@
   (maphash (lambda (k v)
              (declare (ignorable k))
              (present v 'tile :stream stream))
-           (tiles (frame/game-board *application-frame*)))
+           (tiles (frame/game-board frame)))
   (run-draw-units))
 
 (defmethod display-record-sheet ((frame megastrike) stream)
@@ -192,7 +163,7 @@
              (turn-number frame) (nth (current-phase frame) *phase-order*)))
   (if (active-unit frame) (unit-detail stream (active-unit frame)))
   (terpri stream)
-  (format stream "~a" (initiative-list *application-frame*)))
+  (format stream "~a" (initiative-list frame)))
 
 (defmethod display-quickstats ((frame megastrike) stream)
   (run-show-quickstats))

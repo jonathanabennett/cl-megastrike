@@ -2,11 +2,11 @@
 
 (in-package #:megastrike)
 
-(defparameter +color-list+ `(("Red" . ,+red+)
-                             ("Blue" . ,+blue+)
+(defparameter +color-list+ `(("Red" .    ,+red+)
+                             ("Blue" .   ,+blue+)
                              ("Purple" . ,+purple+)
-                             ("Green" . ,+light-green+)
-                             ("Gold" . ,+gold+)))
+                             ("Green" .  ,+light-green+)
+                             ("Gold" .   ,+gold+)))
 
 (define-application-frame megastrike ()
   ((active-unit      :initform nil        :accessor active-unit)
@@ -71,4 +71,3 @@
     (vertically ()
       (:fill round-report)
       (1/10 menu)))))
-
