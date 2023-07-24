@@ -45,7 +45,8 @@
                    :role role :pv pv :size size :cur-armor armor :max-armor armor
                    :cur-struct struct :max-struct struct :move-list mv-cons
                    :q (hexagon-q u-hex) :r (hexagon-r u-hex) :s (hexagon-s u-hex)
-                   :short short :medium medium :long long :ov ov :special-list spec-list
+                   :short (floor short) :medium (floor medium) :long (floor long)
+                   :ov ov :special-list spec-list
                    :img display :tro tro :pilot pname :skill pskill))))
 
 (defun construct-mv-alist (mv-string)
