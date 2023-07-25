@@ -92,10 +92,7 @@
                  :name "Next Phase"
                  :menu t)
   ()
-  (let ((phase (nth (current-phase *application-frame*) *phase-order*)))
-    (cond
-       ((eql phase :end) (do-end-phase *application-frame*))
-       (t                (do-phase *application-frame*)))))
+  (do-phase *application-frame*))
 
 (define-megastrike-command (com-quit-game :name "Quit Game" :menu t)
   ()

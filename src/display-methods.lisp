@@ -2,12 +2,15 @@
 
 (defmethod display-round-report ((frame megastrike) stream)
   (write-string (phase-log frame) stream)
+  (incf (current-phase frame))
+  (if (= (current-phase frame) 5)
+      (setf (current-phase frame) 0))
   (terpri stream)
   (let ((done-button (make-pane 'push-button
                                 :label "Done"
                                 :activate-callback
                                 #'(lambda (g)
-                                    (setf (frame-current-layout frame) :game-board)))))
+                                    (do-phase frame)))))
     (with-output-as-gadget (stream)
     done-button)))
 
@@ -69,21 +72,22 @@
                                           :activate-callback
                                           #'(lambda (gadget)
                                               (setf (frame/game-board frame)
-                                                    (make-grid (parse-integer width) (parse-integer height)))
+                                                    (make-grid (parse-integer (gadget-value width))
+                                                               (parse-integer (gadget-value height))))
                                               (redisplay-frame-panes frame)))))
         update-map-button)))
   (terpri stream)
-  (with-output-as-gadget (stream)
     (let ((armies-ready (> (length (frame/armies frame)) 1))
-          (map-ready (> (hash-table-count (tiles (frame/game-board frame))) 1))
-          (launch-game-button (make-pane
+          (map-ready (> (hash-table-count (tiles (frame/game-board frame))) 1)))
+      (if (and armies-ready map-ready)
+          (with-output-as-gadget (stream)
+            (let ((launch-game-button (make-pane
                                'push-button
                                :label "Game Ready"
                                :activate-callback
                                #'(lambda (g)
-                                   (setf (frame-current-layout frame) :game-round)))))
-      (if (and armies-ready map-ready)
-          launch-game-button))))
+                                   (do-initiative-phase frame)))))
+              launch-game-button)))))
 
 (defmethod display-lobby-army-list ((frame megastrike) stream)
   (if (= 0 (length (beast:all-entities)))
