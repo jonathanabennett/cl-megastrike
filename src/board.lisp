@@ -10,9 +10,9 @@ stored by xy coordinates.")))
 
 (defmethod insert-tile ((g grid) (ti tile))
   "Insert tile `ti' into the `tile-hash' of grid `g' if it doesn't exist."
-  (if (gethash (offset-from-hex (tile-hexagon ti)) (tiles g))
-      (gethash (offset-from-hex (tile-hexagon ti)) (tiles g))
-      (setf (gethash (offset-from-hex (tile-hexagon ti)) (tiles g)) ti)))
+  (if (gethash (offset-from-hex ti) (tiles g))
+      (gethash (offset-from-hex ti) (tiles g))
+      (setf (gethash (offset-from-hex ti) (tiles g)) ti)))
 
 ;;; Board file parsing logic
 

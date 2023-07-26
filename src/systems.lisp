@@ -31,3 +31,6 @@
           (formatting-cell (stream) (format stream "~a" (pilot/skill entity)))
           (formatting-cell (stream) (format stream "~2d~2d" (first (offset-from-hex hex))
                                                             (second (offset-from-hex hex))))))))
+(define-system mark-occupied-hexes ((entity location))
+  (let ((grid (frame/game-board *application-frame*)))
+    ()))

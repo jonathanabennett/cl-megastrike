@@ -48,14 +48,14 @@
   (let ((range (hex-distance (new-hexagon :q (location/q origin)
                                           :r (location/r origin)
                                           :s (location/s origin))
-                             (tile-hexagon target))))
+                             target)))
     (setf (phase-log *application-frame*)
           (concatenate 'string phase-log (format nil "Range from ~a to ~a is ~d.~%"
                                                  (offset-from-hex (new-hexagon
                                                                    :q (location/q origin)
                                                                    :r (location/r origin)
                                                                    :s (location/s origin)))
-                                                 (tile-hexagon target)
+                                                 target
                                                  range)))
     (notify-user *application-frame* range)))
 
@@ -88,6 +88,16 @@
           (concatenate 'string (phase-log *application-frame*) roll (format nil "~%")))
     (notify-user *application-frame* roll)))
 
+(define-megastrike-command (com-deploy-unit :name "Deploy" :menu t)
+  ((u 'combat-unit)
+   (h 'tile))
+  (if (not (tile-occupied h))
+      (set-location u h)
+      (notify-user *application-frame*
+                   (format nil "Hex ~2d~2d is occupied."
+                           (first (hex-from-offset h))
+                           (second (hex-from-offset h))))))
+
 (define-megastrike-command (com-advance-phase
                  :name "Next Phase"
                  :menu t)
@@ -102,9 +112,7 @@
 
 (defun main ()
   (mito:connect-toplevel :sqlite3 :database-name ":memory:")
-  (sleep 1)
   (mito:ensure-table-exists 'mek)
-  (sleep 1)
   (load-data)
   (sleep 1)
   (build-mul)

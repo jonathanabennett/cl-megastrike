@@ -165,15 +165,15 @@
           (hex-distance (new-hexagon :q (location/q unit)
                                      :r (location/r unit)
                                      :s (location/s unit))
-                        (tile-hexagon destination)))
-      (progn (set-location unit (tile-hexagon destination))
+                        destination))
+      (progn (set-location unit destination)
              (incf (initiative-place *application-frame*))
              (setf (can-activate/has-acted unit) t)
              (setf (phase-log *application-frame*)
                    (concatenate 'string (phase-log *application-frame*)
                                 (format nil "~a has moved to ~a.~%"
                                         (info/full-name unit)
-                                        (offset-from-hex (tile-hexagon destination))))))))
+                                        (offset-from-hex destination)))))))
 
 (defmethod set-location ((unit combat-unit) (loc hexagon))
   (setf (location/q unit) (hexagon-q loc))
