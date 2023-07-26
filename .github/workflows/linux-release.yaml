@@ -1,0 +1,19 @@
+name: build-linux-release
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Roswell
+        env:
+          LISP: sbcl-bin
+        run: curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh
+      - name: Install Megastrike
+        run: ros install jonathanabennett/megastrike
+      - name: Change Directory
+        run: cd .roswell/local-projects/jonathanabennett/megastrike
+      - name: Build Megastrike
+        run: ros build roswell/megastrike.ros
+      - name: Move executable
+        run: mv roswell/megastrike ../megastrike
