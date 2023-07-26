@@ -10,9 +10,7 @@ jobs:
         run: curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh
       - name: Install Megastrike
         run: ros install jonathanabennett/megastrike
-      - name: Change Directory
-        run: cd /home/runner/.roswell/local-projects/jonathanabennett/megastrike
       - name: Build Megastrike
-        run: ros build roswell/megastrike.ros
+        run: ros build /home/runner/.roswell/local-projects/jonathanabennett/megastrike
       - name: Move executable
         run: mv roswell/megastrike ../megastrike
