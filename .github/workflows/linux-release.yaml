@@ -4,7 +4,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
       - name: Install Roswell
         env:
           LISP: sbcl-bin
@@ -12,7 +11,7 @@ jobs:
       - name: Install Megastrike
         run: ros install jonathanabennett/megastrike
       - name: Change Directory
-        run: cd .roswell/local-projects/jonathanabennett/megastrike
+        run: cd /home/runner/.roswell/local-projects/jonathanabennett/megastrike
       - name: Build Megastrike
         run: ros build roswell/megastrike.ros
       - name: Move executable
