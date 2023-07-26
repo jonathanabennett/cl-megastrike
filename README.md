@@ -74,27 +74,27 @@ If you have completed all of these steps, you will see the "Game Not Ready" butt
 
 ### Initiative Phase
 
-To roll initiative, click "Roll Initiative" at the bottom. That will generate an initiative list, which shows up on the right side. Click "Next phase" until you get to the Movement phase (Phase advancing is not yet automatic if there are no actions to take, and there is a deployment phase in there).
+Initiative should roll automatically. If it does not, click "Next Phase" to roll it. You will see the initiative list in the round report.
 
 ### Deployment Phase
 
-The deployment phase is not yet implemented. Simply click "Next Phase"
+To deploy a unit, click deploy, then click a unit in the quickstats block in the bottom right and click the hex you want to deploy in. Right now, you can deploy anywhere, you will have to manually enforce deployment zones. When everyone has deployed, click "Next Phase" and then click done.
 
 ### Movement Phase
 
-Select a unit on the appropriate side by clicking on them, then click "Move" and then the hex you want to move to. If you cannot reach that hex, nothing will happen. Try again. If your unit moves, then click a unit on the other side and repeat. If a unit is standing still, click them, click move, and then click their hex. When everyone has moved, click "Next Phase"
+Select a unit on the appropriate side by clicking on them, then click "Move" and then the hex you want to move to. If you cannot reach that hex, nothing will happen. Try again. If your unit moves, then click a unit on the other side and repeat. If a unit is standing still, click them, click move, and then click their hex. When everyone has moved, click "Next Phase" and review the Round report, then click done.
 
 ### Combat Phase
 
-The Combat phase works the same way. Click a unit on the correct side, click Attack, and then click your target. Check the "Quickstats" blocks on the lower right pane to see if you did damage. Once everyone has fired, click Next Phase.
+The Combat phase works the same way. Click a unit on the correct side, click Attack, and then click your target. Check the "Quickstats" blocks on the lower right pane to see if you did damage. Once everyone has fired, click Next Phase, review the round report, and then click done.
 
 ### End Phase
 
-Destroyed units will be removed automatically at the end of the end phase. Click "Next Phase" to start the next round.
+Destroyed units will be removed automatically at the end of the end phase. Click Done, then Next Phase to start the next round.
 
 ### Next round
 
-Roll initiative for your new turn and play on! Play continues until one side is destroyed. When you are finished, click "Quit Game" to exit.
+Initiative for the next round should roll automatically! If it does not, click "Done" and "Next Phase" again. Play continues until one side is destroyed. When you are finished, click "Quit Game" to exit.
 
 ## What's coming
 
@@ -102,27 +102,31 @@ Roll initiative for your new turn and play on! Play continues until one side is 
 
 This, the first "functional" release, is a very primitive implementation of the rules, allowing a hot-seat 2v2. The map is a featureless plain. The pilots will all be skill 4. Selecting new units requires programming. Facing will not be calculated. Critical hits will not be applied. Only standard attack types will work. Only walking and jumping will be allowed (nothing but Mechs). Basically, you will be able to move, shoot, and lose armor/structure until your mech dies.
 
-### 1.1.0 This release
+### 1.1.0
 
 Allow you to build your armies before battle. Deployment happens via entering the locations (as the instructions above), expect this to change very quickly.
 
-### 1.2.0
+### 1.2.0 This release
 
-Full implementation of introductory rules for maps and movement.
+Deployment happens now by click on the map in the deployment phase. Automatic advancement of phases works sometimes, but it doesn't always detect that it should advance.
 
 ### 1.3.0
 
-Full implementation of introductory rules for attacks and damage (excluding physical attacks).
+Full implementation of introductory rules for maps and movement.
 
 ### 1.4.0
 
-Implementation of physical attacks, heat, and all specials that are part of the Introductory rule set.
+Full implementation of introductory rules for attacks and damage (excluding physical attacks).
 
 ### 1.5.0
 
-Full implementation of the introductory rule set for Alphastrike.
+Implementation of physical attacks, heat, and all specials that are part of the Introductory rule set.
 
 ### 1.6.0
+
+Full implementation of the introductory rule set for Alphastrike.
+
+### 1.7.0
 
 Add save games and other cleanup before moving on to implement the Standard rules for the 2.0 series.
 

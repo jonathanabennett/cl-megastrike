@@ -5,13 +5,14 @@
     :initarg :tiles
     :accessor tiles
     :initform (make-hash-table :test 'equalp)
-    :documentation "The hash of the Tile objects which make up the map, stored by xy coordinates.")))
+    :documentation "The hash of the Tile objects which make up the map,
+stored by xy coordinates.")))
 
 (defmethod insert-tile ((g grid) (ti tile))
-  "Insert tile `ti' into the `tile-hash' of grid `g'."
-  (if (gethash (offset-from-hex (tile-hexagon ti)) (tiles g))
-      (gethash (offset-from-hex (tile-hexagon ti)) (tiles g))
-      (setf (gethash (offset-from-hex (tile-hexagon ti)) (tiles g)) ti)))
+  "Insert tile `ti' into the `tile-hash' of grid `g' if it doesn't exist."
+  (if (gethash (offset-from-hex ti) (tiles g))
+      (gethash (offset-from-hex ti) (tiles g))
+      (setf (gethash (offset-from-hex ti) (tiles g)) ti)))
 
 ;;; Board file parsing logic
 
