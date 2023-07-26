@@ -27,7 +27,7 @@
                  :s (hexagon-s temp-hex)
                  :elevation elevation
                  :terrain terrain
-                 :terrain-palette palette))
+                 :terrain-palette palette)))
 
 (defun draw-tile (tile stream)
   (draw-polygon stream (draw-hex tile (frame/layout *application-frame*))

@@ -6,6 +6,7 @@ appropriate function."
   (setf (initiative-place frame) 0)
   (setf (active-unit frame) nil)
   (run-advance-phase)
+  (setf (frame-current-layout frame) :round-report)
   (let ((phase (current-phase frame)))
     (format *debug-io* "Phase: ~a~%" phase)
     (cond
@@ -18,7 +19,9 @@ appropriate function."
 (defun do-initiative-phase (frame)
   "This function runs the initiative phase automatically (since the initiative phase
 requires no user intervention.)"
-  (format *debug-io* "In Initiative Phase~%")
+  (setf (phase-log *application-frame*)
+        (concatenate 'string (phase-log *application-frame*)
+                     (format *debug-io* "In Initiative Phase~%")))
   (setf (initiative-list frame)
         (roll-initiative (frame/armies frame)))
   (setf (frame-current-layout frame) :round-report))
@@ -60,7 +63,9 @@ requires no user intervention.)"
 (defun do-deployment-phase (frame)
   "This function runs each round to determine whether or not to simply skip the
 deployment phase. Deployment phases are only run when there are deployable units."
-  (format *debug-io* "In Deployment Phase~%")
+  (setf (phase-log *application-frame*)
+        (concatenate 'string (phase-log *application-frame*)
+                     (format *debug-io* "In Deployment Phase~%")))
   (let ((to-deploy '()))
      (setf (frame-current-layout frame) :game-round)
      (map-entities #'(lambda (e) (if (eql (location/q e) nil) (push e to-deploy))))
@@ -75,24 +80,27 @@ deployment phase. Deployment phases are only run when there are deployable units
 
 (defun do-movement-phase (frame)
   "This function will handle the movement phase."
-  (format *debug-io* "In Movement Phase~%")
-  (setf (frame-current-layout-frame) :game-round)
+  (setf (phase-log *application-frame*)
+        (concatenate 'string (phase-log *application-frame*)
+                     (format *debug-io* "In Movement Phase~%")))
+  (setf (frame-current-layout frame) :game-round)
   (setf (phase-log *application-frame*)
         (concatenate 'string (phase-log *application-frame*)
                      "Entering Movement phase.")))
 
 (defun do-combat-phase (frame)
   "This function will handle the combat phase."
-  (format *debug-io* "In Combat Phase~%")
-  (setf (frame-current-layout-frame) :game-round)
+  (setf (phase-log *application-frame*)
+        (concatenate 'string (phase-log *application-frame*)
+                     (format *debug-io* "In Combat Phase~%")))
+  (setf (frame-current-layout frame) :game-round)
   (setf (phase-log *application-frame*)
         (concatenate 'string (phase-log *application-frame*)
                      "Entering Combat phase.")))
 
 (defun do-end-phase (frame)
-  (format *debug-io* "In End Phase~%")
-  (setf (initiative-place frame) 0)
-  (setf (active-unit frame) nil)
+  (setf (phase-log *application-frame*)
+        (concatenate 'string (phase-log *application-frame*)
+                     (format *debug-io* "In End Phase~%")))
   (incf (turn-number frame))
   (run-end-phase))
-

@@ -121,8 +121,8 @@
                                        (new-element-from-mul
                                         (lobby/selected-mek frame)
                                         :pname (gadget-value pname)
-                                        :pskill (parse-integer (gadget-value pskill)))
-                             (redisplay-frame-panes frame))))))
+                                        :pskill (parse-integer (gadget-value pskill))))
+                             (redisplay-frame-panes frame)))))
       add-unit-button)))
   (terpri stream)
   (let ((meks *master-unit-list*))
