@@ -11,8 +11,9 @@ jobs:
         uses: actions/checkout@v3
       - name: Install sbcl
         run: |
-          curl.exe --output sbcl.msi --url http://prdownloads.sourceforge.net/sbcl/sbcl-2.3.2-x86-64-windows-binary.msi \
-          msiexec /package sbcl.msi /quiet /norestart
+          curl.exe https://github.com/sbcl/sbcl/suites/14610349674/artifacts/828195592 \
+          && tar -xf sbcl-windows-installer.zip
+          msiexec /package sbcl-2.3.6.183-b834c521c-x86-64-windows-binary.msi /quiet /norestart
       - name: Build Megastrike
         run: make install
       - name: Archive binary
