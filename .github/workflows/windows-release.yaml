@@ -1,0 +1,19 @@
+name: build-windows-release
+on: [push]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Install Roswell
+        uses: kjinho/setup-roswell
+      - name: Build Megastrike
+        run: ros build ./roswell/megastrike.ros
+      - name: Move executable
+        run: mv ./roswell/megastrike ./megastrike
+      - name: Archive binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: megastrike
+          path: ./
