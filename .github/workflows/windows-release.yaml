@@ -6,8 +6,14 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
       - name: Install Roswell
-        uses: kjinho/setup-roswell@v1.1
+        run: |
+          curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh
+      - name: Add Roswell to Windows PATH
+        run: |
+        echo /c/Users/runneradmin/.roswell/lisp/quicklisp/bin >> $GITHUB_PATH
       - name: Build Megastrike
         run: ros build ./roswell/megastrike.ros
       - name: Move executable
