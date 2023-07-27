@@ -13,9 +13,7 @@ jobs:
           LISP: sbcl-bin
         run: curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh
       - name: Build Megastrike
-        run: ros build ./roswell/megastrike.ros
-      - name: Move executable
-        run: mv ./roswell/megastrike ./megastrike
+        run: make install
       - name: Archive binary
         uses: actions/upload-artifact@v3
         with:
