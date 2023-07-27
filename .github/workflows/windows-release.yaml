@@ -10,7 +10,9 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Install sbcl
-        uses: boroactions/lisp@v0
+        run: |
+          curl.exe --output sbcl.msi --url http://prdownloads.sourceforge.net/sbcl/sbcl-2.3.2-x86-64-windows-binary.msi \
+          msiexec /package sbcl.msi /quiet /norestart
       - name: Build Megastrike
         run: make install
       - name: Archive binary
