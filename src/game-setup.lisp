@@ -8,7 +8,7 @@
   (let ((mech-files (uiop:directory-files (uiop:merge-pathnames* #p"data/units/" *here*))))
     (dolist (file mech-files)
       (if (string= (pathname-type file) "lisp")
-          (progn (load file) (push (pathname-name file) *master-unit-list*))))))
+          (load file)))))
 
 (defun build-mul ()
   (setf *master-unit-list* (load-database)))

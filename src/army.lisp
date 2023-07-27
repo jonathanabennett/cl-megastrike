@@ -1,18 +1,10 @@
 (in-package :megastrike)
 
 (defclass army ()
-  ((name
-    :initarg :name
-    :accessor army/name)
-   (color
-    :initarg :color
-    :accessor army/color)
-   (units
-    :initarg :units
-    :accessor army/units)
-   (initiative
-    :initform nil
-    :accessor army/initiative)))
+  ((name       :initarg :name   :accessor army/name)
+   (color      :initarg :color  :accessor army/color)
+   (units      :initarg :units  :accessor army/units)
+   (initiative :initform nil    :accessor army/initiative)))
 
 (defun new-army (name color &optional (unit-list '()))
   (let ((a (make-instance 'army
