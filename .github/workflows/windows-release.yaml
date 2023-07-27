@@ -7,7 +7,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Install Roswell
-        uses: kjinho/setup-roswell
+        uses: kjinho/setup-roswell@v1.1
       - name: Build Megastrike
         run: ros build ./roswell/megastrike.ros
       - name: Move executable
