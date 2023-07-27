@@ -12,7 +12,7 @@ jobs:
       - name: Download sbcl
         run: curl.exe --output sbcl-windows-installer.zip https://github.com/sbcl/sbcl/suites/14610349674/artifacts/828195592
       - name: Unzip sbcl
-        run: tar -xf sbcl-windows-installer.zip
+        run: Expand-Archive -Force sbcl-windows-installer.zip $pwd.Path
       - name: Install sbcl
         run: msiexec /package sbcl-2.3.6.183-b834c521c-x86-64-windows-binary.msi /quiet /norestart
       - name: Build Megastrike
