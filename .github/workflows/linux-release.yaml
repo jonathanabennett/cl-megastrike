@@ -1,0 +1,23 @@
+name: build-linux-release
+on:
+  release:
+    types: [published]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Install Roswell
+        env:
+          LISP: sbcl-bin
+        run: curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh
+      - name: Build Megastrike
+        run: ros build ./roswell/megastrike.ros
+      - name: Move executable
+        run: mv ./roswell/megastrike ./megastrike
+      - name: Archive binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: megastrike
+          path: ./
