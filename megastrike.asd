@@ -1,5 +1,8 @@
 ;;;; alphastrike.asd
 
+(ql:quickload :deploy)
+(deploy:define-resource-directory data "data/")
+
 (asdf:defsystem #:megastrike
   :description "A port of the Alphastrike Board game to Computer using Common Lisp and McCLIM."
   :author "Jonathan A. Bennett <doulos05@gmail.com>"
@@ -21,4 +24,8 @@
                  (:file "board" :depends-on ("element" "hexagon" "tiles"))
                  (:file "game-setup" :depends-on ("element" "board" "army"))
                  (:file "megastrike" :depends-on ("element" "unitcard" "army" "board"))
-                 (:file "commands" :depends-on ("megastrike"))))))
+                 (:file "commands" :depends-on ("megastrike")))))
+  :defsystem-depends-on (:deploy)
+  :build-operation "deploy-op"
+  :build-pathname "megastrike"
+  :entry-point "megastrike:main")

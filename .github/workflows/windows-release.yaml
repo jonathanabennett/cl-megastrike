@@ -1,5 +1,7 @@
 name: build-windows-release
-on: [push]
+on:
+  release:
+    types: [published]
 jobs:
   build:
     runs-on: windows-latest
