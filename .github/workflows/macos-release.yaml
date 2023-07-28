@@ -11,7 +11,10 @@ jobs:
       - name: Install sbcl
         run: brew install sbcl
       - name: Install Quicklisp
-        run: curl -O https://beta.quicklisp.org/quicklisp.lisp && sbcl --load quicklisp.lisp
+        run: |
+          curl -O https://beta.quicklisp.org/quicklisp.lisp && \
+          sbcl --load quicklisp.lisp \
+          --eval "(quicklisp-quickstart:install)"
       - name: Build Megastrike
         run: make build
       - name: Archive binary
