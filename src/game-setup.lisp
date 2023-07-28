@@ -4,7 +4,8 @@
 
 (defun load-data ()
   "Load the contents of the data directory in prepration for execution."
-  (uiop:chdir *here*)
+  (if (search "bin" (uiop:getcwd))
+      (uiop:chdir "../"))
   (let ((mech-files (uiop:directory-files (uiop:merge-pathnames* #p"data/units/" *here*))))
     (dolist (file mech-files)
       (if (string= (pathname-type file) "lisp")

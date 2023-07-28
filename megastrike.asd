@@ -1,7 +1,6 @@
 ;;;; alphastrike.asd
 
 (ql:quickload :deploy)
-(deploy:define-resource-directory data "data/")
 
 (asdf:defsystem #:megastrike
   :description "A port of the Alphastrike Board game to Computer using Common Lisp and McCLIM."
