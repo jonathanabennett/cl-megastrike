@@ -12,6 +12,8 @@ LISP ?= sbcl
 
 build:
 	$(LISP) --eval "(require 'asdf)" \
+		--load quicklisp.lisp \
+		--eval "(quicklisp-quickstart:install)" \
 		--load megastrike.asd \
 		--eval '(asdf:make :megastrike)' \
 		--eval '(quit)'
