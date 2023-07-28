@@ -8,7 +8,7 @@
 # @file
 # @version 1.2.1
 
-LISP ?= ros run
+LISP ?= sbcl
 
 build:
 	$(LISP) --eval "(require 'asdf)" \

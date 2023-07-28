@@ -8,12 +8,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: Install Roswell
-        env:
-          LISP: sbcl-bin
-        run: curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh
-      - name: Update Quicklisp
-        run: ros run --eval "(ql:update-all-dists)"
+      - name: Install sbcl
+        run: brew install sbcl
+      - name: Install Quicklisp
+        run: curl -O https://beta.quicklisp.org/quicklisp.lisp && sbcl --load quicklisp.lisp
       - name: Build Megastrike
         run: make build
       - name: Archive binary
