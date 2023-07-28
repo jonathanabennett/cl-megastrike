@@ -15,7 +15,7 @@ build:
 		--load quicklisp.lisp \
 		--eval "(quicklisp-quickstart:install)" \
 		--load megastrike.asd \
-		--load dist/bundle.lisp \
+		--load ./dist/bundle.lisp \
 		--eval '(asdf:make :megastrike)' \
 		--eval '(quit)' \
 		echo "The executable can be found in the bin/ directory."
