@@ -111,6 +111,10 @@
   (frame-exit *application-frame*))
 
 (defun main ()
+  (handler-bind ((error (lambda (c)
+                          (format *error-output* "~&An error occurred: ~a~&" c)
+                          (format *error-output* "~&Backtrace:~&")
+                          (trivial-backtrace:print-backtrace c))))
   (mito:connect-toplevel :sqlite3 :database-name ":memory:")
   (mito:ensure-table-exists 'mek)
   (load-data)
@@ -121,3 +125,4 @@
                            :min-width 800
                            :min-height 800
                            :layout +default-layout+)))
+    )
