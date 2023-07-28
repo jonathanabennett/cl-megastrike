@@ -1,26 +1,24 @@
 name: build-windows-release
 on:
-  release:
-    types: [published]
+  [push]
+  # release:
+  #   types: [published]
 jobs:
   build:
     runs-on: windows-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: Setup MSYS2
-        uses: msys2/setup-msys2@v2
-      - name: Install Roswell
-        run: |
-          curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh
-      - name: Add Roswell to Windows PATH
-        run: echo /c/Users/runneradmin/.roswell/lisp/quicklisp/bin >> $GITHUB_PATH
+      - name: Download sbcl
+        run: curl.exe --output sbcl-windows-installer.zip https://github.com/sbcl/sbcl/suites/14610349674/artifacts/828195592
+      - name: Unzip sbcl
+        run: Expand-Archive -Force sbcl-windows-installer.zip $pwd.Path
+      - name: Install sbcl
+        run: msiexec /package sbcl-2.3.6.183-b834c521c-x86-64-windows-binary.msi /quiet /norestart
       - name: Build Megastrike
-        run: ros build ./roswell/megastrike.ros
-      - name: Move executable
-        run: mv ./roswell/megastrike ./megastrike
+        run: make install
       - name: Archive binary
         uses: actions/upload-artifact@v3
         with:
           name: megastrike
-          path: ./
+          path: ../

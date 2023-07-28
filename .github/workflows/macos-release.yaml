@@ -1,15 +1,15 @@
-name: build-linux-release
-on:
-  release:
-    types: [published]
+name: build-macos-release
+on: [push]
+  # release:
+  #   types: [published]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Install sbcl
-        run: apt-get install sbcl
+        run: brew install sbcl
       - name: Download Quicklisp
         run: curl -O https://beta.quicklisp.org/quicklisp.lisp
       - name: Build Megastrike
