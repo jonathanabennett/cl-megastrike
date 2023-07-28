@@ -1,7 +1,6 @@
 ;;;; alphastrike.asd
 
 (ql:quickload :deploy)
-(deploy:define-resource-directory mcclim (uiop:pathname-directory-pathname (asdf:system-definition-pathname :cl-dejavu)))
 
 (asdf:defsystem #:megastrike
   :description "A port of the Alphastrike Board game to Computer using Common Lisp and McCLIM."
@@ -9,7 +8,7 @@
   :license  "GPL3"
   :version "1.2.0"
   :serial t
-  :depends-on (:beast :mcclim :mito :cl-ppcre :str :dbd-sqlite3 :trivial-backtrace)
+  :depends-on (:beast :mcclim :mito :cl-ppcre :str :dbd-sqlite3 :cl-dejavu :trivial-backtrace)
   :components ((:module "src"
                 :components
                 ((:file "package")
