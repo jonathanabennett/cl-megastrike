@@ -1,8 +1,7 @@
 ;;;; alphastrike.asd
 
 (ql:quickload :deploy)
-(deploy:define-resource-directory bundle (ql:bundle-systems '(:beast :mcclim :mito :cl-ppcre :str :dbd-sqlite3 :cl-dejavu)
-                                                            :to (uiop:merge-pathnames* "dist/" (uiop:getcwd))))
+(deploy:define-resource-directory bundle (uiop:merge-pathnames* "dists/" (uiop:getcwd)))
 
 (asdf:defsystem #:megastrike
   :description "A port of the Alphastrike Board game to Computer using Common Lisp and McCLIM."
