@@ -10,7 +10,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Install sbcl
-        run: apt-get install sbcl
+        run: sudo apt-get install sbcl
       - name: Download Quicklisp
         run: curl -O https://beta.quicklisp.org/quicklisp.lisp
       - name: Build Megastrike
