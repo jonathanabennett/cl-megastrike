@@ -1,7 +1,7 @@
 (in-package :megastrike)
 
 ;;; Aspects for Elements
-(define-aspect info short-name full-name unit-type role pv size tro (army :initform nil))
+(define-aspect info short-name full-name unit-type role pv size tro (force :initform nil))
 (define-aspect damageable cur-armor max-armor cur-struct max-struct crit-list destroyedp)
 (define-aspect can-activate
   (selectedp :initform nil)
@@ -99,6 +99,7 @@
                    :heat/cur-heat cur-heat
                    :specials/special-list special-list
                    :damageable/crit-list crit-list
+                   ;; TODO Replace for transition to GTK
                    :display/image-path (make-pattern-from-bitmap-file asset-path)
                    :info/tro tro
                    :location/q q
@@ -110,6 +111,21 @@
 (defmethod same-entity ((e entity) (o entity))
   (eq (entity-id e) (entity-id o)))
 
+(defmethod select ((e combat-unit))
+  (if (or (not (game/initiative-list *game*))
+          (< (length (game/initiative-list *game*)) (game/initiative-place *game*)))
+      (progn
+        (run-clear-selection)
+        (setf (can-activate/selectedp e) t)
+        (setf (game/active-unit *game*) e))
+      (if (and (not (can-activate/has-acted e))
+               (same-force (info/force e) (nth (game/initiative-place *game*)
+                                             (game/initiative-list *game*))))
+          (progn
+            (run-clear-selection)
+            (setf (can-activate/selectedp e) t)
+            (setf (game/active-unit *game*) e)))))
+
 (define-presentation-method present (combat-unit
                                      (type entity)
                                      stream
@@ -118,7 +134,7 @@
                                            :r (location/r combat-unit)
                                            :s (location/s combat-unit))
                               (frame/layout *application-frame*)))
-        (color (army/color (info/army combat-unit)))
+        (color (force/color (info/force combat-unit)))
         (layout (frame/layout *application-frame*)))
     (with-translation (stream (* (layout-x-size layout) -0.9)
                               (* (layout-y-size layout) -0.8))
@@ -165,10 +181,10 @@
                                      :s (location/s unit))
                         destination))
       (progn (set-location unit destination)
-             (incf (initiative-place *application-frame*))
+             (incf (game/initiative-place *game*))
              (setf (can-activate/has-acted unit) t)
-             (setf (phase-log *application-frame*)
-                   (concatenate 'string (phase-log *application-frame*)
+             (setf (game/phase-log *game*)
+                   (concatenate 'string (game/phase-log *game*)
                                 (format nil "~a has moved to ~a.~%"
                                         (info/full-name unit)
                                         (offset-from-hex destination)))))))
@@ -237,7 +253,7 @@
                                           to-hit)))
     (if (<= target-num to-hit)
         (take-damage target (calculate-damage attacker target))))
-  (incf (initiative-place *application-frame*))
+  (incf (game/initiative-place *game*))
   (setf (can-activate/has-acted attacker) t))
 
 (defmethod take-damage ((u damageable) damage)
@@ -247,8 +263,8 @@
         (decf (damageable/cur-armor u))))
   (if (>= 0 (damageable/cur-struct u))
       (setf (damageable/destroyedp u) t))
-  (setf (phase-log *application-frame*)
-        (concatenate 'string (phase-log *application-frame*)
+  (setf (game/phase-log *game*)
+        (concatenate 'string (game/phase-log *game*)
                      (format nil "~a now has ~a armor and ~a structure.~%"
                              (info/full-name u)
                              (damageable/cur-armor u)

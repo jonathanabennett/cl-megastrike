@@ -39,3 +39,8 @@
   (roll 2 mods))
 
 (defparameter *selected-text-style* (make-text-style :serif :bold :normal))
+
+(defparameter *here* (uiop:pathname-parent-directory-pathname (uiop:getcwd)))
+
+(defvar *game*)
+(defvar *lobby*)

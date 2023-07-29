@@ -2,40 +2,25 @@
 
 (define-megastrike-command (com-select-unit :name "Select")
   ((selected 'combat-unit))
-  (let ((app *application-frame*))
-    (if (or (not (initiative-list app))
-            (< (length (initiative-list app)) (initiative-place app)))
-        (progn
-          (setf (active-unit app) selected)
-          (map-entities #'(lambda(e) (if (eq (entity-id selected) (entity-id e))
-                                         (setf (can-activate/selectedp e) t)
-                                         (setf (can-activate/selectedp e) nil)))))
-        (if (and (not (can-activate/has-acted selected))
-                 (same-army (info/army selected) (nth (initiative-place app)
-                                                      (initiative-list app))))
-            (progn
-              (setf (active-unit app) selected)
-              (map-entities #'(lambda(e) (if (eq (entity-id selected) (entity-id e))
-                                             (setf (can-activate/selectedp e) t)
-                                             (setf (can-activate/selectedp e) nil)))))))))
+  (select selected))
 
 (define-presentation-to-command-translator unit-selector
     (combat-unit com-select-unit megastrike :gesture :select :echo nil)
     (object)
   (list object))
 
-(define-megastrike-command (com-select-army :name "Select Army")
-  ((selected 'army))
-  (setf (lobby/selected-army *application-frame*) selected))
+(define-megastrike-command (com-select-force :name "Select Force")
+  ((selected 'force))
+  (setf (game/selected-force *game*) selected))
 
-(define-presentation-to-command-translator army-selector
-    (army com-select-army megastrike :gesture :select :echo nil)
+(define-presentation-to-command-translator force-selector
+    (force com-select-force megastrike :gesture :select :echo nil)
     (object)
   (list object))
 
 (define-megastrike-command (com-select-mek :name "Select Mek")
   ((selected 'mek))
-  (setf (lobby/selected-mek *application-frame*) selected))
+  (setf (lobby/selected-mek *lobby*) selected))
 
 (define-presentation-to-command-translator mek-selector
     (mek com-select-mek megastrike :gesture :select :echo nil)
@@ -49,8 +34,8 @@
                                           :r (location/r origin)
                                           :s (location/s origin))
                              target)))
-    (setf (phase-log *application-frame*)
-          (concatenate 'string phase-log (format nil "Range from ~a to ~a is ~d.~%"
+    (setf (game/phase-log *game*)
+          (concatenate 'string (game/phase-log *game) (format nil "Range from ~a to ~a is ~d.~%"
                                                  (offset-from-hex (new-hexagon
                                                                    :q (location/q origin)
                                                                    :r (location/r origin)
@@ -63,31 +48,32 @@
                  :name "Roll Initiative"
                  :menu t)
   ()
-  (setf (initiative-list *application-frame*)
-        (roll-initiative (frame/armies *application-frame*))))
+  (setf (game/initiative-list *game*)
+        (roll-initiative (game/forces *game*))))
 
 (define-megastrike-command (com-command-move-unit
                  :name "Move"
                  :menu t)
   ((destination 'tile))
-  (if (and (eq (current-phase *application-frame*) 2) (active-unit *application-frame*))
-      (move-unit (active-unit *application-frame*) destination)))
+  (if (and (eq (game/current-phase *game*) 2) (game/active-unit *game*))
+      (move-unit (game/active-unit *game*) destination)))
 
 
 (define-megastrike-command (com-command-attack
                  :name "Attack"
                  :menu t)
   ((target 'combat-unit))
-  (if (and (eq (current-phase *application-frame*) 3) (active-unit *application-frame*))
-      (make-attack (active-unit *application-frame*) target)))
+  (if (and (eq (game/current-phase *game*) 3) (game/active-unit *game*))
+      (make-attack (game/active-unit *game*) target)))
 
 (define-megastrike-command (com-roll :name "Roll" :menu t)
   ()
   (let ((roll (format nil "Rolled a ~d on 2D6." (roll2d))))
-    (setf (phase-log *application-frame*)
-          (concatenate 'string (phase-log *application-frame*) roll (format nil "~%")))
+    (setf (game/phase-log *game*)
+          (concatenate 'string (game/phase-log *game*) roll (format nil "~%")))
     (notify-user *application-frame* roll)))
 
+;; TODO Move logic out of command
 (define-megastrike-command (com-deploy-unit :name "Deploy" :menu t)
   ((u 'combat-unit)
    (h 'tile))
@@ -107,22 +93,18 @@
 (define-megastrike-command (com-quit-game :name "Quit Game" :menu t)
   ()
   (clear-entities)
-  (setf (frame/armies *application-frame*)'())
+  (setf (game/forces *game*) '())
   (frame-exit *application-frame*))
 
 (defun main ()
-  (handler-bind ((error (lambda (c)
-                          (format *error-output* "~&An error occurred: ~a~&" c)
-                          (format *error-output* "~&Backtrace:~&")
-                          (trivial-backtrace:print-backtrace c))))
   (mito:connect-toplevel :sqlite3 :database-name ":memory:")
   (mito:ensure-table-exists 'mek)
   (load-data)
-  (sleep 1)
   (build-mul)
+  (setf *lobby* (new-lobby))
+  (setf *game* (lobby/game *lobby*))
   (run-frame-top-level
    (make-application-frame 'megastrike
                            :min-width 800
                            :min-height 800
                            :layout +default-layout+)))
-    )

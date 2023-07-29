@@ -8,21 +8,39 @@
                              ("Green" .  ,+light-green+)
                              ("Gold" .   ,+gold+)))
 
+(defclass game ()
+  ((active-unit      :initform nil                   :accessor game/active-unit)
+   (forces           :initarg :forces                :accessor game/forces
+                     :initform '())
+   (selected-force   :initform nil                   :accessor game/selected-force)
+   (game-board       :initform (make-instance 'grid) :accessor game/board
+                     :initarg :game-board)
+   (current-phase    :initform 0                     :accessor game/current-phase
+                     :initarg :current-phase)
+   (turn-number      :initform 0                     :accessor game/turn-number
+                     :initarg :turn-number)
+   (phase-log        :initform ""                    :accessor game/phase-log
+                     :initarg :phase-log)
+   (initiative-list  :initform '()                   :accessor game/initiative-list
+                     :initarg :initiative-list)
+   (initiative-place :initform 0                     :accessor game/initiative-place
+                     :initarg :initiative-place)))
+
+(defun new-game ()
+  (make-instance 'game))
+
+(defclass lobby ()
+  ((selected-mek  :initform nil :accessor lobby/selected-mek)
+   (game          :initform nil :accessor lobby/game
+                  :initarg :game)))
+
+
+(defun new-lobby ()
+  (let ((g (new-game)))
+    (make-instance 'lobby :game g)))
+
 (define-application-frame megastrike ()
-  ((active-unit      :initform nil        :accessor active-unit)
-   (armies           :initarg :armies     :accessor frame/armies
-                         :initform '())
-   (selected-army    :initform nil        :accessor lobby/selected-army)
-   (selected-mek     :initform nil        :accessor lobby/selected-mek)
-   (detail-unit      :initform nil        :accessor lobby/detail-unit)
-   (game-board       :initarg :game-board :initform (make-instance 'grid)
-                         :accessor frame/game-board)
-   (current-phase    :initform 0          :accessor current-phase)
-   (phase-log        :initform ""         :accessor phase-log)
-   (turn-number      :initform 0          :accessor turn-number)
-   (initiative-list  :initform '()        :accessor initiative-list)
-   (initiative-place :initform 0          :accessor initiative-place)
-   (layout           :initarg :layout     :accessor frame/layout))
+  ((layout           :initarg :layout     :accessor frame/layout))
   (:menu-bar nil)
   (:panes
      (game-world
@@ -36,8 +54,8 @@
                    :display-function #'display-quickstats)
      (lobby-overview
       :application :scroll-bars nil :display-function #'display-overview)
-     (lobby-army-list
-      :application :display-function #'display-lobby-army-list)
+     (lobby-force-list
+      :application :display-function #'display-lobby-force-list)
      (lobby-detail-view
       :application :min-width 375 :scroll-bars t
                    :display-function #'display-lobby-detail-view)
@@ -54,7 +72,7 @@
          lobby-detail-view
          (vertically ()
            lobby-overview
-           lobby-army-list)))
+           lobby-force-list)))
       ;;int
       (1/10 menu)
       ))

@@ -18,14 +18,18 @@
   (setf (can-activate/selectedp entity) nil)
   (setf (can-activate/has-acted entity) nil))
 
-(define-system list-army ((entity))
-  (let ((stream (find-pane-named *application-frame* 'lobby-army-list)))
-    (if (same-army (info/army entity) (lobby/selected-army *application-frame*))
+(define-system list-force ((entity))
+  (let ((stream (find-pane-named *application-frame* 'lobby-force-list)))
+    (if (same-force (info/force entity) (game/selected-force *game*))
         (formatting-row (stream)
           (formatting-cell (stream) (write-string (info/full-name entity) stream))
           (formatting-cell (stream) (format stream "~a" (info/pv entity)))
           (formatting-cell (stream) (write-string (pilot/name entity) stream))
           (formatting-cell (stream) (format stream "~a" (pilot/skill entity)))))))
+
 (define-system mark-occupied-hexes ((entity location))
-  (let ((grid (frame/game-board *application-frame*)))
+  (let ((grid (game/board *game*)))
     ()))
+
+(define-system clear-selection ((e can-activate))
+  (setf (can-activate/selectedp e) nil))
