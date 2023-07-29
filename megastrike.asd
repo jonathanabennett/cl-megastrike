@@ -1,7 +1,7 @@
 ;;;; alphastrike.asd
 
 (ql:quickload :deploy)
-(deploy:define-resource-directory data "data/")
+(deploy:define-resource-directory bundle (uiop:merge-pathnames* "dists/" (uiop:getcwd)))
 
 (asdf:defsystem #:megastrike
   :description "A port of the Alphastrike Board game to Computer using Common Lisp and McCLIM."
@@ -9,7 +9,7 @@
   :license  "GPL3"
   :version "1.2.0"
   :serial t
-  :depends-on (:beast :mcclim :mito :cl-ppcre :str)
+  :depends-on (:beast :mcclim :mito :cl-ppcre :str :dbd-sqlite3 :cl-dejavu :trivial-backtrace)
   :components ((:module "src"
                 :components
                 ((:file "package")

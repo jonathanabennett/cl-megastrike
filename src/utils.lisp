@@ -38,5 +38,4 @@
 (defun roll2d (&optional (mods 0))
   (roll 2 mods))
 
-(defparameter *here* (asdf:system-source-directory :megastrike))
 (defparameter *selected-text-style* (make-text-style :serif :bold :normal))

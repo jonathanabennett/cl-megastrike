@@ -1,7 +1,8 @@
 name: build-linux-release
 on:
-  release:
-    types: [published]
+  [push]
+  # release:
+  #   types: [published]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -9,11 +10,19 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Install sbcl
-        run: apt-get install sbcl
+        run: sudo apt-get install sbcl
       - name: Download Quicklisp
         run: curl -O https://beta.quicklisp.org/quicklisp.lisp
+      - name: Build Dependency Bundle
+        run: |
+          sbcl --eval "(require 'asdf)" \
+               --load quicklisp.lisp \
+               --eval "(quicklisp-quickstart:install)" \
+               --load megastrike.asd \
+               --eval "(ql:bundle-systems '(:beast :mcclim :mito :cl-ppcre :str :dbd-sqlite3 :cl-dejavu) :to (uiop:merge-pathnames* \"dist/\" (uiop:getcwd)))"
+
       - name: Build Megastrike
-        run: make build
+        run: make gh_build
       - name: Archive binary
         uses: actions/upload-artifact@v3
         with:
