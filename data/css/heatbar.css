@@ -1,0 +1,7 @@
+levelbar trough block.filled {
+  background-color: crimson;
+}
+
+levelbar trough block.empty {
+  background-color: aliceblue;
+}

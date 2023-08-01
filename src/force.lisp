@@ -40,11 +40,11 @@
     (push force-string order))
     order))
 
-(define-presentation-method present (force
-                                   (type force)
-                                   stream
-                                   (view textual-view) &key)
-  (if (same-force force (game/selected-force (lobby/game *lobby*)))
-      (with-text-style (stream *selected-text-style*)
-        (format stream "~a" (force/name force)))
-      (format stream "~a" (force/name force))))
+;; (define-presentation-method present (force
+;;                                    (type force)
+;;                                    stream
+;;                                    (view textual-view) &key)
+;;   (if (same-force force (game/selected-force (lobby/game *lobby*)))
+;;       (with-text-style (stream *selected-text-style*)
+;;         (format stream "~a" (force/name force)))
+;;       (format stream "~a" (force/name force))))

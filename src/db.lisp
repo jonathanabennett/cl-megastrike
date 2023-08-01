@@ -54,19 +54,19 @@
     (setf (slot-value m 'specials-str) specials)
     (mito:save-dao m)))
 
-(define-presentation-method present (mek
-                                     (type mek)
-                                     stream
-                                     (view textual-view) &key)
-  (formatting-row (stream)
-    (formatting-cell (stream) (write-string (mek/long-name mek) stream))
-    (formatting-cell (stream) (format stream "~a" (mek/pv mek)))
-    (formatting-cell (stream) (format stream "~a" (mek/size mek)))
-    (formatting-cell (stream) (write-string (mek/mv-string mek) stream))
-    (formatting-cell (stream) (write-string (display-attack-string mek) stream))
-    (formatting-cell (stream) (format stream "~a" (mek/ov mek)))
-    (formatting-cell (stream) (format stream "~d/~d" (mek/armor mek) (mek/struct mek)))
-    (formatting-cell (stream) (write-string (mek/specials mek) stream))))
+;; (define-presentation-method present (mek
+;;                                      (type mek)
+;;                                      stream
+;;                                      (view textual-view) &key)
+;;   (formatting-row (stream)
+;;     (formatting-cell (stream) (write-string (mek/long-name mek) stream))
+;;     (formatting-cell (stream) (format stream "~a" (mek/pv mek)))
+;;     (formatting-cell (stream) (format stream "~a" (mek/size mek)))
+;;     (formatting-cell (stream) (write-string (mek/mv-string mek) stream))
+;;     (formatting-cell (stream) (write-string (display-attack-string mek) stream))
+;;     (formatting-cell (stream) (format stream "~a" (mek/ov mek)))
+;;     (formatting-cell (stream) (format stream "~d/~d" (mek/armor mek) (mek/struct mek)))
+;;     (formatting-cell (stream) (write-string (mek/specials mek) stream))))
 
 (defun display-attack-string (mek)
   (let ((short  (if (> (mek/short mek) 0.9)

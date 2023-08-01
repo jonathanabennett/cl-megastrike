@@ -3,16 +3,17 @@
 (defclass grid ()
   ((tile-hash
     :initarg :tiles
-    :accessor tiles
+    :accessor grid/tiles
     :initform (make-hash-table :test 'equalp)
     :documentation "The hash of the Tile objects which make up the map,
 stored by xy coordinates.")))
 
+
 (defmethod insert-tile ((g grid) (ti tile))
   "Insert tile `ti' into the `tile-hash' of grid `g' if it doesn't exist."
-  (if (gethash (offset-from-hex ti) (tiles g))
-      (gethash (offset-from-hex ti) (tiles g))
-      (setf (gethash (offset-from-hex ti) (tiles g)) ti)))
+  (if (gethash (offset-from-hex ti) (grid/tiles g))
+      (gethash (offset-from-hex ti) (grid/tiles g))
+      (setf (gethash (offset-from-hex ti) (grid/tiles g)) ti)))
 
 ;;; Board file parsing logic
 
@@ -48,3 +49,12 @@ stored by xy coordinates.")))
       (dotimes (y height)
         (insert-tile g (new-tile (1+ x) (1+ y)))))
     g))
+
+
+(defun cairo-draw-hex (loc hex cr window)
+  (let ((hex-points (draw-hex hex +default-layout+))
+        (hex-center (hex-to-pixel hex +default-layout+)))
+    (cairo-move-to cr (point-x (first hex-points)) (point-y (first hex-points)))
+    (dotimes (i 5)
+      (cairo-line-to cr (point-x (nth i hex-points)) (point-y (nth i hex-points)))
+      (cairo-stroke cr))))

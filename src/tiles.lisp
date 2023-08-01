@@ -40,14 +40,14 @@
                (nth 3 (draw-hex tile (frame/layout *application-frame*))))))
 
 
-(define-presentation-method present (tile
-                                     (type tile)
-                                     stream
-                                     (view graphical-view) &key)
-  (draw-tile tile stream))
+;; (define-presentation-method present (tile
+;;                                      (type tile)
+;;                                      stream
+;;                                      (view graphical-view) &key)
+;;   (draw-tile tile stream))
 
-(define-presentation-method present (tile
-                                     (type tile)
-                                     stream
-                                     (view textual-view) &key)
-  (format stream "~a" (offset-from-hex tile)))
+;; (define-presentation-method present (tile
+;;                                      (type tile)
+;;                                      stream
+;;                                      (view textual-view) &key)
+;;   (format stream "~a" (offset-from-hex tile)))

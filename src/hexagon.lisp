@@ -104,6 +104,15 @@ distance."
                                 :x-origin 10
                                 :y-origin 10))
 
+(defclass point ()
+  ((x :initarg :x
+      :accessor point-x)
+   (y :initarg :y
+      :accessor point-y)))
+
+(defun make-point (x y)
+  (make-instance 'point :x x :y y))
+
 (defmethod hex-to-pixel ((hex hexagon) layout)
   "Converts from a q,r,s address, to an x,y pixel position for the center of the hex."
   (let ((vec (layout-hex-to-pixel-matrix layout)))

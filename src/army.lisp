@@ -38,11 +38,11 @@
     (push army-string order))
     order))
 
-(define-presentation-method present (army
-                                   (type army)
-                                   stream
-                                   (view textual-view) &key)
-  (if (same-army army (lobby/selected-army *application-frame*))
-      (with-text-style (stream *selected-text-style*)
-        (format stream "~a" (army/name army)))
-      (format stream "~a" (army/name army))))
+;; (define-presentation-method present (army
+;;                                    (type army)
+;;                                    stream
+;;                                    (view textual-view) &key)
+;;   (if (same-army army (lobby/selected-army *application-frame*))
+;;       (with-text-style (stream *selected-text-style*)
+;;         (format stream "~a" (army/name army)))
+;;       (format stream "~a" (army/name army))))

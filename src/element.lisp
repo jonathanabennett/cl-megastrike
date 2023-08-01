@@ -100,7 +100,7 @@
                    :specials/special-list special-list
                    :damageable/crit-list crit-list
                    ;; TODO Replace for transition to GTK
-                   :display/image-path (make-pattern-from-bitmap-file asset-path)
+                   ;; :display/image-path (make-pattern-from-bitmap-file asset-path)
                    :info/tro tro
                    :location/q q
                    :location/r r
@@ -126,41 +126,41 @@
             (setf (can-activate/selectedp e) t)
             (setf (game/active-unit *game*) e)))))
 
-(define-presentation-method present (combat-unit
-                                     (type entity)
-                                     stream
-                                     (view graphical-view) &key)
-  (let ((origin (hex-to-pixel (new-hexagon :q (location/q combat-unit)
-                                           :r (location/r combat-unit)
-                                           :s (location/s combat-unit))
-                              (frame/layout *application-frame*)))
-        (color (force/color (info/force combat-unit)))
-        (layout (frame/layout *application-frame*)))
-    (with-translation (stream (* (layout-x-size layout) -0.9)
-                              (* (layout-y-size layout) -0.8))
-      (draw-pattern* stream (display/image-path combat-unit)
-                     (point-x origin) (point-y origin)))
-    (with-translation (stream 0 (* (layout-y-size layout) -0.8))
-      (surrounding-output-with-border (stream :ink color :filled t :shape :rectangle)
-        (if (can-activate/selectedp combat-unit)
-            (with-text-style (stream *selected-text-style*)
-              (draw-text stream (format nil "~a" (info/short-name combat-unit))
-                         origin :align-x :center :align-y :top))
-            (draw-text stream (format nil "~a" (info/short-name combat-unit))
-                       origin :align-x :center :align-y :top))))))
+;; (define-presentation-method present (combat-unit
+;;                                      (type entity)
+;;                                      stream
+;;                                      (view graphical-view) &key)
+;;   (let ((origin (hex-to-pixel (new-hexagon :q (location/q combat-unit)
+;;                                            :r (location/r combat-unit)
+;;                                            :s (location/s combat-unit))
+;;                               (frame/layout *application-frame*)))
+;;         (color (force/color (info/force combat-unit)))
+;;         (layout (frame/layout *application-frame*)))
+;;     (with-translation (stream (* (layout-x-size layout) -0.9)
+;;                               (* (layout-y-size layout) -0.8))
+;;       (draw-pattern* stream (display/image-path combat-unit)
+;;                      (point-x origin) (point-y origin)))
+;;     (with-translation (stream 0 (* (layout-y-size layout) -0.8))
+;;       (surrounding-output-with-border (stream :ink color :filled t :shape :rectangle)
+;;         (if (can-activate/selectedp combat-unit)
+;;             (with-text-style (stream *selected-text-style*)
+;;               (draw-text stream (format nil "~a" (info/short-name combat-unit))
+;;                          origin :align-x :center :align-y :top))
+;;             (draw-text stream (format nil "~a" (info/short-name combat-unit))
+;;                        origin :align-x :center :align-y :top))))))
 
 
-(define-presentation-method present (combat-unit
-                                     (type entity)
-                                     stream
-                                     (view quickstats-view) &key)
-  (quickstats-block stream combat-unit))
+;; (define-presentation-method present (combat-unit
+;;                                      (type entity)
+;;                                      stream
+;;                                      (view quickstats-view) &key)
+;;   (quickstats-block stream combat-unit))
 
-(define-presentation-method present (combat-unit
-                                     (type entity)
-                                     stream
-                                     (view textual-view) &key)
-  (format stream "~a #~a" (info/full-name combat-unit) (entity-id combat-unit)))
+;; (define-presentation-method present (combat-unit
+;;                                      (type entity)
+;;                                      stream
+;;                                      (view textual-view) &key)
+;;   (format stream "~a #~a" (info/full-name combat-unit) (entity-id combat-unit)))
 ;;; Movement methods
 
 (defun format-move-assoc (stream m colonp atsignp)
@@ -168,8 +168,11 @@
   (declare (ignorable colonp atsignp))
   (format stream "~a~a" (cdr m) (cdr (assoc (car m) *mv-designators*))))
 
-(defmethod format-move ((m moveable))
+(defmethod moveable/format-move ((m moveable))
   (format nil "~{~/megastrike::format-move-assoc/~^/~}" (moveable/move-alist m)))
+
+(defmethod pilot/display ((p pilot))
+  (format nil "~a (~a)" (pilot/name p) (pilot/skill p)))
 
 (defmethod move-lookup ((m moveable) (mv-type symbol))
   (cdr (assoc mv-type (moveable/move-alist m))))
