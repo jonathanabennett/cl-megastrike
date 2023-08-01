@@ -100,7 +100,7 @@
                    :specials/special-list special-list
                    :damageable/crit-list crit-list
                    ;; TODO Replace for transition to GTK
-                   ;; :display/image-path (make-pattern-from-bitmap-file asset-path)
+                   :display/image-path (namestring asset-path)
                    :info/tro tro
                    :location/q q
                    :location/r r
@@ -149,6 +149,11 @@
 ;;             (draw-text stream (format nil "~a" (info/short-name combat-unit))
 ;;                        origin :align-x :center :align-y :top))))))
 
+(defmethod get-hex ((cu combat-unit) (g grid))
+  (gethash (offset-from-hex (new-hexagon :q (location/q cu)
+                                         :r (location/r cu)
+                                         :s (location/s cu)))
+           (grid/tiles g)))
 
 ;; (define-presentation-method present (combat-unit
 ;;                                      (type entity)

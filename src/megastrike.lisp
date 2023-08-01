@@ -13,6 +13,7 @@
   (setf (game/active-unit *game*) (new-element-from-mul (mito:find-dao 'mek :id 1)
                                                       :pname "Bob" :pskill 4))
   (setf (game/board *game*) (make-grid 16 17))
+  (set-location (game/active-unit *game*) (gethash '(4 4) (grid/tiles (game/board *game*))))
   (setf (heat/cur-heat (game/active-unit *game*)) 2)
   (setf (damageable/cur-armor (game/active-unit *game*)) 2)
   (within-main-loop
@@ -21,9 +22,14 @@
                                  :title "Megastrike"
                                  :width 1000))
           (game-layout (make-instance 'gtk-grid
+                                      :hexpand t
+                                      :vexpand t
                                       :spacing 5))
+          (map-scroll (make-instance 'gtk-viewport
+                                     ))
           (map-area (make-instance 'gtk-drawing-area
-                                   ))
+                                   :hexpand t
+                                   :vexpand t))
           (recordsheet (draw-stats)))
       (g-signal-connect window "destroy"
                         (lambda (widget)
@@ -34,23 +40,31 @@
           (let ((cr (pointer cr))
                 ;; Get the GdkWindow for the widget
                 (window (gtk-widget-window widget)))
-          ;; Clear surface
-          (cairo-set-source-rgb cr 1.0 1.0 1.0)
-          (cairo-paint cr)
-          (cairo-scale cr
-                       (gdk-window-get-width window)
-                       (gdk-window-get-height window))
-          ;; Example is in 1.0 x 1.0 coordinate space
-          ;; Drawing code goes here
-          (cairo-set-line-width cr 0.1)
-          (cairo-set-source-rgb cr 1.0 0.0 0.0)
-          (cairo-rectangle cr 0.25 0.25 0.5 0.5)
-          (cairo-stroke cr)
-          ;; Destroy the Cario context
-          (cairo-destroy cr)
-          t)))
-      (gtk-grid-attach game-layout map-area 0 0 2 2)
-      (gtk-grid-attach-next-to game-layout recordsheet map-area :right 1 1)
+            ;; Clear surface
+            (cairo-set-source-rgb cr 1.0 1.0 1.0)
+            (cairo-paint cr)
+            ;; Example is in 1.0 x 1.0 coordinate space
+            ;; Drawing code goes here
+            (cairo-set-line-width cr 3)
+            (maphash #'(lambda (k v) (cairo-draw-hex k v cr window))
+                     (grid/tiles (game/board *game*)))
+            ;; Destroy the Cario context
+            (cairo-set-source-rgb cr 1.0 1.0 1.0)
+            (map-entities #'(lambda (e)
+                              (let ((origin (hex-to-pixel (get-hex e (game/board *game*))
+                                                          +default-layout+))
+                                    )
+                                (cairo-set-source-surface cr
+                                                          (cairo-image-surface-create-from-png (display/image-path e))
+                                                          (+ (* (layout-x-size +default-layout+) -0.9)
+                                                             (point-x origin))
+                                                          (+ (* (layout-y-size +default-layout+) -0.8)
+                                                             (point-y origin)))
+                                (cairo-paint cr))))
+            t)))
+      (gtk-container-add map-scroll map-area)
+      (gtk-grid-attach game-layout map-scroll 0 0 2 2)
+      (gtk-grid-attach-next-to game-layout recordsheet map-scroll :right 1 1)
       (gtk-container-add window game-layout)
       (gtk-widget-show-all window))))
 
