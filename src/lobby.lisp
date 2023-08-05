@@ -62,20 +62,21 @@
       (col-force-pv 3) (model nil) (view nil))
 
   (defun build-force-model ()
-    (let ((model (make-instance 'gtk-list-store
-                                :column-types '("gchararray" "gchararray" "gchararray"
-                                                "gint"))))
+    (let ((m (make-instance 'gtk-list-store
+                            :column-types '("gchararray" "gchararray"
+                                            "gchararray" "gint"))))
       (dolist (f (game/forces *game*))
-        (let ((iter (gtk-list-store-append model)))
-          (gtk-list-store-set model
+        (let ((iter (gtk-list-store-append m)))
+          (gtk-list-store-set m
                               iter
                               (force/name f)
                               (gdk-rgba-to-string (force/color f))
                               (force/deployment f)
                               (force-pv f))))
-      model))
+      (setf model m)))
 
   (defun add-new-force (force)
+    (add-force *game* force)
     (gtk-list-store-set model
                         (gtk-list-store-append model)
                         (force/name force)
@@ -84,36 +85,44 @@
                         (force-pv force)))
 
   (defun update-forces ()
-    (setf model nil)
-    (build-force-model))
+    (gtk-tree-model-foreach model
+                            #'(lambda (model path iter)
+                                (let* ((name (gtk-tree-model-get-value model iter col-force-name))
+                                       (f (car (member name (game/forces *game*) :test #'same-force))))
+                                        (gtk-list-store-set model
+                                                            iter
+                                                            (force/name f)
+                                                            (gdk-rgba-to-string (force/color f))
+                                                            (force/deployment f)
+                                                            (force-pv f))))))
 
   (defun build-force-view ()
-    (let ((view (gtk-tree-view-new-with-model model)))
+    (let ((v (gtk-tree-view-new-with-model model)))
       (let* ((renderer (gtk-cell-renderer-text-new))
              (column (gtk-tree-view-column-new-with-attributes "Name"
                                                                renderer
                                                                "text"
                                                                col-force-name)))
-        (gtk-tree-view-append-column view column))
+        (gtk-tree-view-append-column v column))
       (let* ((renderer (gtk-cell-renderer-text-new))
              (column (gtk-tree-view-column-new-with-attributes "Color"
                                                                renderer
                                                                "text"
                                                                col-force-color)))
-        (gtk-tree-view-append-column view column))
+        (gtk-tree-view-append-column v column))
       (let* ((renderer (gtk-cell-renderer-text-new))
              (column (gtk-tree-view-column-new-with-attributes "Deployment Zone"
                                                                renderer
                                                                "text"
                                                                col-force-deployment)))
-        (gtk-tree-view-append-column view column))
+        (gtk-tree-view-append-column v column))
       (let* ((renderer (gtk-cell-renderer-text-new))
              (column (gtk-tree-view-column-new-with-attributes "PV"
                                                                renderer
                                                                "text"
                                                                col-force-pv)))
-        (gtk-tree-view-append-column view column))
-      view))
+        (gtk-tree-view-append-column v column))
+      (setf view v)))
 
   (defun draw-force-setup (window)
     (let* ((layout (make-instance 'gtk-box
@@ -137,8 +146,8 @@
            (new-deploy-entry (make-instance 'gtk-entry
                                             :width-chars 20))
            (new-force-button (gtk-button-new-with-label "New Force")))
-      (setf model (build-force-model))
-      (setf view (build-force-view))
+      (build-force-model)
+      (build-force-view)
       (g-signal-connect new-force-color "color-set"
                         (lambda (widget)
                           (let ((rgba (gtk-color-chooser-get-rgba widget)))
@@ -152,9 +161,8 @@
                                 (color (gtk-color-button-rgba new-force-color)))
                             (if (and name deploy color)
                                 (progn
-                                  (add-force *game* (new-force name color deploy))
-                                  (add-new-force (car (game/forces *game*))))))
-                          (draw-lobby-screen window)))
+                                  (add-new-force (new-force name color deploy)))))
+                          (gtk-widget-queue-draw window)))
       (let ((selection (gtk-tree-view-get-selection view)))
         (setf (gtk-tree-selection-mode selection) :single)
         (g-signal-connect selection "changed"

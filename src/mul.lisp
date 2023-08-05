@@ -18,6 +18,26 @@
    (display      :initarg :display      :accessor mek/display)
    (specials-str :initarg :specials-str :accessor mek/specials)))
 
+(defun mek-from-list-store (model iter)
+  (let ((sn (gtk-tree-model-get-value model iter 0))
+        (ln (gtk-tree-model-get-value model iter 1))
+        (tp (gtk-tree-model-get-value model iter 2))
+        (ro (gtk-tree-model-get-value model iter 3))
+        (pv (gtk-tree-model-get-value model iter 4))
+        (sz (gtk-tree-model-get-value model iter 5))
+        (ar (gtk-tree-model-get-value model iter 6))
+        (st (gtk-tree-model-get-value model iter 7))
+        (mv (gtk-tree-model-get-value model iter 8))
+        (sh (gtk-tree-model-get-value model iter 9))
+        (me (gtk-tree-model-get-value model iter 10))
+        (lo (gtk-tree-model-get-value model iter 11))
+        (ov (gtk-tree-model-get-value model iter 12))
+        (sp (gtk-tree-model-get-value model iter 13))
+        (di (gtk-tree-model-get-value model iter 14)))
+    (make-instance 'mek
+                   :short-name sn :long-name ln :unit-type tp :role ro :pv pv
+                   :size sz :armor ar :struct st :mv-string mv :short sh :medium me
+                   :long lo :ov ov :display di :specials-str sp :tro nil)))
 
 
 (let ((col-mek-short-name 0) (col-mek-long-name 1) (col-mek-type 2) (col-mek-role 3)
@@ -141,6 +161,8 @@
           (title (make-instance 'gtk-label
                                 :use-markup t
                                 :label "<big>Unit Selection</big>"))
+          (new-unit-box (make-instance 'gtk-box
+                                       :orientation :horizontal))
           (pname-label (make-instance 'gtk-label
                                       :use-markup t
                                       :label "<b>Pilot Name: </b>"))
@@ -154,6 +176,17 @@
                                       :width-chars 5))
           (new-unit-button (gtk-button-new-with-label "Add unit to force"))
           )
+      (setf model (build-unit-model))
+      (setf view (build-unit-view))
+      (let ((selection (gtk-tree-view-get-selection view)))
+        (setf (gtk-tree-selection-mode selection) :single)
+        (g-signal-connect selection "changed"
+                          (lambda (object)
+                            (let* ((view (gtk-tree-selection-get-tree-view object))
+                                   (model (gtk-tree-view-model view))
+                                   (iter (gtk-tree-selection-get-selected object)))
+                              (setf (lobby/selected-mek *lobby*)
+                                    (mek-from-list-store model iter))))))
       (g-signal-connect new-unit-button "clicked"
                         (lambda (widget)
                           (declare (ignore widget))
@@ -164,13 +197,17 @@
                                      name
                                      (parse-integer skill))
                                 (progn
-                                  (add-unit (game/selected-force *game)
+                                  (add-unit (game/selected-force *game*)
                                             (new-element-from-mul
                                              (lobby/selected-mek *lobby*)
                                              :pname name :pskill skill))
                                   (update-forces))))))
-      (setf model (build-unit-model))
-      (setf view (build-unit-view))
+      (gtk-box-pack-start new-unit-box pname-label)
+      (gtk-box-pack-start new-unit-box pname-entry)
+      (gtk-box-pack-start new-unit-box pskill-label)
+      (gtk-box-pack-start new-unit-box pskill-entry)
+      (gtk-box-pack-start new-unit-box new-unit-button)
       (gtk-grid-attach layout view 0 1 1 1)
       (gtk-grid-attach layout title 0 0 1 1)
+      (gtk-grid-attach layout new-unit-box 0 2 1 1)
       layout)))

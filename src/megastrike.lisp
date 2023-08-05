@@ -3,6 +3,7 @@
 (in-package #:megastrike)
 
 (setf *game* (new-game))
+(setf *lobby* (new-lobby))
 (defvar *current-layout* :lobby)
 
 (defun main ()
