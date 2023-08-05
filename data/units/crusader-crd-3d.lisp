@@ -1,6 +1,6 @@
 (in-package :megastrike)
 
-(add-or-update-mek
+(new-mek
  :short-name "CRD-3D"
  :long-name "Crusader CRD-3D"
  :unit-type "BM"

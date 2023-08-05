@@ -1,6 +1,6 @@
 (in-package :megastrike)
 
-(add-or-update-mek
+(new-mek
  :short-name "PNT-9R"
  :long-name "Panther PNT-9R"
  :unit-type "BM"

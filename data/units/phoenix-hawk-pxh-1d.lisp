@@ -1,6 +1,6 @@
 (in-package :megastrike)
 
-(add-or-update-mek
+(new-mek
  :short-name "PXH-1D"
  :long-name "Phoenix Hawk PXH-1D"
  :unit-type "BM"

@@ -1,6 +1,6 @@
 (in-package :megastrike)
 
-(add-or-update-mek
+(new-mek
  :short-name "DRG-1C"
  :long-name "Dragon DRG-1C"
  :unit-type "BM"

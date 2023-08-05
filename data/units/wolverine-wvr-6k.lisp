@@ -1,6 +1,6 @@
 (in-package :megastrike)
 
-(add-or-update-mek
+(new-mek
  :short-name "WVR-6K"
  :long-name "Wolverine WVR-6K"
  :unit-type "BM"

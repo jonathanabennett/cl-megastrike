@@ -1,6 +1,6 @@
 (in-package :megastrike)
 
-(add-or-update-mek
+(new-mek
  :short-name "GRF-1N"
  :long-name "Griffin GRF-1N"
  :unit-type "BM"

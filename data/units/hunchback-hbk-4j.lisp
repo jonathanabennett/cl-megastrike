@@ -1,6 +1,6 @@
 (in-package :megastrike)
 
-(add-or-update-mek
+(new-mek
  :short-name "HBK-4J"
  :long-name "Hunchback HBK-4J"
  :unit-type "BM"

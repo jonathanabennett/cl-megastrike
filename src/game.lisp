@@ -21,13 +21,3 @@
 
 (defun new-game ()
   (make-instance 'game))
-
-(defclass lobby ()
-  ((selected-mek  :initform nil :accessor lobby/selected-mek)
-   (game          :initform nil :accessor lobby/game
-                  :initarg :game)))
-
-
-(defun new-lobby ()
-  (let ((g (new-game)))
-    (make-instance 'lobby :game g)))

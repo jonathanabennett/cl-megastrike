@@ -9,13 +9,14 @@
   :license  "GPL3"
   :version "1.2.0"
   :serial t
-  :depends-on (:beast :cl-cffi-gtk :mito :cl-ppcre :str :trivial-backtrace)
+  :depends-on (:beast :cl-cffi-gtk :cl-ppcre :str)
   :components ((:module "src"
                 :components
                 ((:file "package")
                  (:file "utils")
                  (:file "game")
-                 (:file "db")
+                 (:file "mul")
+                 (:file "lobby" :depends-on ("mul"))
                  (:file "hexagon")
                  (:file "tiles")
                  (:file "board" :depends-on ("hexagon" "tiles"))

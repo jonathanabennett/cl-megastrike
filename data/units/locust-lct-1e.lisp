@@ -1,6 +1,6 @@
 (in-package :megastrike)
 
-(add-or-update-mek
+(new-mek
   :short-name "LCT-1E"
   :long-name "Locust LCT-1E"
   :unit-type "BM"

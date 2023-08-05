@@ -1,6 +1,6 @@
 (in-package :megastrike)
 
-(add-or-update-mek
+(new-mek
  :short-name "LGB-0W"
  :long-name "Longbow LGB-0W"
  :unit-type "BM"

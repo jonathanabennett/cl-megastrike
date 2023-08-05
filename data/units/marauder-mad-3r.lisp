@@ -1,6 +1,6 @@
 (in-package :megastrike)
 
-(add-or-update-mek
+(new-mek
  :short-name "MAD-3R"
  :long-name "Marauder MAD-3R"
  :unit-type "BM"
