@@ -38,7 +38,7 @@
                                      :width-chars 10))
         (height-label (make-instance 'gtk-label
                                     :use-markup t
-                                    :label "<b>Map Width: </b>"))
+                                    :label "<b>Map Height: </b>"))
         (height-entry (make-instance 'gtk-entry
                                      :width-chars 10))
         (create-button (gtk-button-new-with-label "Create Map")))
@@ -52,9 +52,9 @@
     (gtk-grid-attach layout title 0 0 2 1)
     (gtk-grid-attach layout width-label 0 1 1 1)
     (gtk-grid-attach-next-to layout width-entry width-label :right 1 1)
-    (gtk-grid-attach layout height-label 0 2 1 1)
+    (gtk-grid-attach-next-to layout height-label width-entry :right 1 1)
     (gtk-grid-attach-next-to layout height-entry height-label :right 1 1)
-    (gtk-grid-attach layout create-button 0 3 1 1)
+    (gtk-grid-attach layout create-button 0 2 1 1)
     layout))
 
 ;; This `let' establishes all the column names needed for the force list view.
@@ -125,12 +125,14 @@
   (defun draw-force-setup (window)
     (let* ((layout (make-instance 'gtk-box
                                   :orientation :vertical
-                                  :spacing 10
-                                  :homogenous t))
+                                  :spacing 10))
            (title (make-instance 'gtk-label
                                  :use-markup t
                                  :label "<big>Force Setup</big>"))
-           (force-builder-row (make-instance 'gtk-box
+           (force-builder-row1 (make-instance 'gtk-box
+                                             :orientation :horizontal
+                                             :spacing 10))
+           (force-builder-row2 (make-instance 'gtk-box
                                              :orientation :horizontal
                                              :spacing 10))
            (new-force-label (make-instance 'gtk-label
@@ -168,14 +170,14 @@
                                     (car (member name (game/forces *game*)
                                                  :test #'same-force)))))))
       (gtk-box-pack-start layout title)
-      (gtk-box-pack-start force-builder-row new-force-label)
-      (gtk-box-pack-start force-builder-row new-force-entry)
-      (gtk-box-pack-start force-builder-row new-force-color)
-      (gtk-box-pack-start force-builder-row new-deploy-label)
-      (gtk-box-pack-start force-builder-row new-deploy-label)
-      (gtk-box-pack-start force-builder-row new-deploy-entry)
-      (gtk-box-pack-start force-builder-row new-force-button)
-      (gtk-box-pack-start layout force-builder-row)
+      (gtk-box-pack-start force-builder-row1 new-force-label)
+      (gtk-box-pack-start force-builder-row1 new-force-entry)
+      (gtk-box-pack-start force-builder-row1 new-force-color)
+      (gtk-box-pack-start force-builder-row2 new-deploy-label)
+      (gtk-box-pack-start force-builder-row2 new-deploy-entry)
+      (gtk-box-pack-start force-builder-row2 new-force-button)
+      (gtk-box-pack-start layout force-builder-row1)
+      (gtk-box-pack-start layout force-builder-row2)
       (gtk-box-pack-start layout view)
       layout)))
 
