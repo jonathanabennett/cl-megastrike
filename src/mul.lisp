@@ -150,10 +150,10 @@
                       "Specials" renderer "text" col-mek-specials)))
         (gtk-tree-view-append-column view column))
 
-      (let* ((renderer (gtk-cell-renderer-text-new))
-             (column (gtk-tree-view-column-new-with-attributes
-                      "Image" renderer "text" col-mek-display)))
-        (gtk-tree-view-append-column view column))
+      ;; (let* ((renderer (gtk-cell-renderer-text-new))
+      ;;        (column (gtk-tree-view-column-new-with-attributes
+      ;;                 "Image" renderer "text" col-mek-display)))
+      ;;   (gtk-tree-view-append-column view column))
       view))
 
   (defun draw-unit-selection ()
