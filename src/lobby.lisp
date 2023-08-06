@@ -126,6 +126,11 @@
                         (force/deployment force)
                         (force-pv force)))
 
+  (defun force-color-cell-data (column renderer model iter)
+    (declare (ignore column))
+    (let ((rgba-string (gtk-tree-model-get-value model iter col-force-color)))
+      (setf (gtk-cell-renderer-text-background-rgba renderer) (gdk-rgba-parse rgba-string))
+      (setf (gtk-cell-renderer-text-text renderer) rgba-string)))
 
   (defun update-forces ()
     (gtk-tree-model-foreach m #'update-force))
@@ -143,6 +148,7 @@
                                                                renderer
                                                                "text"
                                                                col-force-color)))
+        (gtk-tree-view-column-set-cell-data-func column renderer #'force-color-cell-data)
         (gtk-tree-view-append-column v column))
       (let* ((renderer (gtk-cell-renderer-text-new))
              (column (gtk-tree-view-column-new-with-attributes "Deployment Zone"
