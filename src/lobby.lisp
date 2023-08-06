@@ -59,45 +59,43 @@
 
 ;; This `let' establishes all the column names needed for the force list view.
 (let ((col-force-name 0) (col-force-color 1) (col-force-deployment 2)
-      (col-force-pv 3) (model nil) (view nil))
+      (col-force-pv 3) (m nil) (view nil))
 
   (defun build-force-model ()
-    (let ((m (make-instance 'gtk-list-store
+    (let ((model (make-instance 'gtk-list-store
                             :column-types '("gchararray" "gchararray"
                                             "gchararray" "gint"))))
       (dolist (f (game/forces *game*))
-        (let ((iter (gtk-list-store-append m)))
-          (gtk-list-store-set m
+        (let ((iter (gtk-list-store-append model)))
+          (gtk-list-store-set model
                               iter
                               (force/name f)
                               (gdk-rgba-to-string (force/color f))
                               (force/deployment f)
                               (force-pv f))))
-      (setf model m)))
+      (setf m model)))
+
+(defun update-force (model path iter)
+  (let* ((name (gtk-tree-model-get-value model iter 0))
+         (pv (gtk-tree-model-get-value model iter 3))
+         (force (car (member name (game/forces *game*) :test #'same-force))))
+    (gtk-list-store-set-value model iter 3 (force-pv force))))
 
   (defun add-new-force (force)
     (add-force *game* force)
-    (gtk-list-store-set model
-                        (gtk-list-store-append model)
+    (gtk-list-store-set m
+                        (gtk-list-store-append m)
                         (force/name force)
                         (gdk-rgba-to-string (force/color force))
                         (force/deployment force)
                         (force-pv force)))
 
+
   (defun update-forces ()
-    (gtk-tree-model-foreach model
-                            #'(lambda (model path iter)
-                                (let* ((name (gtk-tree-model-get-value model iter col-force-name))
-                                       (f (car (member name (game/forces *game*) :test #'same-force))))
-                                        (gtk-list-store-set model
-                                                            iter
-                                                            (force/name f)
-                                                            (gdk-rgba-to-string (force/color f))
-                                                            (force/deployment f)
-                                                            (force-pv f))))))
+    (gtk-tree-model-foreach m #'update-force))
 
   (defun build-force-view ()
-    (let ((v (gtk-tree-view-new-with-model model)))
+    (let ((v (gtk-tree-view-new-with-model m)))
       (let* ((renderer (gtk-cell-renderer-text-new))
              (column (gtk-tree-view-column-new-with-attributes "Name"
                                                                renderer
@@ -148,11 +146,6 @@
            (new-force-button (gtk-button-new-with-label "New Force")))
       (build-force-model)
       (build-force-view)
-      (g-signal-connect new-force-color "color-set"
-                        (lambda (widget)
-                          (let ((rgba (gtk-color-chooser-get-rgba widget)))
-                            (format t "Selected color is ~A~%"
-                                    (gdk-rgba-to-string rgba)))))
       (g-signal-connect new-force-button "clicked"
                         (lambda (widget)
                           (declare (ignore widget))
