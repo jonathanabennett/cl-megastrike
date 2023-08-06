@@ -18,13 +18,50 @@
         (map-selection (draw-map-selection))
         (force-setup (draw-force-setup window))
         (unit-selection (draw-unit-selection))
-        (unit-list (draw-unit-list)))
+        (unit-list (draw-unit-list))
+        (launch-button (gtk-button-new-with-label "Not Ready")))
+    (setf (gtk-widget-sensitive launch-button) nil)
+    ;; (g-signal-connect layout-button "clicked"
+    ;;                   (lambda (widget)
+    ;;                     (declare (ignore widget))
+    ;;                     (if (gtk-widget-is-visible lobby-view)
+    ;;                         (progn
+    ;;                           (gtk-container-remove layout lobby-view)
+    ;;                           (gtk-grid-attach layout game-view 0 0 1 1)))
+    ;;                     (gtk-widget-show-all window)))
+    (g-timeout-add 500 (lambda ()
+                         (if (and (check-board)
+                                  (check-forces)
+                                  (check-units))
+                             (progn
+                               (setf (gtk-widget-sensitive launch-button) t)
+                               (setf (gtk-button-label launch-button) "Launch Game")))
+                         t))
     (gtk-grid-attach layout map-selection  0 0 1 1)
     (gtk-grid-attach layout unit-selection 1 0 1 1)
     (gtk-grid-attach layout force-setup    0 1 1 1)
     (gtk-grid-attach layout unit-list      1 1 1 1)
+    (gtk-grid-attach layout launch-button  2 2 1 1)
     (gtk-container-add window layout)
     (gtk-widget-show-all window)))
+
+(defun check-board ()
+  (if (game/board *game*)
+      t
+      nil))
+
+(defun check-forces ()
+  (and (game/forces *game*)
+       (< 1 (length (game/forces *game*)))))
+
+(defun check-units ()
+  (let ((unit-counts (mapcar #'count-units (game/forces *game*))))
+    (all-numbers-greater-than-zero unit-counts)))
+
+(defun all-numbers-greater-than-zero (lst)
+  (cond ((null lst) t)
+        ((>= 0 (car lst)) nil)
+        (t (all-numbers-greater-than-zero (cdr lst)))))
 
 (defun draw-map-selection ()
   (let ((layout (make-instance 'gtk-grid))
