@@ -77,20 +77,26 @@
                                     :label "<b>Map Height: </b>"))
         (height-entry (make-instance 'gtk-entry
                                      :width-chars 10))
+        (map-created (make-instance 'gtk-label
+                                    :label "No Map Created."))
         (create-button (gtk-button-new-with-label "Create Map")))
+    (if (check-board)
+        (gtk-label-set-text map-created "Map Created."))
     (g-signal-connect create-button "clicked"
                       (lambda (widget)
                         (declare (ignore widget))
                         (let ((w (parse-integer (gtk-entry-text width-entry)))
                               (h (parse-integer (gtk-entry-text height-entry))))
                           (if (and w h)
-                              (setf (game/board *game*) (make-grid w h))))))
+                              (setf (game/board *game*) (make-grid w h)))
+                          (gtk-label-set-text map-created "Map Created."))))
     (gtk-grid-attach layout title 0 0 2 1)
     (gtk-grid-attach layout width-label 0 1 1 1)
     (gtk-grid-attach-next-to layout width-entry width-label :right 1 1)
     (gtk-grid-attach-next-to layout height-label width-entry :right 1 1)
     (gtk-grid-attach-next-to layout height-entry height-label :right 1 1)
-    (gtk-grid-attach layout create-button 0 2 1 1)
+    (gtk-grid-attach layout map-created 0 2 1 1)
+    (gtk-grid-attach layout create-button 1 2 1 1)
     layout))
 
 ;; This `let' establishes all the column names needed for the force list view.
