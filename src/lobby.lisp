@@ -179,10 +179,103 @@
       (gtk-box-pack-start layout view)
       layout)))
 
-(defun draw-unit-list ()
-  (let ((layout (make-instance 'gtk-grid))
-        (title (make-instance 'gtk-label
-                              :use-markup t
-                              :label "<big>Unit List</big>")))
-    (gtk-grid-attach layout title 0 0 1 1)
-    layout))
+(let ((col-id 0) (col-force 1) (col-full-name 2)
+      (col-type 3) (col-role 4) (col-pv 5)
+      (col-mv 6) (col-arm-struct 7) (col-attack 8)
+      (col-ov 9) (col-specials 10) (model nil))
+
+  (defun build-unit-list-model ()
+    (let ((m (make-instance 'gtk-list-store
+                            :column-types '("gint" "gchararray" "gchararray"
+                                            "gchararray" "gchararray" "gint"
+                                            "gchararray" "gchararray" "gchararray"
+                                            "gint" "gchararray"))))
+      m))
+
+  (defun add-to-unit-list (cu)
+    (let ((iter (gtk-list-store-append model)))
+      (gtk-list-store-set model
+                          iter
+                          (entity-id cu)
+                          (force/name (info/force cu))
+                          (info/full-name cu)
+                          (info/unit-type cu)
+                          (info/role cu)
+                          (info/pv cu)
+                          (moveable/format-move cu)
+                          (format nil "~a/~a" (damageable/cur-armor cu) (damageable/cur-struct cu))
+                          (format nil "~a/~a/~a"
+                                  (attacks/short cu)
+                                  (attacks/medium cu)
+                                  (attacks/long cu))
+                          (heat/ov cu)
+                          (format nil "~{~a, ~}" (specials/special-list cu)))))
+
+  (defun build-unit-list-view (model)
+    (let ((view (gtk-tree-view-new-with-model model)))
+      (let* ((renderer (gtk-cell-renderer-text-new))
+             (column (gtk-tree-view-column-new-with-attributes
+                      "ID" renderer "text" col-id)))
+        (gtk-tree-view-append-column view column))
+
+      (let* ((renderer (gtk-cell-renderer-text-new))
+             (column (gtk-tree-view-column-new-with-attributes
+                      "Force" renderer "text" col-force)))
+        (gtk-tree-view-append-column view column))
+
+      (let* ((renderer (gtk-cell-renderer-text-new))
+             (column (gtk-tree-view-column-new-with-attributes
+                      "Unit Name" renderer "text" col-full-name)))
+        (gtk-tree-view-append-column view column))
+
+      (let* ((renderer (gtk-cell-renderer-text-new))
+             (column (gtk-tree-view-column-new-with-attributes
+                      "Type" renderer "text" col-type)))
+        (gtk-tree-view-append-column view column))
+
+      (let* ((renderer (gtk-cell-renderer-text-new))
+             (column (gtk-tree-view-column-new-with-attributes
+                      "Role" renderer "text" col-role)))
+        (gtk-tree-view-append-column view column))
+
+      (let* ((renderer (gtk-cell-renderer-text-new))
+             (column (gtk-tree-view-column-new-with-attributes
+                      "PV" renderer "text" col-pv)))
+        (gtk-tree-view-append-column view column))
+
+      (let* ((renderer (gtk-cell-renderer-text-new))
+             (column (gtk-tree-view-column-new-with-attributes
+                      "Move" renderer "text" col-mv)))
+        (gtk-tree-view-append-column view column))
+
+      (let* ((renderer (gtk-cell-renderer-text-new))
+             (column (gtk-tree-view-column-new-with-attributes
+                      "A/S" renderer "text" col-arm-struct)))
+        (gtk-tree-view-append-column view column))
+
+      (let* ((renderer (gtk-cell-renderer-text-new))
+             (column (gtk-tree-view-column-new-with-attributes
+                      "Attack" renderer "text" col-attack)))
+        (gtk-tree-view-append-column view column))
+
+      (let* ((renderer (gtk-cell-renderer-text-new))
+             (column (gtk-tree-view-column-new-with-attributes
+                      "OV" renderer "text" col-ov)))
+        (gtk-tree-view-append-column view column))
+
+      (let* ((renderer (gtk-cell-renderer-text-new))
+             (column (gtk-tree-view-column-new-with-attributes
+                      "Specials" renderer "text" col-specials)))
+        (gtk-tree-view-append-column view column))
+      view))
+
+  (defun draw-unit-list ()
+    (setf model (build-unit-list-model))
+    (let ((layout (make-instance 'gtk-grid))
+          (view (build-unit-list-view model))
+          (title (make-instance 'gtk-label
+                               :use-markup t
+                               :label "<big>Unit List</big>")))
+      (gtk-grid-attach layout title 0 0 1 1)
+      (gtk-grid-attach layout view  0 1 1 1)
+      layout)))

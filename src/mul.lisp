@@ -196,11 +196,12 @@
                                      (lobby/selected-mek *lobby*)
                                      name
                                      (parse-integer skill))
-                                (progn
+                                (let ((cu (new-element-from-mul
+                                           (lobby/selected-mek *lobby*)
+                                           :pname name :pskill skill)))
                                   (add-unit (game/selected-force *game*)
-                                            (new-element-from-mul
-                                             (lobby/selected-mek *lobby*)
-                                             :pname name :pskill skill))
+                                            cu)
+                                  (add-to-unit-list cu)
                                   (update-forces))))))
       (gtk-box-pack-start new-unit-box pname-label)
       (gtk-box-pack-start new-unit-box pname-entry)
