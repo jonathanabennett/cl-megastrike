@@ -21,14 +21,13 @@
         (unit-list (draw-unit-list))
         (launch-button (gtk-button-new-with-label "Not Ready")))
     (setf (gtk-widget-sensitive launch-button) nil)
-    ;; (g-signal-connect layout-button "clicked"
-    ;;                   (lambda (widget)
-    ;;                     (declare (ignore widget))
-    ;;                     (if (gtk-widget-is-visible lobby-view)
-    ;;                         (progn
-    ;;                           (gtk-container-remove layout lobby-view)
-    ;;                           (gtk-grid-attach layout game-view 0 0 1 1)))
-    ;;                     (gtk-widget-show-all window)))
+    (g-signal-connect launch-button "clicked"
+                      (lambda (widget)
+                        (declare (ignore widget))
+                        (if (gtk-widget-is-visible layout)
+                            (progn
+                              (gtk-container-remove window layout)
+                              (draw-gameplay-screen window)))))
     (g-timeout-add 500 (lambda ()
                          (if (and (check-board)
                                   (check-forces)

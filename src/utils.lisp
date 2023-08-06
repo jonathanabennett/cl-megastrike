@@ -33,3 +33,4 @@
 
 (defvar *game*)
 (defvar *lobby*)
+(defvar *current-layout*)

@@ -4,7 +4,7 @@
 
 (setf *game* (new-game))
 (setf *lobby* (new-lobby))
-(defvar *current-layout* :lobby)
+(setf *current-layout* :lobby)
 
 (defun main ()
   (within-main-loop
@@ -16,16 +16,7 @@
           ;;                              :orientation :horizontal
           ;;                              :height-request 30
           ;;                              :layout-style :spread))
-          (layout-button (gtk-button-new-with-label "Launch Game"))
           )
-      (g-signal-connect layout-button "clicked"
-                        (lambda (widget)
-                          (declare (ignore widget))
-                          (if (gtk-widget-is-visible lobby-view)
-                              (progn
-                                (gtk-container-remove layout lobby-view)
-                                (gtk-grid-attach layout game-view 0 0 1 1)))
-                          (gtk-widget-show-all window)))
       (g-signal-connect window "destroy"
                         (lambda (widget)
                           (declare (ignore widget))
@@ -82,23 +73,24 @@
 
 (defun draw-stats ()
   (let ((grid (make-instance 'gtk-grid
-                               :spacing 10))
-        (unit-id-line (make-instance 'gtk-label
-                                     :use-markup t
-                                     :halign :start
-                                     :label (format nil "<big>~a</big>~4@t ID: ~a"
-                                                   (info/full-name (game/active-unit *game*))
-                                                   (entity-id (game/active-unit *game*)))))
-        (info-line (general-info-block (game/active-unit *game*)))
-        (attack-line (attack-info-block (game/active-unit *game*)))
-        (heat-line (heat-info-block (game/active-unit *game*)))
-        (armor-levels (damage-info-block (game/active-unit *game*)))
-        (specials (specials-info-block (game/active-unit *game*)))
-        )
-    (gtk-grid-attach grid unit-id-line 0 0 1 1)
-    (gtk-grid-attach grid info-line 0 1 1 1)
-    (gtk-grid-attach grid attack-line 0 2 1 1)
-    (gtk-grid-attach grid heat-line 0 3 1 1)
-    (gtk-grid-attach grid armor-levels 0 4 1 1)
-    (gtk-grid-attach grid specials 0 5 1 1)
+                               :spacing 10)))
+    (if (game/active-unit *game*)
+        (let ((unit-id-line (make-instance
+                             'gtk-label
+                             :use-markup t
+                             :halign :start
+                             :label (format nil "<big>~a</big>~4@t ID: ~a"
+                                            (info/full-name (game/active-unit *game*))
+                                            (entity-id (game/active-unit *game*)))))
+              (info-line (general-info-block (game/active-unit *game*)))
+              (attack-line (attack-info-block (game/active-unit *game*)))
+              (heat-line (heat-info-block (game/active-unit *game*)))
+              (armor-levels (damage-info-block (game/active-unit *game*)))
+              (specials (specials-info-block (game/active-unit *game*))))
+          (gtk-grid-attach grid unit-id-line 0 0 1 1)
+          (gtk-grid-attach grid info-line 0 1 1 1)
+          (gtk-grid-attach grid attack-line 0 2 1 1)
+          (gtk-grid-attach grid heat-line 0 3 1 1)
+          (gtk-grid-attach grid armor-levels 0 4 1 1)
+          (gtk-grid-attach grid specials 0 5 1 1)))
     grid))
