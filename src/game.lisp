@@ -6,8 +6,8 @@
    (forces           :initarg :forces                :accessor game/forces
                      :initform '())
    (selected-force   :initform nil                   :accessor game/selected-force)
-   (game-board       :initform (make-instance 'grid) :accessor game/board
-                     :initarg :game-board)
+   ;; (game-board       :initform (make-instance 'grid) :accessor game/board
+   ;;                   :initarg :game-board)
    (current-phase    :initform 0                     :accessor game/current-phase
                      :initarg :current-phase)
    (turn-number      :initform 0                     :accessor game/turn-number

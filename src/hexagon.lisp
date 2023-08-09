@@ -97,7 +97,7 @@ distance."
                                 :hex-to-pixel-matrix
                                   (vector (/ 3.0 2.0) 0 (/ (sqrt 3.0) 2.0) (sqrt 3.0))
                                 :pixel-to-hex-matrix
-                                  (vector (/ 2.0 3.0) 0 (/ 1.0 3.0) (/ (sqrt 3.0) 3.0))
+                                  (vector (/ 2.0 3.0) 0 (/ -1.0 3.0) (/ (sqrt 3.0) 3.0))
                                 :start-angle 0
                                 :x-size 45
                                 :y-size 45
@@ -125,6 +125,24 @@ distance."
                          (layout-y-size layout))
                       (layout-y-origin layout)))))
 
+(defun pixel-to-hex (pt layout)
+  "Converts from an x,y pixel position to a q,r,s address."
+  (let ((vec (layout-pixel-to-hex-matrix layout))
+        (modified-point nil)
+        (q nil) (r nil))
+    (setf modified-point (make-point
+                          (/ (- (x pt)
+                                (layout-x-origin layout))
+                             (layout-x-size layout))
+                          (/ (- (y pt)
+                                (layout-y-origin layout))
+                             (layout-y-size layout))))
+    (setf q (+ (* (x pt) (elt vec 0))
+               (* (y pt) (elt vec 1))))
+    (setf r (+ (* (x pt) (elt vec 2))
+               (* (y pt) (elt vec 3))))
+    (hex-round q r (* (+ q r) -1))))
+
 (defun find-hex-corner (center corner layout)
   "Find the x,y pixel coordinates for the corner of a hex."
   (let ((angle (* 2.0 pi (/ (+ (layout-start-angle layout)
@@ -142,3 +160,33 @@ distance."
     (dotimes (i 6)
       (push (find-hex-corner center i layout) points))
      points))
+
+(defun hex-round (q r s)
+  (let ((q-diff (abs (- q (round q))))
+        (r-diff (abs (- r (round r))))
+        (s-diff (abs (- s (round s)))))
+    (cond
+      ((and (> q-diff r-diff)
+            (> q-diff s-diff))
+       (new-hexagon :q (* (+ r s) -1) :r r :s s))
+      ((and (> r-diff s-diff)
+            (> r-diff q-diff))
+       (new-hexagon :q q :r (* (+ q s) -1) :s s))
+      (t (new-hexagon :q q :r r :s (* (+ q r) -1))))))
+
+(defun linear-interpolation (a b step)
+  (+ a (* (- b a) step)))
+
+(defmethod hex-lerp ((a hexagon) (b hexagon) step)
+  (let ((q (linear-interpolation (hexagon-q a) (hexagon-q b) step))
+        (r (linear-interpolation (hexagon-r a) (hexagon-r b) step))
+        (s (linear-interpolation (hexagon-s a) (hexagon-s b) step))))
+  (values q r s))
+
+(defmethod hex-line ((a hexagon) (b hexagon))
+  (let* ((distance (hex-distance a b))
+         (hex-list '())
+         (step (/ 1.0 (max distance 1))))
+    (dotimes (c distance)
+      (push (hex-round (hex-lerp a b (* c step))) hex-list))
+    hex-list))
