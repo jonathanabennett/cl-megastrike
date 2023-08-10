@@ -8,37 +8,37 @@
    (initiative  :initform nil    :accessor force/initiative)))
 
 (defun new-force (name color deploy &optional (unit-list '()))
-  (let ((a (make-instance 'force
+  (let ((f (make-instance 'force
                        :name name
                        :color color
                        :deploy deploy
                        :units unit-list)))
-    a))
+    f))
 
-(defmethod same-force ((a force) (o force))
-  (string= (force/name a) (force/name o)))
+(defmethod same-force ((f force) (o force))
+  (string= (force/name f) (force/name o)))
 
-(defmethod same-force ((a force) (s string))
-  (string= (force/name a) s))
+(defmethod same-force ((f force) (s string))
+  (string= (force/name f) s))
 
-(defmethod same-force ((s string) (a force))
-  (string= (force/name a) s))
+(defmethod same-force ((s string) (f force))
+  (string= (force/name f) s))
 
-(defmethod same-force ((a force) o)
+(defmethod same-force ((f force) o)
   nil)
 
-(defmethod same-force (o (a force))
+(defmethod same-force (o (f force))
   nil)
 
 (defmethod add-force ((g game) (f force))
   (push f (game/forces g)))
 
-(defmethod add-unit ((a force) (u combat-unit))
-  (setf (info/force u) a))
+(defmethod add-unit ((f force) (u combat-unit))
+  (setf (info/force u) f))
 
-(defmethod count-units ((a force))
+(defmethod count-units ((f force))
   (let ((count 0))
-    (map-entities #'(lambda (e) (if (same-force (info/force e) a) (incf count))))
+    (map-entities #'(lambda (e) (if (same-force (info/force e) f) (incf count))))
     count))
 
 (defmethod force-pv ((f force))
@@ -47,10 +47,10 @@
                       (if (same-force (info/force e) f) (incf total (info/pv e)))))
     total))
 
-(defmethod turn-order-list ((a force))
-  (let ((force-string (force/name a))
+(defmethod turn-order-list ((f force))
+  (let ((force-string (force/name f))
         (order '()))
-  (dotimes (i (count-units a))
+  (dotimes (i (count-units f))
     (push force-string order))
     order))
 
