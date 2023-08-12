@@ -6,24 +6,24 @@
 ;; (setf *lobby* (new-lobby))
 (setf *current-layout* :lobby)
 
-(define-application (:name megastrike
+(gtk:define-application (:name megastrike
                      :id "bennett.megastrike")
-  (define-main-window (window (make-application-window :application *application*))
-    (setf (window-title window) "Megastrike")
-    (let ((box (make-box :orientation +orientation-vertical+
-                         :spacing 4)))
+  (gtk:define-main-window (window (gtk:make-application-window :application gtk:*application*))
+    (setf (gtk:window-title window) "Megastrike")
+    (let ((box (gtk:make-grid)))
       (let ((lobby (draw-lobby-screen)))
-        (setf (widget-hexpand-p lobby) t
-              (widget-vexpand-p lobby) t)
-        (box-append box lobby)
-        (let ((button (make-button :label "Exit")))
-          (connect button "clicked" (lambda (button)
+
+        (setf (gtk:widget-hexpand-p lobby) t
+              (gtk:widget-vexpand-p lobby) t)
+        (gtk:grid-attach box lobby 0 0 1 1)
+        (let ((button (gtk:make-button :label "Exit")))
+          (gtk:connect button "clicked" (lambda (button)
                                       (declare (ignore button))
-                                      (window-destroy window)))
-          (box-append box button)))
-      (setf (window-child window) box))
-    (unless (widget-visible-p window)
-      (window-present window))))
+                                      (gtk:window-destroy window)))
+          (gtk:grid-attach box button 0 1 1 1)))
+      (setf (gtk:window-child window) box))
+    (unless (gtk:widget-visible-p window)
+      (gtk:window-present window))))
 
 ;; (defun main ()
 ;;   (within-main-loop
