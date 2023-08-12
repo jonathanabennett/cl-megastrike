@@ -30,9 +30,6 @@
 (defmethod same-force (o (f force))
   nil)
 
-(defmethod add-force ((g game) (f force))
-  (push f (game/forces g)))
-
 (defmethod add-unit ((f force) (u combat-unit))
   (setf (info/force u) f))
 
@@ -54,131 +51,104 @@
     (push force-string order))
     order))
 
-(let ((col-force-name 0) (col-force-color 1) (col-force-deployment 2)
-      (col-force-pv 3) (m nil) (view nil))
+(let (model)
+  (defun new-force-string (f)
+    (format t "In new force string function")
+    (let ((uuid (format nil "~a" (uuid:make-v1-uuid))))
+      (setf (gethash uuid (game/forces-hash *game*)) f)
+      (gtk:string-list-append model uuid)))
 
-  (defun build-force-model ()
-    (let ((model (make-instance 'gtk-list-store
-                            :column-types '("gchararray" "gchararray"
-                                            "gchararray" "gint"))))
-      (dolist (f (game/forces *game*))
-        (let ((iter (gtk-list-store-append model)))
-          (gtk-list-store-set model
-                              iter
-                              (force/name f)
-                              (gdk-rgba-to-string (force/color f))
-                              (force/deployment f)
-                              (force-pv f))))
-      (setf m model)))
+  (defun draw-force-setup ()
+    (let (name deploy)
+      (let* ((layout (gtk:make-grid))
+             (name-label (gtk:make-label :str "Unit Selection"))
+             (name-entry (gtk:make-entry))
+             (color-selection-dialog (gtk:make-color-dialog))
+             (color-selection (gtk:make-color-dialog-button :dialog color-selection-dialog))
+             (deploy-label (gtk:make-label :str "Deployment Zone"))
+             (deploy-entry (gtk:make-entry))
+             (new-force-btn (gtk:make-button :label "New Force"))
+             (force-list (force-list-view)))
+        ;; (gtk:connect color-selection "notify"
+        ;;              (lambda (entry)
+        ;;                (setf deploy (ignore-errors
+        ;;                            (gtk:entry-buffer-text (entry-buffer deploy-entry))))))
+        (gtk:connect deploy-entry "changed"
+                     (lambda (entry)
+                       (setf deploy (ignore-errors
+                                   (gtk:entry-buffer-text (gtk:entry-buffer deploy-entry))))))
+        (gtk:connect name-entry "changed"
+                     (lambda (entry)
+                       (setf name (ignore-errors
+                                   (gtk:entry-buffer-text (gtk:entry-buffer name-entry))))))
+        (gtk:connect new-force-btn "clicked"
+                     (lambda (button)
+                       (declare (ignore button))
+                       (format t "Running button")
+                       (let ((color (gdk:rgba-to-string
+                                     (gtk:color-dialog-button-rgba color-selection))))
+                         (format t "Color is ~a." color)
+                         (if (and name deploy color)
+                             (let ((f (new-force name color deploy)))
+                               (new-force-string f))))))
+        (gtk:grid-attach layout name-label      0 0 1 1)
+        (gtk:grid-attach layout name-entry      1 0 1 1)
+        (gtk:grid-attach layout color-selection 2 0 1 1)
+        (gtk:grid-attach layout deploy-label    3 0 1 1)
+        (gtk:grid-attach layout deploy-entry    4 0 1 1)
+        (gtk:grid-attach layout new-force-btn   5 0 1 1)
+        (gtk:grid-attach layout force-list      0 1 6 1)
+        layout)))
 
-(defun update-force (model path iter)
-  (let* ((name (gtk-tree-model-get-value model iter 0))
-         (pv (gtk-tree-model-get-value model iter 3))
-         (force (car (member name (game/forces *game*) :test #'same-force))))
-    (gtk-list-store-set-value model iter 3 (force-pv force))))
+  (defun force-list-view ()
+    (setf model (gtk:make-string-list :strings '()))
+    (let* ((rows (loop for uuid being the hash-keys of (game/forces-hash *game*)
+                      :collect uuid))
+          (forces-view (gtk:make-column-view :model (gtk:make-single-selection :model model)))
 
-  (defun add-new-force (force)
-    (add-force *game* force)
-    (gtk-list-store-set m
-                        (gtk-list-store-append m)
-                        (force/name force)
-                        (gdk-rgba-to-string (force/color force))
-                        (force/deployment force)
-                        (force-pv force)))
+          (name-factory (gtk:make-signal-list-item-factory))
+          (name-col (gtk:make-column-view-column :title "Force" :factory name-factory))
 
-  (defun force-color-cell-data (column renderer model iter)
-    (declare (ignore column))
-    (let ((rgba-string (gtk-tree-model-get-value model iter col-force-color)))
-      (setf (gtk-cell-renderer-text-background-rgba renderer) (gdk-rgba-parse rgba-string))
-      (setf (gtk-cell-renderer-text-text renderer) rgba-string)))
+          (color-factory (gtk:make-signal-list-item-factory))
+          (color-col (gtk:make-column-view-column :title "Color" :factory color-factory))
 
-  (defun update-forces ()
-    (gtk-tree-model-foreach m #'update-force))
+          (deploy-factory (gtk:make-signal-list-item-factory))
+          (deploy-col (gtk:make-column-view-column :title "Deploy Zone" :factory deploy-factory))
 
-  (defun build-force-view ()
-    (let ((v (gtk-tree-view-new-with-model m)))
-      (let* ((renderer (gtk-cell-renderer-text-new))
-             (column (gtk-tree-view-column-new-with-attributes "Name"
-                                                               renderer
-                                                               "text"
-                                                               col-force-name)))
-        (gtk-tree-view-append-column v column))
-      (let* ((renderer (gtk-cell-renderer-text-new))
-             (column (gtk-tree-view-column-new-with-attributes "Color"
-                                                               renderer
-                                                               "text"
-                                                               col-force-color)))
-        (gtk-tree-view-column-set-cell-data-func column renderer #'force-color-cell-data)
-        (gtk-tree-view-append-column v column))
-      (let* ((renderer (gtk-cell-renderer-text-new))
-             (column (gtk-tree-view-column-new-with-attributes "Deployment Zone"
-                                                               renderer
-                                                               "text"
-                                                               col-force-deployment)))
-        (gtk-tree-view-append-column v column))
-      (let* ((renderer (gtk-cell-renderer-text-new))
-             (column (gtk-tree-view-column-new-with-attributes "PV"
-                                                               renderer
-                                                               "text"
-                                                               col-force-pv)))
-        (gtk-tree-view-append-column v column))
-      (setf view v)))
+          (pv-factory (gtk:make-signal-list-item-factory))
+          (pv-col (gtk:make-column-view-column :title "PV" :factory pv-factory)))
+      (gtk:column-view-append-column forces-view name-col)
+      (gtk:column-view-append-column forces-view color-col)
+      (gtk:column-view-append-column forces-view deploy-col)
+      (gtk:column-view-append-column forces-view pv-col)
 
-  (defun draw-force-setup (window)
-    (let* ((layout (make-instance 'gtk-box
-                                  :orientation :vertical
-                                  :spacing 10))
-           (title (make-instance 'gtk-label
-                                 :use-markup t
-                                 :label "<big>Force Setup</big>"))
-           (force-builder-row1 (make-instance 'gtk-box
-                                             :orientation :horizontal
-                                             :spacing 10))
-           (force-builder-row2 (make-instance 'gtk-box
-                                             :orientation :horizontal
-                                             :spacing 10))
-           (new-force-label (make-instance 'gtk-label
-                                           :label "Force Name: "))
-           (new-force-entry (make-instance 'gtk-entry
-                                           :width-chars 20))
-           (new-force-color (make-instance 'gtk-color-button
-                                           :rgba (gdk-rgba-parse "Gold")))
-           (new-deploy-label (make-instance 'gtk-label
-                                            :label "Deployment Zone: "))
-           (new-deploy-entry (make-instance 'gtk-entry
-                                            :width-chars 20))
-           (new-force-button (gtk-button-new-with-label "New Force")))
-      (build-force-model)
-      (build-force-view)
-      (g-signal-connect new-force-button "clicked"
-                        (lambda (widget)
-                          (declare (ignore widget))
-                          (let ((name (gtk-entry-text new-force-entry))
-                                (deploy (gtk-entry-text new-deploy-entry))
-                                (color (gtk-color-button-rgba new-force-color)))
-                            (if (and name deploy color)
-                                (progn
-                                  (add-new-force (new-force name color deploy)))))
-                          (gtk-widget-queue-draw window)))
-      (let ((selection (gtk-tree-view-get-selection view)))
-        (setf (gtk-tree-selection-mode selection) :single)
-        (g-signal-connect selection "changed"
-                          (lambda (object)
-                            (let* ((view (gtk-tree-selection-get-tree-view object))
-                                   (model (gtk-tree-view-model view))
-                                   (iter (gtk-tree-selection-get-selected object))
-                                   (name (gtk-tree-model-get-value model iter col-force-name)))
-                              (setf (game/selected-force *game*)
-                                    (car (member name (game/forces *game*)
-                                                 :test #'same-force)))))))
-      (gtk-box-pack-start layout title)
-      (gtk-box-pack-start force-builder-row1 new-force-label)
-      (gtk-box-pack-start force-builder-row1 new-force-entry)
-      (gtk-box-pack-start force-builder-row1 new-force-color)
-      (gtk-box-pack-start force-builder-row2 new-deploy-label)
-      (gtk-box-pack-start force-builder-row2 new-deploy-entry)
-      (gtk-box-pack-start force-builder-row2 new-force-button)
-      (gtk-box-pack-start layout force-builder-row1)
-      (gtk-box-pack-start layout force-builder-row2)
-      (gtk-box-pack-start layout view)
-      layout)))
+      (setf (gtk:widget-vexpand-p forces-view) t
+            (gtk:widget-hexpand-p forces-view) t)
+
+      (flet ((setup-label (factory item)
+               (declare (ignore factory))
+               (setf (gtk:list-item-child item) (gtk:make-label :str "")))
+             (setup-color (factory item)
+               (declare (ignore factory))
+               (let (cd (gtk:make-color-dialog))
+                 (setf (gtk:list-item-child item) (gtk:make-color-dialog-button :dialog cd))))
+             (unbind (factory item) (declare (ignore factory item)))
+             (teardown (factory item) (declare (ignore factory item))))
+        (loop :for factory :in (list name-factory color-factory deploy-factory pv-factory)
+              :for type  :in (list "string" "string" "string" "int")
+              :for accessor :in (list #'force/name #'force/color #'force/deployment #'force-pv)
+              :do (gtk:connect factory "setup" #'setup-label)
+                 (if (not (string= type "color"))
+                      (gtk:connect factory "setup" #'setup-label)
+                      (gtk:connect factory "setup" #'setup-color))
+                  (gtk:connect factory "unbind" #'unbind)
+                  (gtk:connect factory "teardown" #'teardown)
+                  (gtk:connect factory "bind"
+                           (let ((accessor accessor))
+                             (lambda (factory item)
+                               (declare (ignore factory))
+                               (let* ((uuid (gtk:string-object-string (gobj:coerce (gtk:list-item-item item) 'gtk:string-object)))
+                                      (row (gethash uuid (game/forces-hash *game*)))
+                                      (value (format nil "~a" (funcall accessor row))))
+                                 (setf (gtk:label-text (gobj:coerce (gtk:list-item-child item) 'gtk:label)) value)))))))
+      forces-view)))
