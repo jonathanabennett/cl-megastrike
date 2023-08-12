@@ -28,7 +28,7 @@
           (formatting-cell (stream) (format stream "~a" (pilot/skill entity)))))))
 
 (define-system mark-occupied-hexes ((entity location))
-  (let ((grid (game/board *game*)))
+  (let ((board (game/board *game*)))
     ()))
 
 (define-system clear-selection ((e can-activate))

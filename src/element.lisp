@@ -149,11 +149,11 @@
 ;;             (draw-text stream (format nil "~a" (info/short-name combat-unit))
 ;;                        origin :align-x :center :align-y :top))))))
 
-(defmethod get-hex ((cu combat-unit) (g grid))
+(defmethod get-hex ((cu combat-unit) (g board))
   (gethash (offset-from-hex (new-hexagon :q (location/q cu)
                                          :r (location/r cu)
                                          :s (location/s cu)))
-           (grid/tiles g)))
+           (board/tiles g)))
 
 ;; (define-presentation-method present (combat-unit
 ;;                                      (type entity)

@@ -1,19 +1,19 @@
 (in-package #:megastrike)
 
-(defclass grid ()
+(defclass board ()
   ((tile-hash
     :initarg :tiles
-    :accessor grid/tiles
+    :accessor board/tiles
     :initform (make-hash-table :test 'equalp)
     :documentation "The hash of the Tile objects which make up the map,
 stored by xy coordinates.")))
 
 
-(defmethod insert-tile ((g grid) (ti tile))
-  "Insert tile `ti' into the `tile-hash' of grid `g' if it doesn't exist."
-  (if (gethash (offset-from-hex ti) (grid/tiles g))
-      (gethash (offset-from-hex ti) (grid/tiles g))
-      (setf (gethash (offset-from-hex ti) (grid/tiles g)) ti)))
+(defmethod insert-tile ((g board) (ti tile))
+  "Insert tile `ti' into the `tile-hash' of board `g' if it doesn't exist."
+  (if (gethash (offset-from-hex ti) (board/tiles g))
+      (gethash (offset-from-hex ti) (board/tiles g))
+      (setf (gethash (offset-from-hex ti) (board/tiles g)) ti)))
 
 ;;; Board file parsing logic
 
@@ -37,14 +37,14 @@ stored by xy coordinates.")))
          (style       (nth 4 line-string)))
     (list hex-address elevation terrain style)))
 
-(defun load-board-file (f grid)
+(defun load-mapsheet-file (f board)
   (let ((file-lines (uiop:read-file-lines f)))
     (dolist (l file-lines)
       (if (search "hex" l)
-           (insert-tile grid (new-tile l))))))
+           (insert-tile board (new-tile l))))))
 
-(defun make-grid (width height)
-  (let ((g (make-instance 'grid)))
+(defun make-board (width height)
+  (let ((g (make-instance 'board)))
     (dotimes (x width)
       (dotimes (y height)
         (insert-tile g (new-tile (1+ x) (1+ y)))))
