@@ -5,12 +5,25 @@
 
 (deftype elements-type ()
   "This defines the valid list of element types in the game."
-  '(member BM DS))
-(deftype move-type ()
-  "This defines the valid ways an element can move in the game."
-  '(member walk jump))
-(defvar *mv-designators* '((:WALK . "")
-                           (:JUMP . "j")))
+  '(member BM IM PM SV CV BA CI SS WS JS DS DA SC CF AF))
+
+(defvar *mv-designators* '((:WALK            . "")
+                           (:JUMP            . "j")
+                           (:tracked-quadvee . "qt")
+                           (:wheeled-quadvee . "qw")
+                           (:tracked         . "t")
+                           (:wheeled         . "w")
+                           (:hover           . "h")
+                           (:vtol            . "v")
+                           (:naval           . "n")
+                           (:submarine       . "s")
+                           (:foot-inf        . "f")
+                           (:mot-inf         . "m")
+                           (:wige            . "g")
+                           (:aerodyne        . "a")
+                           (:spheroid        . "p")
+                           ))
+
 (deftype crit ()
   "This defines the possible critical hits an element can take in the game."
   '(member 'ENGINE 'FIRE-CONTROL 'MP 'WEAPONS))

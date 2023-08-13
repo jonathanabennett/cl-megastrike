@@ -47,22 +47,6 @@
                    :ov ov :special-list spec-list
                    :img display :tro tro :pilot pname :skill pskill))))
 
-(defun construct-mv-alist (mv-string)
-  (let ((mv-alist '())
-         (mv-strings (ppcre:all-matches-as-strings
-                      (ppcre:create-scanner "\\d+[a-zA-z]?") mv-string)))
-    (dolist (str mv-strings)
-      (multiple-value-bind (dist type) (parse-integer str :junk-allowed t)
-        (if (= (length str) type)
-            (setf mv-alist (acons :walk dist mv-alist))
-            (cond
-              ((string= "j" (subseq str type))
-               (setf mv-alist (acons :jump dist mv-alist)))
-
-              (t
-               (setf mv-alist (acons :walk dist mv-alist)))))))
-    mv-alist))
-
 (defun construct-spec-list (specials-str)
   (let ((spec-list '()))
     (dolist (spec (str:words specials-str))
