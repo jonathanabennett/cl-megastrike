@@ -2,29 +2,6 @@
 
 (defvar *mul* (make-hash-table :test #'equal))
 
-;; ("MUL ID"
-;;  "Chassis"
-;;  "Model"
-;;  "Role"
-;;  "Type"
-;;  "Size"
-;;  "Movement"
-;;  "TMM"
-;;  "Armor"
-;;  "Structure"
-;;  "Threshold"
-;;  "S" "S*"
-;;  "M" "M*"
-;;  "L" "L*"
-;;  "E" "E*"
-;;  "Overheat"
-;;  "Point Value"
-;;  "Abilities"
-;;  "Front Arc"
-;;  "Left Arc"
-;;  "Right Arc"
-;;  "Rear Arc")
-
 ;; This will read in the data from the MUL.csv file after it's cleaned up
 ;; (cl-csv:read-csv #p"data/units/mul.csv" :separator #\Tab :escape-mode :following)
 ;; Cleaning up is accomplished by:
@@ -32,7 +9,6 @@
 ;; 2) Running :%s/\(\d\+\)"/\1""/g in VIM on the file.
 ;; To regeneratoe from Megamek: java -jar MegaMek.jar -asc filename.
 ;; Copy it into the data/units folder of Megastrike
-
 
 (defclass mek ()
   ((chassis   :initarg :chassis   :accessor mek/chassis)
@@ -74,8 +50,9 @@
                        :ov ov :pv pv :abilities abilities :front-arc front-arc
                        :left-arc left-arc :right-arc right-arc :rear-arc rear-arc))
 
-(defun parse-csv (header-row row)
-  (let ((data (loop for key in header-row
+(defun mul-parser (header-row row)
+  (let ((uuid (uuid:make-v1-uuid))
+        (data (loop for key in header-row
                     for value in row
                     collect `(,(read-from-string key) . ,value))))
     (setf (cdr (assoc 'size data)) (parse-integer (cdr (assoc 'size data))))
@@ -94,7 +71,18 @@
     (setf (cdr (assoc 'e* data)) (string= (cdr (assoc 'e* data)) "TRUE"))
     (setf (cdr (assoc 'overheat data)) (parse-integer (cdr (assoc 'overheat data))))
     (setf (cdr (assoc 'point data)) (parse-integer (cdr (assoc 'point data))))
-    data))
+    (new-mek (assoc 'chassis data) (assoc 'model data)
+             (assoc 'role data) (assoc 'unit-type data)
+             (assoc 'size data) (assoc 'movement data)
+             (assoc 'tmm data) (assoc 'armor data)
+             (assoc 'structure data) (assoc 'threshold data)
+             (assoc 'short data) (assoc 'short* data)
+             (assoc 'medium data) (assoc 'medium* data)
+             (assoc 'long data) (assoc 'long* data)
+             (assoc 'extreme data) (assoc 'extreme* data)
+             (assoc 'ov data) (assoc 'pv data) (assoc 'abilities data)
+             (assoc 'front-arc data) (assoc 'left-arc data)
+             (assoc 'right-arc data) (assoc 'rear-arc data))))
 
 (defun construct-mv-alist (mv-string)
   (let ((mv-alist '())
@@ -116,8 +104,6 @@
           do (setf letter-part (concatenate 'string letter-part (string char))))
     (list number-part letter-part)))
 
-(defun move-from-string (mv-string)
-  ())
-
-(defun load-into-mul (m)
-  (let ((uuid (format nil "~a" (uuid:make-v1-uuid))))))
+(defun load-mul (f)
+  (cl-csv:read-csv f :row-fn #'mul-parser :separator #\Tab
+                   :escape-mode :following))

@@ -7,8 +7,8 @@
   "This defines the valid list of element types in the game."
   '(member BM IM PM SV CV BA CI SS WS JS DS DA SC CF AF))
 
-(defvar *mv-designators* '((:WALK            . "")
-                           (:JUMP            . "j")
+(defvar *mv-designators* '((:walk            . "")
+                           (:jump            . "j")
                            (:tracked-quadvee . "qt")
                            (:wheeled-quadvee . "qw")
                            (:tracked         . "t")
