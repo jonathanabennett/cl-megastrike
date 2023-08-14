@@ -25,27 +25,6 @@
     (unless (gtk:widget-visible-p window)
       (gtk:window-present window))))
 
-;; (defun main ()
-;;   (within-main-loop
-;;     (let ((window (make-instance 'gtk-window
-;;                                  :type :toplevel
-;;                                  :title "Megastrike"
-;;                                  :width 1000))
-;;           ;; (command-menu (make-instance 'gtk-button-box
-;;           ;;                              :orientation :horizontal
-;;           ;;                              :height-request 30
-;;           ;;                              :layout-style :spread))
-;;           )
-;;       (g-signal-connect window "destroy"
-;;                         (lambda (widget)
-;;                           (declare (ignore widget))
-;;                           (leave-gtk-main)))
-
-;;       (if (eq *current-layout* :lobby)
-;;           (setf lobby-view (draw-lobby-screen window))
-;;           (setf game-view (draw-gameplay-screen window)))
-;;       )))
-
 ;; (defun draw-gameplay-screen (window)
 ;;   (let ((layout (make-instance 'gtk-grid
 ;;                                :hexpand t
