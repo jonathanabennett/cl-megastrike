@@ -112,3 +112,10 @@
          (h-row (nth 0 data)))
     (dolist (r (cdr data))
       (mul-parser h-row r))))
+
+(defun draw-mul ()
+  (let (name skill)
+    (let* ((layout (gtk:make-grid))
+           (mul (mul-list-view))
+           )
+      )))
