@@ -51,7 +51,7 @@
                        :left-arc left-arc :right-arc right-arc :rear-arc rear-arc))
 
 (defun mul-parser (header-row row)
-  (let ((uuid (uuid:make-v1-uuid))
+  (let ((uuid (format nil "~a" (uuid:make-v1-uuid)))
         (data (loop for key in header-row
                     for value in row
                     collect `(,(read-from-string key) . ,value))))
@@ -87,13 +87,56 @@
                        (cdr (assoc 'left-arc data)) (cdr (assoc 'right-arc data))
                        (cdr (assoc 'rear-arc data)))))))
 
+(defun mek/full-name (m)
+  (format nil "~a ~a" (mek/chassis m) (mek/model m)))
+
+(defun mek/comparable-short (m)
+  (if (mek/short* m)
+      0.5
+      (mek/short m)))
+
+(defun mek/comparable-medium (m)
+  (if (mek/medium* m)
+      0.5
+      (mek/medium m)))
+
+(defun mek/comparable-long (m)
+  (if (mek/long* m)
+      0.5
+      (mek/long m)))
+
+(defun mek/comparable-extreme (m)
+  (if (mek/extreme* m)
+      0.5
+      (mek/extreme m)))
+
+(defun mek/short-str (m)
+  (if (mek/short* m)
+      "0*"
+      (format nil "~a" (mek/short m))))
+
+(defun mek/medium-str (m)
+  (if (mek/medium* m)
+      "0*"
+      (format nil "~a" (mek/medium m))))
+
+(defun mek/long-str (m)
+  (if (mek/long* m)
+      "0*"
+      (format nil "~a" (mek/long m))))
+
+(defun mek/extreme-str (m)
+  (if (mek/extreme* m)
+      "0*"
+      (format nil "~a" (mek/extreme m))))
+
 (defun construct-mv-alist (mv-string)
   (let ((mv-alist '())
          (mv-strings (ppcre:all-matches-as-strings
                       (ppcre:create-scanner "\\d+\\\"[a-zA-z]?") mv-string)))
     (dolist (str mv-strings)
       (multiple-value-bind (dist type) (extract-numbers-and-letters str)
-        (setf mv-alist (acons (rassoc type *mv-designators* :test #'string=)
+        (setf mv-alist (acons (cdr (rassoc type *mv-designators* :test #'string=))
                               (/ (parse-integer dist) 2) mv-alist))))
     mv-alist))
 
@@ -116,18 +159,40 @@
 (defun draw-mul ()
   (let (name skill)
     (let* ((layout (gtk:make-grid))
-           (mul (mul-list-view))
-           )
-      )))
+           (mul (mul-list-view)))
+      (gtk:grid-attach layout mul 0 0 1 1)
+      layout)))
+
+;; Callback function to compare strings
+(cffi:defcallback compare-string-object-via-accessor :int
+    ((a :pointer)
+     (b :pointer)
+     (data :pointer))
+  (let ((accessor (gethash (cffi:pointer-address data) glib::*objects*))) ; Use (glib::get-object (cffi:pointer-address data)) in the latest version of cl-glib.
+    (let ((string-a (funcall accessor (gtk:string-object-string (gobj:pointer-object a 'gtk:string-object))))
+          (string-b (funcall accessor (gtk:string-object-string (gobj:pointer-object b 'gtk:string-object)))))
+      (if (string< string-a string-b) +1 -1))))
+
+;; Callback function to compare numbers
+(cffi:defcallback compare-string-number-object-via-accessor :int
+    ((a :pointer)
+     (b :pointer)
+     (data :pointer))
+  (let ((accessor (gethash (cffi:pointer-address data) glib::*objects*))) ; Use (glib::get-object (cffi:pointer-address data)) in the latest version of cl-glib.
+    (let ((number-a (funcall accessor (gtk:string-object-string (gobj:pointer-object a 'gtk:string-object))))
+          (number-b (funcall accessor (gtk:string-object-string (gobj:pointer-object b 'gtk:string-object)))))
+      (if (< number-a number-b) +1 -1))))
 
 (defun mul-list-view ()
   (let* ((model (gtk:make-string-list :strings (loop for uuid being the hash-keys of *mul*
                                                      :collect uuid)))
-         (view (gtk-make-column-view :model (gtk-make-single-selection :model model)))
+         (view (gtk:make-column-view :model (gtk:make-single-selection :model model)))
          (chassis-factory (gtk:make-signal-list-item-factory))
          (chassis-col (gtk:make-column-view-column :title "Chassis" :factory chassis-factory))
          (role-factory (gtk:make-signal-list-item-factory))
          (role-col (gtk:make-column-view-column :title "Role" :factory role-factory))
+         (pv-factory (gtk:make-signal-list-item-factory))
+         (pv-col (gtk:make-column-view-column :title "PV" :factory pv-factory))
          (type-factory (gtk:make-signal-list-item-factory))
          (type-col (gtk:make-column-view-column :title "Type" :factory type-factory))
          (size-factory (gtk:make-signal-list-item-factory))
@@ -136,16 +201,180 @@
          (movement-col (gtk:make-column-view-column :title "Movement" :factory movement-factory))
          (tmm-factory (gtk:make-signal-list-item-factory))
          (tmm-col (gtk:make-column-view-column :title "TMM" :factory tmm-factory))
-         (as-factory (gtk:make-signal-list-item-factory))
-         (as-col (gtk:make-column-view-column :title "Arm/Struct" :factory as-factory))
-         (attacks-factory (gtk:make-signal-list-item-factory))
-         (attacks-col (gtk:make-column-view-column :title "S/M/L/E" :factory attacks-factory))
-         (tmm-factory (gtk:make-signal-list-item-factory))
-         (tmm-col (gtk:make-column-view-column :title "TMM" :factory tmm-factory))
-         (tmm-factory (gtk:make-signal-list-item-factory))
-         (tmm-col (gtk:make-column-view-column :title "TMM" :factory tmm-factory))
-         (tmm-factory (gtk:make-signal-list-item-factory))
-         (tmm-col (gtk:make-column-view-column :title "TMM" :factory tmm-factory))
-         (tmm-factory (gtk:make-signal-list-item-factory))
-         (tmm-col (gtk:make-column-view-column :title "TMM" :factory tmm-factory))
-         )))
+         (armor-factory (gtk:make-signal-list-item-factory))
+         (armor-col (gtk:make-column-view-column :title "Armor" :factory armor-factory))
+         (threshold-factory (gtk:make-signal-list-item-factory))
+         (threshold-col (gtk:make-column-view-column :title "Threshold" :factory threshold-factory))
+         (struct-factory (gtk:make-signal-list-item-factory))
+         (struct-col (gtk:make-column-view-column :title "Structure" :factory struct-factory))
+         (short-factory (gtk:make-signal-list-item-factory))
+         (short-col (gtk:make-column-view-column :title "S" :factory short-factory))
+         (med-factory (gtk:make-signal-list-item-factory))
+         (med-col (gtk:make-column-view-column :title "M" :factory med-factory))
+         (long-factory (gtk:make-signal-list-item-factory))
+         (long-col (gtk:make-column-view-column :title "L" :factory long-factory))
+         (extreme-factory (gtk:make-signal-list-item-factory))
+         (extreme-col (gtk:make-column-view-column :title "E" :factory extreme-factory))
+         (ov-factory (gtk:make-signal-list-item-factory))
+         (ov-col (gtk:make-column-view-column :title "OV" :factory ov-factory))
+         (abilities-factory (gtk:make-signal-list-item-factory))
+         (abilities-col (gtk:make-column-view-column :title "Abilities" :factory abilities-factory)))
+
+    (setf (gtk:column-view-column-sorter chassis-col) (gtk:make-custom-sorter
+                                                       :sort-func (cffi:callback compare-string-object-via-accessor)
+                                                       :user-data (cffi:make-pointer
+                                                                   (glib::put-object
+                                                                    (alexandria:compose #'mek/chassis
+                                                                                        (alexandria:rcurry #'gethash *mul*))))
+                                                       :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter role-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose #'mek/model
+                                                                                                       (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter type-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose
+                                                                                    #'mek/model
+                                                                                    (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter size-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-number-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose
+                                                                                    #'mek/size
+                                                                                    (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter movement-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose #'mek/movement
+                                                                                                       (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter tmm-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-number-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose
+                                                                                    #'mek/tmm
+                                                                                    (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter armor-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-number-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose
+                                                                                    #'mek/armor
+                                                                                    (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter struct-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-number-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose
+                                                                                    #'mek/structure
+                                                                                    (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter threshold-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-number-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose
+                                                                                    #'mek/threshold
+                                                                                    (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter short-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-number-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose
+                                                                                    #'mek/comparable-short
+                                                                                    (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter med-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-number-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose
+                                                                                    #'mek/comparable-medium
+                                                                                    (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter long-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-number-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose
+                                                                                    #'mek/comparable-long
+                                                                                    (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter extreme-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-number-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose
+                                                                                    #'mek/comparable-extreme
+                                                                                    (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter ov-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-number-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose
+                                                                                    #'mek/ov
+                                                                                    (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter pv-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-number-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose
+                                                                                    #'mek/pv
+                                                                                    (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback))
+          (gtk:column-view-column-sorter abilities-col) (gtk:make-custom-sorter
+                                                    :sort-func (cffi:callback compare-string-object-via-accessor)
+                                                    :user-data (cffi:make-pointer (glib::put-object
+                                                                                   (alexandria:compose
+                                                                                    #'mek/abilities
+                                                                                    (alexandria:rcurry #'gethash *mul*))))
+                                                    :user-destroy (cffi:callback glib::free-object-callback)))
+    (gtk:column-view-append-column view chassis-col)
+    (gtk:column-view-append-column view role-col)
+    (gtk:column-view-append-column view pv-col)
+    (gtk:column-view-append-column view type-col)
+    (gtk:column-view-append-column view size-col)
+    (gtk:column-view-append-column view movement-col)
+    (gtk:column-view-append-column view tmm-col)
+    (gtk:column-view-append-column view armor-col)
+    (gtk:column-view-append-column view struct-col)
+    (gtk:column-view-append-column view threshold-col)
+    (gtk:column-view-append-column view short-col)
+    (gtk:column-view-append-column view med-col)
+    (gtk:column-view-append-column view long-col)
+    (gtk:column-view-append-column view extreme-col)
+    (gtk:column-view-append-column view ov-col)
+    (gtk:column-view-append-column view abilities-col)
+
+    (setf (gtk:column-view-model view)
+          (gtk:make-single-selection :model (gtk:make-sort-list-model :model model :sorter (gtk:column-view-sorter view))))
+    (setf (gtk:widget-hexpand-p view) t
+          (gtk:widget-vexpand-p view) t)
+    (flet ((setup (factory item)
+             (declare (ignore factory))
+             (setf (gtk:list-item-child item) (gtk:make-label :str "")))
+           (unbind (factory item) (declare (ignore factory item)))
+           (teardown (factory item) (declare (ignore factory item))))
+      (loop :for factory :in (list chassis-factory role-factory pv-factory type-factory
+                                   size-factory movement-factory tmm-factory
+                                   armor-factory struct-factory threshold-factory
+                                   short-factory med-factory long-factory extreme-factory
+                                   ov-factory abilities-factory)
+            :for accessor :in (list #'mek/full-name #'mek/role #'mek/pv #'mek/type
+                                    #'mek/size #'mek/movement #'mek/tmm #'mek/armor
+                                    #'mek/structure #'mek/threshold #'mek/short-str
+                                    #'mek/medium-str #'mek/long-str #'mek/extreme-str
+                                    #'mek/ov #'mek/abilities)
+            :do (gtk:connect factory "setup" #'setup)
+                (gtk:connect factory "unbind" #'unbind)
+                (gtk:connect factory "teardown" #'teardown)
+                (gtk:connect factory "bind"
+                             (let ((accessor accessor))
+                               (lambda (factory item)
+                                 (declare (ignore factory))
+                                 (let* ((uuid (gtk:string-object-string (gobj:coerce (gtk:list-item-item item) 'gtk:string-object)))
+                                        (row (gethash uuid *mul*))
+                                        (value (format nil "~a" (funcall accessor row))))
+                                   (setf (gtk:label-text (gobj:coerce (gtk:list-item-child item) 'gtk:label)) value)))))))
+    view))

@@ -9,13 +9,15 @@
     (make-instance 'lobby :game g)))
 
 (defun draw-lobby-screen ()
+  (load-mul (merge-pathnames "data/units/mul.csv" (asdf:system-source-directory :megastrike)))
   (let ((layout (gtk:make-grid))
         ;; (mul (make-mul)) TODO Make this function create and return a string-list
         ;; (battle-ls (make-string-list))
         )
     (let ((map-selection (gtk:make-label :str "Map position"))
           (force-setup (draw-force-setup))
-          (unit-selection (gtk:make-label :str "MUL position"))
+          (mul-scroll (gtk:make-scrolled-window))
+          (unit-selection (draw-mul))
           (unit-list (gtk:make-label :str "Combat Units Position")))
     ;; (let ((button (gtk-button-new-with-label "Not Ready")))
     ;;   (connect button "clicked" (lambda (widget)
@@ -40,8 +42,9 @@
           (gtk:widget-vexpand-p unit-selection) t
           (gtk:widget-hexpand-p unit-list) t
           (gtk:widget-vexpand-p unit-list) t)
+      (setf (gtk:scrolled-window-child mul-scroll) unit-selection)
     (gtk:grid-attach layout map-selection  0 0 1 1)
-    (gtk:grid-attach layout unit-selection 1 0 1 1)
+    (gtk:grid-attach layout mul-scroll     1 0 1 1)
     (gtk:grid-attach layout force-setup    0 1 1 1)
     (gtk:grid-attach layout unit-list      1 1 1 1)
     layout)))
