@@ -10,28 +10,11 @@
 
 (defun draw-lobby-screen ()
   (load-mul (merge-pathnames "data/units/mul.csv" (asdf:system-source-directory :megastrike)))
-  (let ((layout (gtk:make-grid))
-        ;; (battle-ls (make-string-list))
-        )
+  (let ((layout (gtk:make-grid)))
     (let ((map-selection (gtk:make-label :str "Map position"))
           (force-setup (draw-force-setup))
           (unit-selection (draw-mul))
           (unit-list (gtk:make-label :str "Combat Units Position")))
-    ;; (let ((button (gtk-button-new-with-label "Not Ready")))
-    ;;   (connect button "clicked" (lambda (widget)
-    ;;                               (declare (ignore widget))
-    ;;                               (if (gtk-widget-is-visible layout)
-    ;;                                   (progn
-    ;;                                     (gtk-container-remove window layout)
-    ;;                                     (draw-gameplay-screen window))))))
-    ;; (g-timeout-add 500 (lambda ()
-    ;;                      (if (and (check-board)
-    ;;                               (check-forces)
-    ;;                               (check-units))
-    ;;                          (progn
-    ;;                            (setf (gtk-widget-sensitive launch-button) t)
-    ;;                            (setf (gtk-button-label launch-button) "Launch Game")))
-    ;;                      t))
     (setf (gtk:widget-hexpand-p map-selection) t
           (gtk:widget-vexpand-p map-selection) t
           (gtk:widget-hexpand-p force-setup) t
@@ -44,6 +27,7 @@
     (gtk:grid-attach layout unit-selection 1 0 1 1)
     (gtk:grid-attach layout force-setup    0 1 1 1)
     (gtk:grid-attach layout unit-list      1 1 1 1)
+    (format t "Return the lobby")
     layout)))
 
 (defun draw-unit-selection ()
