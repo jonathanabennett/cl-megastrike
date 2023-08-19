@@ -51,8 +51,7 @@
                        :left-arc left-arc :right-arc right-arc :rear-arc rear-arc))
 
 (defun mul-parser (header-row row)
-  (let ((uuid (format nil "~a" (uuid:make-v1-uuid)))
-        (data (loop for key in header-row
+  (let ((data (loop for key in header-row
                     for value in row
                     collect `(,(read-from-string key) . ,value))))
     (setf (cdr (assoc 'size data)) (parse-integer (cdr (assoc 'size data))))
@@ -72,7 +71,7 @@
     (setf (cdr (assoc 'overheat data)) (parse-integer (cdr (assoc 'overheat data))))
     (setf (cdr (assoc 'point data)) (parse-integer (cdr (assoc 'point data))))
     (if (string= (cdr (assoc 'type data)) "BM")
-        (setf (gethash uuid *mul*)
+        (setf (gethash (cdr (assoc 'mul data)) *mul*)
               (new-mek (cdr (assoc 'chassis data)) (cdr (assoc 'model data))
                        (cdr (assoc 'role data)) (cdr (assoc 'type data))
                        (cdr (assoc 'size data)) (cdr (assoc 'movement data))
