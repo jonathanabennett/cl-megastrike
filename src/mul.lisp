@@ -157,9 +157,9 @@
 
 (defun draw-mul ()
   (let (name skill)
-    (let* ((layout (gtk:make-grid))
+    (let* ((layout (gtk:make-scrolled-window))
            (mul (mul-list-view)))
-      (gtk:grid-attach layout mul 0 0 1 1)
+      (setf (gtk:scrolled-window-child layout) mul)
       layout)))
 
 ;; Callback function to compare strings
