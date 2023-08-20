@@ -10,6 +10,7 @@
 
 (defun draw-lobby-screen ()
   (load-mul (merge-pathnames "data/units/mul.csv" (asdf:system-source-directory :megastrike)))
+  (sleep 0.5)
   (let ((layout (gtk:make-grid)))
     (let ((map-selection (gtk:make-label :str "Map position"))
           (force-setup (draw-force-setup))
