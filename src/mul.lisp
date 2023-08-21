@@ -88,7 +88,9 @@
     (format t "~a~%" (mek/full-name (gethash uuid *mul*)))))
 
 (defun mek/full-name (m)
-  (format nil "~a ~a" (mek/chassis m) (mek/model m)))
+  (if m
+      (format nil "~a ~a" (mek/chassis m) (mek/model m))
+      nil))
 
 (defun mek/comparable-short (m)
   (if (mek/short* m)
@@ -186,16 +188,16 @@
 (defun mul-list-view ()
   (let* ((model (gtk:make-string-list :strings (loop for uuid being the hash-keys of *mul*
                                                      :collect uuid)))
-         (view (gtk:make-column-view :model (gtk:make-single-selection :model model)))
+         (view (gtk:make-column-view :model nil))
          (chassis-factory (gtk:make-signal-list-item-factory))
          (chassis-col (gtk:make-column-view-column :title "Chassis" :factory chassis-factory)))
     (setf (gtk:column-view-column-sorter chassis-col) (gtk:make-custom-sorter
                                                        :sort-func (cffi:callback compare-string-object-via-accessor)
                                                        :user-data (cffi:make-pointer (glib::put-object (alexandria:compose #'mek/full-name (alexandria:rcurry #'gethash *mul*))))
                                                        :user-destroy (cffi:callback glib::free-object-callback)))
+    (gtk:column-view-append-column view chassis-col)
     (setf (gtk:column-view-model view)
           (gtk:make-single-selection :model (gtk:make-sort-list-model :model model :sorter (gtk:column-view-sorter view))))
-    (gtk:column-view-append-column view chassis-col)
     (setf (gtk:widget-hexpand-p view) t
           (gtk:widget-vexpand-p view) t)
     (flet ((setup (factory item)
