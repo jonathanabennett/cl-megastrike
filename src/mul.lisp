@@ -82,10 +82,17 @@
                      (cdr (assoc 'm data)) (cdr (assoc 'm* data))
                      (cdr (assoc 'l data)) (cdr (assoc 'l* data))
                      (cdr (assoc 'e data)) (cdr (assoc 'e* data))
-                     (cdr (assoc 'ov data)) (cdr (assoc 'point data))
+                     (cdr (assoc 'overheat data)) (cdr (assoc 'point data))
                      (cdr (assoc 'abilities data)) (cdr (assoc 'front-arc data))
                      (cdr (assoc 'left-arc data)) (cdr (assoc 'right-arc data))
                      (cdr (assoc 'rear-arc data)))))))
+
+(defun mek/comparable-ov (m)
+  (if m
+      (if (mek/ov m)
+          (mek/ov m)
+          -1)
+      -1))
 
 (defun mek/full-name (m)
   (if m
