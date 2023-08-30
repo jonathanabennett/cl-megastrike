@@ -11,29 +11,29 @@
 ;; Copy it into the data/units folder of Megastrike
 
 (defclass mek ()
-  ((chassis   :initarg :chassis   :accessor mek/chassis)
-   (model     :initarg :model     :accessor mek/model)
-   (role      :initarg :role      :accessor mek/role)
-   (unit-type :initarg :type      :accessor mek/type)
-   (size      :initarg :size      :accessor mek/size)
-   (movement  :initarg :movement  :accessor mek/movement)
-   (tmm       :initarg :tmm       :accessor mek/tmm
+  ((chassis   :initarg :chassis   :initform "" :accessor mek/chassis)
+   (model     :initarg :model     :initform "" :accessor mek/model)
+   (role      :initarg :role      :initform nil :accessor mek/role)
+   (unit-type :initarg :type      :initform nil :accessor mek/type)
+   (size      :initarg :size      :initform 0   :accessor mek/size)
+   (movement  :initarg :movement  :initform ""  :accessor mek/movement)
+   (tmm       :initarg :tmm       :initform 0   :accessor mek/tmm
               :documentation "TMM from the distance only of the first movement type. Does not include movement type modifier like jumping")
-   (armor     :initarg :armor     :accessor mek/armor)
-   (structure :initarg :structure :accessor mek/structure)
-   (threshold :initarg :threshold :accessor mek/threshold)
-   (short     :initarg :short     :accessor mek/short)
-   (short*    :initarg :short*    :accessor mek/short*)
-   (medium    :initarg :medium    :accessor mek/medium)
-   (medium*   :initarg :medium*   :accessor mek/medium*)
-   (long      :initarg :long      :accessor mek/long)
-   (long*     :initarg :long*     :accessor mek/long*)
-   (extreme   :initarg :extreme   :accessor mek/extreme)
-   (extreme*  :initarg :extreme*  :accessor mek/extreme*)
-   (ov        :initarg :ov        :accessor mek/ov)
-   (pv        :initarg :pv        :accessor mek/pv)
-   (display   :initarg :display   :accessor mek/display)
-   (abilities :initarg :abilities :accessor mek/abilities)
+   (armor     :initarg :armor     :initform 0   :accessor mek/armor)
+   (structure :initarg :structure :initform 0   :accessor mek/structure)
+   (threshold :initarg :threshold :initform 0   :accessor mek/threshold)
+   (short     :initarg :short     :initform 0   :accessor mek/short)
+   (short*    :initarg :short*    :initform nil :accessor mek/short*)
+   (medium    :initarg :medium    :initform 0   :accessor mek/medium)
+   (medium*   :initarg :medium*   :initform nil :accessor mek/medium*)
+   (long      :initarg :long      :initform 0   :accessor mek/long)
+   (long*     :initarg :long*     :initform nil :accessor mek/long*)
+   (extreme   :initarg :extreme   :initform 0   :accessor mek/extreme)
+   (extreme*  :initarg :extreme*  :initform nil :accessor mek/extreme*)
+   (ov        :initarg :ov        :initform 0   :accessor mek/ov)
+   (pv        :initarg :pv        :initform 0   :accessor mek/pv)
+   (display   :initarg :display   :initform nil :accessor mek/display)
+   (abilities :initarg :abilities :initform ""  :accessor mek/abilities)
    (front-arc :initarg :front-arc :initform nil :accessor mek/front-arc)
    (left-arc  :initarg :left-arc  :initform nil :accessor mek/left-arc)
    (right-arc :initarg :right-arc :initform nil :accessor mek/right-arc)
@@ -175,6 +175,10 @@
       (format nil "~{~/megastrike::format-move-assoc/~^/~}" (mek/movement m))
       "None"))
 
+(defun filter-mek (filter m)
+  (if (mek/type m)
+      (member (mek/type m) (mek/type filter) :test #'string=)
+      t))
 
 (defun extract-numbers-and-letters (input)
   (let ((number-part "")
@@ -192,13 +196,6 @@
     (dolist (r (cdr data))
       (mul-parser h-row r))))
 
-(defun draw-mul ()
-  (let (name skill)
-    (let* ((layout (gtk:make-scrolled-window))
-           (mul (mul-list-view)))
-      (setf (gtk:scrolled-window-child layout) mul)
-      layout)))
-
 ;; Callback function to compare strings
 (cffi:defcallback compare-string-object-via-accessor :int
     ((a :pointer)
@@ -210,6 +207,12 @@
       (if (string= string-a string-b)
           0
           (if (string< string-a string-b) +1 -1)))))
+
+(cffi:defcallback filter-string-object-via-accessor :bool
+    ((item :pointer)
+     (data :pointer))
+  (let ((filter-func (gethash (cffi:pointer-address data) glib::*objects*)))
+    (funcall filter-func (gtk:string-object-string (gobj:pointer-object item 'gtk:string-object)))))
 
 ;; Callback function to compare numbers
 (cffi:defcallback compare-string-number-object-via-accessor :int
@@ -223,10 +226,34 @@
           0
           (if (< number-a number-b) +1 -1)))))
 
-(defun mul-list-view ()
-  (let* ((model (gtk:make-string-list :strings (loop for uuid being the hash-keys of *mul*
+(defun draw-mul-list ()
+  (let* ((layout (gtk:make-grid))
+         (scroll (gtk:make-scrolled-window))
+         (model (gtk:make-string-list :strings (loop for uuid being the hash-keys of *mul*
                                                      :collect uuid)))
-         (view (gtk:make-column-view :model nil))
+         (filt (make-instance 'mek))
+         (filter (gtk:make-custom-filter :match-func (cffi:callback filter-string-object-via-accessor)
+                                         :user-data (cffi:make-pointer (glib::put-object (alexandria:compose (alexandria:curry #'filter-mek filt) (alexandria:rcurry #'gethash *mul*))))
+                                         :user-destroy (cffi:callback glib::free-object-callback)))
+         (view (mul-list-view model)))
+    (setf (gtk:column-view-model view)
+          (gtk:make-single-selection :model (gtk:make-sort-list-model :model (gtk:make-filter-list-model :model model :filter filter) :sorter (gtk:column-view-sorter view))))
+    (let ((btn (gtk:make-button :label "Ground Units")))
+      (gtk:connect btn "clicked"
+                   (lambda (button)
+                     (declare (ignore button))
+                     (format t "Battlemechs only")
+                     (setf (mek/type filt) '("BM"))
+                     (gtk:filter-changed filter gtk:+filter-change-different+)))
+      (gtk:grid-attach layout btn 0 0 1 1))
+    (setf (gtk:widget-hexpand-p scroll) t
+          (gtk:widget-vexpand-p scroll) t)
+    (setf (gtk:scrolled-window-child scroll) view)
+    (gtk:grid-attach layout scroll 0 1 1 1)
+    layout))
+
+(defun mul-list-view (model)
+  (let* ((view (gtk:make-column-view :model nil))
          (chassis-factory (gtk:make-signal-list-item-factory))
          (chassis-col (gtk:make-column-view-column :title "Chassis" :factory chassis-factory))
          (role-factory (gtk:make-signal-list-item-factory))
@@ -258,8 +285,7 @@
          (ov-factory (gtk:make-signal-list-item-factory))
          (ov-col (gtk:make-column-view-column :title "OV" :factory ov-factory))
          (abilities-factory (gtk:make-signal-list-item-factory))
-         (abilities-col (gtk:make-column-view-column :title "Abilities" :factory abilities-factory))
-         )
+         (abilities-col (gtk:make-column-view-column :title "Abilities" :factory abilities-factory)))
     (setf (gtk:column-view-column-sorter chassis-col) (gtk:make-custom-sorter
                                                        :sort-func (cffi:callback compare-string-object-via-accessor)
                                                        :user-data (cffi:make-pointer (glib::put-object (alexandria:compose #'mek/full-name (alexandria:rcurry #'gethash *mul*))))
@@ -323,8 +349,7 @@
           (gtk:column-view-column-sorter abilities-col) (gtk:make-custom-sorter
                                                        :sort-func (cffi:callback compare-string-object-via-accessor)
                                                        :user-data (cffi:make-pointer (glib::put-object (alexandria:compose #'mek/abilities (alexandria:rcurry #'gethash *mul*))))
-                                                       :user-destroy (cffi:callback glib::free-object-callback))
-          )
+                                                       :user-destroy (cffi:callback glib::free-object-callback)))
     (gtk:column-view-append-column view chassis-col)
     (gtk:column-view-append-column view role-col)
     (gtk:column-view-append-column view type-col)
@@ -341,10 +366,6 @@
     (gtk:column-view-append-column view extreme-col)
     (gtk:column-view-append-column view ov-col)
     (gtk:column-view-append-column view abilities-col)
-    (setf (gtk:column-view-model view)
-          (gtk:make-single-selection :model (gtk:make-sort-list-model :model model :sorter (gtk:column-view-sorter view))))
-    (setf (gtk:widget-hexpand-p view) t
-          (gtk:widget-vexpand-p view) t)
     (flet ((setup (factory item)
              (declare (ignore factory))
              (setf (gtk:list-item-child item) (gtk:make-label :str "")))

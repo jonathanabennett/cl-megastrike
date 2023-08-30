@@ -14,7 +14,7 @@
   (let ((layout (gtk:make-grid)))
     (let ((map-selection (gtk:make-label :str "Map position"))
           (force-setup (draw-force-setup))
-          (unit-selection (draw-mul))
+          (unit-selection (draw-mul-list))
           (unit-list (gtk:make-label :str "Combat Units Position")))
     (setf (gtk:widget-hexpand-p map-selection) t
           (gtk:widget-vexpand-p map-selection) t
