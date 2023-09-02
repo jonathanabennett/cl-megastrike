@@ -87,6 +87,19 @@
                      (cdr (assoc 'left-arc data)) (cdr (assoc 'right-arc data))
                      (cdr (assoc 'rear-arc data)))))))
 
+(defmacro mek/comparable-num (func mek)
+  (if mek
+      (let ((fname (gensym))
+            (m (gensym))
+            (val (gensym)))
+        `(let* ((,fname ,func)
+                (,m ,mek)
+                (,val (funcall ,fname ,m)))
+           (if ,val
+               ,val
+               -1)))
+      -1))
+
 (defun mek/comparable-ov (m)
   (if m
       (if (mek/ov m)
@@ -176,9 +189,11 @@
       "None"))
 
 (defun filter-mek (filter m)
-  (if (mek/type m)
-      (member (mek/type m) (mek/type filter) :test #'string=)
-      t))
+  (let ((filt-name (or (mek/chassis filter) nil))
+        (filt-type (or (mek/type filter) nil)))
+    (and (if filt-name (search filt-name (mek/full-name m)) t)
+         (if filt-type (member (mek/type m) filt-type :test #'string=) t)
+         )))
 
 (defun extract-numbers-and-letters (input)
   (let ((number-part "")
@@ -231,25 +246,75 @@
          (scroll (gtk:make-scrolled-window))
          (model (gtk:make-string-list :strings (loop for uuid being the hash-keys of *mul*
                                                      :collect uuid)))
-         (filt (make-instance 'mek))
+         (filt (make-instance 'mek
+                              :type +GROUND-UNITS+))
          (filter (gtk:make-custom-filter :match-func (cffi:callback filter-string-object-via-accessor)
                                          :user-data (cffi:make-pointer (glib::put-object (alexandria:compose (alexandria:curry #'filter-mek filt) (alexandria:rcurry #'gethash *mul*))))
                                          :user-destroy (cffi:callback glib::free-object-callback)))
          (view (mul-list-view model)))
     (setf (gtk:column-view-model view)
           (gtk:make-single-selection :model (gtk:make-sort-list-model :model (gtk:make-filter-list-model :model model :filter filter) :sorter (gtk:column-view-sorter view))))
-    (let ((btn (gtk:make-button :label "Ground Units")))
+    (let ((btn (gtk:make-button :label "All Ground Units")))
       (gtk:connect btn "clicked"
                    (lambda (button)
                      (declare (ignore button))
-                     (format t "Battlemechs only")
-                     (setf (mek/type filt) '("BM"))
+                     (setf (mek/type filt) +GROUND-UNITS+)
                      (gtk:filter-changed filter gtk:+filter-change-different+)))
       (gtk:grid-attach layout btn 0 0 1 1))
+    (let ((btn (gtk:make-button :label "Battlemechs")))
+      (gtk:connect btn "clicked"
+                   (lambda (button)
+                     (declare (ignore button))
+                     (setf (mek/type filt) +BM-UNITS+)
+                     (gtk:filter-changed filter gtk:+filter-change-different+)))
+      (gtk:grid-attach layout btn 1 0 1 1))
+    (let ((btn (gtk:make-button :label "All Mechs")))
+      (gtk:connect btn "clicked"
+                   (lambda (button)
+                     (declare (ignore button))
+                     (setf (mek/type filt) +MECH-UNITS+)
+                     (gtk:filter-changed filter gtk:+filter-change-different+)))
+      (gtk:grid-attach layout btn 2 0 1 1))
+    (let ((btn (gtk:make-button :label "Conventional Units")))
+      (gtk:connect btn "clicked"
+                   (lambda (button)
+                     (declare (ignore button))
+                     (setf (mek/type filt) +CONVENTIONAL-UNITS+)
+                     (gtk:filter-changed filter gtk:+filter-change-different+)))
+      (gtk:grid-attach layout btn 3 0 1 1))
+    (let ((btn (gtk:make-button :label "Vehicles")))
+      (gtk:connect btn "clicked"
+                   (lambda (button)
+                     (declare (ignore button))
+                     (setf (mek/type filt) +VEHICLE-UNITS+)
+                     (gtk:filter-changed filter gtk:+filter-change-different+)))
+      (gtk:grid-attach layout btn 4 0 1 1))
+    (let ((btn (gtk:make-button :label "Infantry")))
+      (gtk:connect btn "clicked"
+                   (lambda (button)
+                     (declare (ignore button))
+                     (setf (mek/type filt) +INFANTRY-UNITS+)
+                     (gtk:filter-changed filter gtk:+filter-change-different+)))
+      (gtk:grid-attach layout btn 5 0 1 1))
+    (let ((name-label (gtk:make-label :str "Chassis:"))
+          (name-entry (gtk:make-entry))
+          (search-btn (gtk:make-button :label "Search")))
+      (gtk:connect name-entry "changed"
+                   (lambda (entry)
+                     (setf (mek/chassis filt)
+                           (ignore-errors
+                            (gtk:entry-buffer-text (gtk:entry-buffer name-entry))))))
+      (gtk:connect search-btn "clicked"
+                   (lambda (button)
+                     (declare (ignore button))
+                     (gtk:filter-changed filter gtk:+filter-change-different+)))
+      (gtk:grid-attach layout name-label 0 1 1 1)
+      (gtk:grid-attach layout name-entry 1 1 1 1)
+      (gtk:grid-attach layout search-btn 2 1 1 1))
     (setf (gtk:widget-hexpand-p scroll) t
           (gtk:widget-vexpand-p scroll) t)
     (setf (gtk:scrolled-window-child scroll) view)
-    (gtk:grid-attach layout scroll 0 1 1 1)
+    (gtk:grid-attach layout scroll 0 2 6 1)
     layout))
 
 (defun mul-list-view (model)

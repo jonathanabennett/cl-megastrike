@@ -7,6 +7,17 @@
   "This defines the valid list of element types in the game."
   '(member BM IM PM SV CV BA CI SS WS JS DS DA SC CF AF))
 
+(defparameter +ALL-TYPES+ '("BM" "IM" "PM" "SV" "CV" "BA" "CI" "SS"
+                            "WS" "JS" "DS" "DA" "SC" "CF" "AF"))
+
+(defparameter +GROUND-UNITS+ '("BM" "IM" "PM" "SV" "CV" "BA" "CI"))
+(defparameter +AERO-UNITS+ '("SS" "WS" "JS" "DS" "DA" "SC" "CF" "AF"))
+(defparameter +BM-UNITS+ '("BM"))
+(defparameter +MECH-UNITS+ '("BM" "IM" "PM"))
+(defparameter +CONVENTIONAL-UNITS+ '("SV" "CV" "BA" "CI"))
+(defparameter +VEHICLE-UNITS+ '("SV" "CV"))
+(defparameter +INFANTRY-UNITS+ '("BA" "CI"))
+
 (defvar *mv-designators* '((:walk            . "")
                            (:jump            . "j")
                            (:tracked-quadvee . "qt")
