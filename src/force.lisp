@@ -121,7 +121,11 @@
       (gtk:column-view-append-column forces-view color-col)
       (gtk:column-view-append-column forces-view deploy-col)
       (gtk:column-view-append-column forces-view pv-col)
-
+      (gtk:connect (gtk:column-view-model forces-view) "selection-changed"
+                   (lambda (model position n-items)
+                     (declare (ignore position n-items))
+                     (let ((uuid (gtk:string-object-string (gobj:coerce (gtk:single-selection-selected-item model) 'gtk:string-object))))
+                       (setf (game/selected-force *game*) (game/find-force *game* uuid)))))
       (setf (gtk:widget-vexpand-p forces-view) t
             (gtk:widget-hexpand-p forces-view) t)
 
