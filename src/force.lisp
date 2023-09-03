@@ -69,10 +69,6 @@
              (deploy-entry (gtk:make-entry))
              (new-force-btn (gtk:make-button :label "New Force"))
              (force-list (force-list-view)))
-        ;; (gtk:connect color-selection "notify"
-        ;;              (lambda (entry)
-        ;;                (setf deploy (ignore-errors
-        ;;                            (gtk:entry-buffer-text (entry-buffer deploy-entry))))))
         (gtk:connect deploy-entry "changed"
                      (lambda (entry)
                        (setf deploy (ignore-errors
