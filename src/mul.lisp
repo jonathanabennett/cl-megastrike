@@ -71,7 +71,8 @@
     (setf (cdr (assoc 'e* data)) (string= (cdr (assoc 'e* data)) "TRUE"))
     (setf (cdr (assoc 'overheat data)) (parse-integer (cdr (assoc 'overheat data))))
     (setf (cdr (assoc 'point data)) (parse-integer (cdr (assoc 'point data))))
-    (let ((uuid (format nil "~a" (uuid:make-v5-uuid uuid::+namespace-dns+ (format nil "~a ~a" (cdr (assoc 'chassis data)) (cdr (assoc 'model data)))))))
+    (let* ((full-name (format nil "~a ~a" (cdr (assoc 'chassis data)) (cdr (assoc 'model data))))
+           (uuid (format nil "~a" (uuid:make-v5-uuid uuid::+namespace-dns+ full-name))))
       (setf (gethash uuid *mul*)
             (new-mek (cdr (assoc 'chassis data)) (cdr (assoc 'model data))
                      (cdr (assoc 'role data)) (cdr (assoc 'type data))
@@ -211,6 +212,13 @@
     (dolist (r (cdr data))
       (mul-parser h-row r))))
 
+;; Callback function to filter objects
+(cffi:defcallback filter-string-object-via-accessor :bool
+    ((item :pointer)
+     (data :pointer))
+  (let ((filter-func (gethash (cffi:pointer-address data) glib::*objects*)))
+    (funcall filter-func (gtk:string-object-string (gobj:pointer-object item 'gtk:string-object)))))
+
 ;; Callback function to compare strings
 (cffi:defcallback compare-string-object-via-accessor :int
     ((a :pointer)
@@ -222,12 +230,6 @@
       (if (string= string-a string-b)
           0
           (if (string< string-a string-b) +1 -1)))))
-
-(cffi:defcallback filter-string-object-via-accessor :bool
-    ((item :pointer)
-     (data :pointer))
-  (let ((filter-func (gethash (cffi:pointer-address data) glib::*objects*)))
-    (funcall filter-func (gtk:string-object-string (gobj:pointer-object item 'gtk:string-object)))))
 
 ;; Callback function to compare numbers
 (cffi:defcallback compare-string-number-object-via-accessor :int
@@ -260,6 +262,7 @@
                    (declare (ignore position n-items))
                    (let ((uuid (gtk:string-object-string (gobj:coerce (gtk:single-selection-selected-item model) 'gtk:string-object))))
                      (setf selected (gethash uuid *mul*)))))
+
     (let ((btn (gtk:make-button :label "All Ground Units")))
       (gtk:connect btn "clicked"
                    (lambda (button)
@@ -267,6 +270,7 @@
                      (setf (mek/type filt) +GROUND-UNITS+)
                      (gtk:filter-changed filter gtk:+filter-change-different+)))
       (gtk:grid-attach layout btn 0 0 1 1))
+
     (let ((btn (gtk:make-button :label "Battlemechs")))
       (gtk:connect btn "clicked"
                    (lambda (button)
@@ -274,6 +278,7 @@
                      (setf (mek/type filt) +BM-UNITS+)
                      (gtk:filter-changed filter gtk:+filter-change-different+)))
       (gtk:grid-attach layout btn 1 0 1 1))
+
     (let ((btn (gtk:make-button :label "All Mechs")))
       (gtk:connect btn "clicked"
                    (lambda (button)
@@ -281,6 +286,7 @@
                      (setf (mek/type filt) +MECH-UNITS+)
                      (gtk:filter-changed filter gtk:+filter-change-different+)))
       (gtk:grid-attach layout btn 2 0 1 1))
+
     (let ((btn (gtk:make-button :label "Conventional Units")))
       (gtk:connect btn "clicked"
                    (lambda (button)
@@ -288,6 +294,7 @@
                      (setf (mek/type filt) +CONVENTIONAL-UNITS+)
                      (gtk:filter-changed filter gtk:+filter-change-different+)))
       (gtk:grid-attach layout btn 3 0 1 1))
+
     (let ((btn (gtk:make-button :label "Vehicles")))
       (gtk:connect btn "clicked"
                    (lambda (button)
@@ -295,6 +302,7 @@
                      (setf (mek/type filt) +VEHICLE-UNITS+)
                      (gtk:filter-changed filter gtk:+filter-change-different+)))
       (gtk:grid-attach layout btn 4 0 1 1))
+
     (let ((btn (gtk:make-button :label "Infantry")))
       (gtk:connect btn "clicked"
                    (lambda (button)
@@ -302,6 +310,7 @@
                      (setf (mek/type filt) +INFANTRY-UNITS+)
                      (gtk:filter-changed filter gtk:+filter-change-different+)))
       (gtk:grid-attach layout btn 5 0 1 1))
+
     (let ((name-label (gtk:make-label :str "Chassis:"))
           (name-entry (gtk:make-entry))
           (search-btn (gtk:make-button :label "Search")))
@@ -317,10 +326,12 @@
       (gtk:grid-attach layout name-label 0 1 1 1)
       (gtk:grid-attach layout name-entry 1 1 1 1)
       (gtk:grid-attach layout search-btn 2 1 1 1))
+
     (setf (gtk:widget-hexpand-p scroll) t
           (gtk:widget-vexpand-p scroll) t)
     (setf (gtk:scrolled-window-child scroll) view)
     (gtk:grid-attach layout scroll 0 2 6 1)
+
     (let ((pname "")
           (pskill "")
           (pname-label (gtk:make-label :str "Pilot Name:"))
@@ -328,14 +339,17 @@
           (pskill-label (gtk:make-label :str "Pilot Skill:"))
           (pskill-entry (gtk:make-entry))
           (new-unit-btn (gtk:make-button :label "Add Unit")))
+
       (gtk:connect pname-entry "changed"
                    (lambda (entry)
                      (setf pname (ignore-errors
                                   (gtk:entry-buffer-text (gtk:entry-buffer pname-entry))))))
+
       (gtk:connect pskill-entry "changed"
                    (lambda (entry)
                      (setf pskill-entry (ignore-errors
                                          (gtk-entry-buffer-text (gtk:entry-buffer pskill-entry))))))
+
       (gtk:connect new-unit-btn "clicked"
                    (lambda (button)
                      (declare (ignore button))
@@ -343,12 +357,13 @@
                        (if (and pname skill selected)
                            (let ((el (new-element-from-mul selected pname skill)))
                              (add-unit (game/selected-force *game*) el))))))
+
       (gtk:grid-attach layout pname-label  0 3 1 1)
       (gtk:grid-attach layout pname-entry  1 3 1 1)
       (gtk:grid-attach layout pskill-label 2 3 1 1)
       (gtk:grid-attach layout pskill-entry 3 3 1 1)
-      (gtk:grid-attach layout new-unit-btn 4 3 1 1)
-      )
+      (gtk:grid-attach layout new-unit-btn 4 3 1 1))
+
     layout))
 
 (defun mul-list-view (model)
