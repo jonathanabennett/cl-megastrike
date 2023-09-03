@@ -244,6 +244,7 @@
 (defun draw-mul-list ()
   (let* ((layout (gtk:make-grid))
          (scroll (gtk:make-scrolled-window))
+         (selected nil)
          (model (gtk:make-string-list :strings (loop for uuid being the hash-keys of *mul*
                                                      :collect uuid)))
          (filt (make-instance 'mek
@@ -254,6 +255,11 @@
          (view (mul-list-view model)))
     (setf (gtk:column-view-model view)
           (gtk:make-single-selection :model (gtk:make-sort-list-model :model (gtk:make-filter-list-model :model model :filter filter) :sorter (gtk:column-view-sorter view))))
+    (gtk:connect (gtk:column-view-model view) "selection-changed"
+                 (lambda (model position n-items)
+                   (declare (ignore position n-items))
+                   (let ((uuid (gtk:string-object-string (gobj:coerce (gtk:single-selection-selected-item model) 'gtk:string-object))))
+                     (setf selected (gethash uuid *mul*)))))
     (let ((btn (gtk:make-button :label "All Ground Units")))
       (gtk:connect btn "clicked"
                    (lambda (button)
@@ -315,6 +321,34 @@
           (gtk:widget-vexpand-p scroll) t)
     (setf (gtk:scrolled-window-child scroll) view)
     (gtk:grid-attach layout scroll 0 2 6 1)
+    (let ((pname "")
+          (pskill "")
+          (pname-label (gtk:make-label :str "Pilot Name:"))
+          (pname-entry (gtk:make-entry))
+          (pskill-label (gtk:make-label :str "Pilot Skill:"))
+          (pskill-entry (gtk:make-entry))
+          (new-unit-btn (gtk:make-button :label "Add Unit")))
+      (gtk:connect pname-entry "changed"
+                   (lambda (entry)
+                     (setf pname (ignore-errors
+                                  (gtk:entry-buffer-text (gtk:entry-buffer pname-entry))))))
+      (gtk:connect pskill-entry "changed"
+                   (lambda (entry)
+                     (setf pskill-entry (ignore-errors
+                                         (gtk-entry-buffer-text (gtk:entry-buffer pskill-entry))))))
+      (gtk:connect new-unit-btn "clicked"
+                   (lambda (button)
+                     (declare (ignore button))
+                     (let ((skill (parse-integer pskill :junk-allowed t)))
+                       (if (and pname skill selected)
+                           (let ((el (new-element-from-mul selected pname skill)))
+                             (add-unit (game/selected-force *game*) el))))))
+      (gtk:grid-attach layout pname-label  0 3 1 1)
+      (gtk:grid-attach layout pname-entry  1 3 1 1)
+      (gtk:grid-attach layout pskill-label 2 3 1 1)
+      (gtk:grid-attach layout pskill-entry 3 3 1 1)
+      (gtk:grid-attach layout new-unit-btn 4 3 1 1)
+      )
     layout))
 
 (defun mul-list-view (model)
