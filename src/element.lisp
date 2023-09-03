@@ -1,15 +1,15 @@
 (in-package :megastrike)
 
 ;;; Aspects for Elements
-(define-aspect info short-name full-name unit-type role pv size tro (force :initform nil))
-(define-aspect damageable cur-armor max-armor cur-struct max-struct crit-list destroyedp)
+(define-aspect info chassis model type role pv size (force :initform nil))
 (define-aspect can-activate
   (selectedp :initform nil)
   (has-acted :initform nil))
-(define-aspect moveable move-alist move-used (destination-tile :initform nil))
-(define-aspect attacks short medium long (target :initform nil))
+(define-aspect moveable move-alist tmm move-used)
+(define-aspect damageable cur-armor max-armor cur-struct max-struct crit-list destroyedp)
+(define-aspect attacks short medium long extreme (target :initform nil))
 (define-aspect heat ov cur-heat)
-(define-aspect specials special-list)
+(define-aspect specials abilities)
 
 (define-aspect display
   (image-path :initform nil))
@@ -35,17 +35,24 @@
                             location
                             pilot))
 
+(defun find-sprite (mek)
+  (let ((first-pass (fuzzy-match:fuzzy-match (mek/chassis mek) (uiop:directory-files (merge-pathnames "data/images/units/mechs" *here*)))))
+    (if (search (mek/model mek) (namestring (first (fuzzy-match:fuzzy-match (mek/model mek) first-pass))))
+        (first (fuzzy-match:fuzzy-match (mek/model mek) first-pass))
+        (first first-pass))))
+
 (defun new-element-from-mul (m &key pname pskill)
-  (with-slots (short-name long-name unit-type role pv size armor struct mv-string
-               short medium long ov display specials-str tro) m
-    (let ((mv-cons (construct-mv-alist mv-string))
-          (spec-list (construct-spec-list specials-str)))
-      (new-element :short-name short-name :full-name long-name :unit-type unit-type
-                   :role role :pv pv :size size :cur-armor armor :max-armor armor
-                   :cur-struct struct :max-struct struct :move-list mv-cons
-                   :short (floor short) :medium (floor medium) :long (floor long)
-                   :ov ov :special-list spec-list
-                   :img display :tro tro :pilot pname :skill pskill))))
+  (with-slots (chassis model role unit-type size movement tmm armor structure
+               ov pv abilities) m
+    (let ((spec-list (construct-spec-list abilities))
+          (display (find-sprite m)))
+      (new-element :chassis chassis :model model :type unit-type :role role :pv pv
+                   :tmm tmm :size size :cur-armor armor :max-armor armor
+                   :cur-struct structure :max-struct structure :move-list movement
+                   :short (mek/comparable-short m) :medium (mek/comparable-medium m)
+                   :long (mek/comparable-long m) :extreme (mek/comparable-extreme m)
+                   :ov ov :special-list spec-list :img (find-sprite m) :pilot pname
+                   :skill pskill))))
 
 (defun construct-spec-list (specials-str)
   (let ((spec-list '()))
@@ -53,18 +60,17 @@
       (push (read-from-string spec) spec-list))
     spec-list))
 
-(defun new-element (&key short-name full-name unit-type role pv size
-                      cur-armor max-armor cur-struct max-struct
-                      move-list short medium long ov (cur-heat 0)
-                      special-list (crit-list '()) img tro q r s
+(defun new-element (&key chassis model type role pv size cur-armor max-armor tmm
+                      cur-struct max-struct move-list short medium long extreme
+                      ov (cur-heat 0) special-list (crit-list '()) img q r s
                       (pilot "Shooty McGee") (skill 4))
   (let ((arm    (if (eq cur-armor nil) max-armor cur-armor))
         (struct (if (eq cur-struct nil) max-struct cur-struct))
         (asset-path (merge-pathnames img *here*)))
     (create-entity 'combat-unit
-                   :info/short-name short-name
-                   :info/full-name full-name
-                   :info/unit-type unit-type
+                   :info/chassis chassis
+                   :info/model model
+                   :info/type type
                    :info/role role
                    :info/pv pv
                    :info/size size
@@ -76,16 +82,17 @@
                    :damageable/destroyedp nil
                    :moveable/move-alist move-list
                    :moveable/move-used (car (car move-list))
+                   :moveable/tmm tmm
                    :attacks/short short
                    :attacks/medium medium
                    :attacks/long long
+                   :attacks/extreme extreme
                    :heat/ov ov
                    :heat/cur-heat cur-heat
-                   :specials/special-list special-list
+                   :specials/abilities special-list
                    :damageable/crit-list crit-list
                    ;; TODO Replace for transition to GTK
                    :display/image-path (namestring asset-path)
-                   :info/tro tro
                    :location/q q
                    :location/r r
                    :location/s s

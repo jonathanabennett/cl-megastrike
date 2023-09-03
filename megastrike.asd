@@ -9,7 +9,7 @@
   :license  "GPL3"
   :version "1.2.0"
   :serial t
-  :depends-on (:beast :cl-gtk4 :cl-gdk4 :cl-slug :cl-csv :cl-ppcre :uuid :str)
+  :depends-on (:beast :cl-gtk4 :cl-gdk4 :fuzzy-match :cl-slug :cl-csv :cl-ppcre :uuid :str)
   :components ((:module "src"
                 :components
                 ((:file "package")

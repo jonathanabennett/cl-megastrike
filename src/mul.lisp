@@ -13,8 +13,9 @@
 (defclass mek ()
   ((chassis   :initarg :chassis   :initform "" :accessor mek/chassis)
    (model     :initarg :model     :initform "" :accessor mek/model)
-   (role      :initarg :role      :initform nil :accessor mek/role)
    (unit-type :initarg :type      :initform nil :accessor mek/type)
+   (role      :initarg :role      :initform nil :accessor mek/role)
+   (pv        :initarg :pv        :initform 0   :accessor mek/pv)
    (size      :initarg :size      :initform 0   :accessor mek/size)
    (movement  :initarg :movement  :initform ""  :accessor mek/movement)
    (tmm       :initarg :tmm       :initform 0   :accessor mek/tmm
@@ -31,9 +32,8 @@
    (extreme   :initarg :extreme   :initform 0   :accessor mek/extreme)
    (extreme*  :initarg :extreme*  :initform nil :accessor mek/extreme*)
    (ov        :initarg :ov        :initform 0   :accessor mek/ov)
-   (pv        :initarg :pv        :initform 0   :accessor mek/pv)
-   (display   :initarg :display   :initform nil :accessor mek/display)
    (abilities :initarg :abilities :initform ""  :accessor mek/abilities)
+   (display   :initarg :display   :initform nil :accessor mek/display)
    (front-arc :initarg :front-arc :initform nil :accessor mek/front-arc)
    (left-arc  :initarg :left-arc  :initform nil :accessor mek/left-arc)
    (right-arc :initarg :right-arc :initform nil :accessor mek/right-arc)
@@ -347,15 +347,20 @@
 
       (gtk:connect pskill-entry "changed"
                    (lambda (entry)
-                     (setf pskill-entry (ignore-errors
-                                         (gtk-entry-buffer-text (gtk:entry-buffer pskill-entry))))))
+                     (setf pskill (ignore-errors
+                                   (gtk:entry-buffer-text (gtk:entry-buffer pskill-entry))))))
 
       (gtk:connect new-unit-btn "clicked"
                    (lambda (button)
                      (declare (ignore button))
+                     (setf pname (ignore-errors
+                                  (gtk:entry-buffer-text (gtk:entry-buffer pname-entry))))
+                     (setf pskill (ignore-errors
+                                   (gtk:entry-buffer-text (gtk:entry-buffer pskill-entry))))
                      (let ((skill (parse-integer pskill :junk-allowed t)))
+                       (format t "~a ~a ~a" pname pskill (mek/full-name selected))
                        (if (and pname skill selected)
-                           (let ((el (new-element-from-mul selected pname skill)))
+                           (let ((el (new-element-from-mul selected :pname pname :pskill skill)))
                              (add-unit (game/selected-force *game*) el))))))
 
       (gtk:grid-attach layout pname-label  0 3 1 1)
