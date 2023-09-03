@@ -51,9 +51,8 @@
     (push force-string order))
     order))
 
-(let (model)
+(let (model view)
   (defun new-force-string (f)
-    (format t "In new force string function")
     (let ((uuid (format nil "~a" (uuid:make-v1-uuid))))
       (setf (gethash uuid (game/forces-hash *game*)) f)
       (gtk:string-list-append model uuid)))
@@ -67,8 +66,9 @@
              (color-selection (gtk:make-color-dialog-button :dialog color-selection-dialog))
              (deploy-label (gtk:make-label :str "Deployment Zone"))
              (deploy-entry (gtk:make-entry))
-             (new-force-btn (gtk:make-button :label "New Force"))
-             (force-list (force-list-view)))
+             (new-force-btn (gtk:make-button :label "New Force")))
+        (setf (gtk:grid-column-homogeneous-p layout) nil)
+        (force-list-view)
         (gtk:connect deploy-entry "changed"
                      (lambda (entry)
                        (setf deploy (ignore-errors
@@ -80,27 +80,24 @@
         (gtk:connect new-force-btn "clicked"
                      (lambda (button)
                        (declare (ignore button))
-                       (format t "Running button")
                        (let ((color (gdk:rgba-to-string
                                      (gtk:color-dialog-button-rgba color-selection))))
-                         (format t "Color is ~a." color)
                          (if (and name deploy color)
                              (let ((f (new-force name color deploy)))
                                (new-force-string f))))))
         (gtk:grid-attach layout name-label      0 0 1 1)
         (gtk:grid-attach layout name-entry      1 0 1 1)
-        (gtk:grid-attach layout color-selection 2 0 1 1)
         (gtk:grid-attach layout deploy-label    0 1 1 1)
         (gtk:grid-attach layout deploy-entry    1 1 1 1)
-        (gtk:grid-attach layout new-force-btn   2 1 1 1)
-        (gtk:grid-attach layout force-list      0 2 3 1)
+        (gtk:grid-attach layout color-selection 0 2 1 1)
+        (gtk:grid-attach layout new-force-btn   1 2 1 1)
+        (gtk:grid-attach layout view            0 3 2 1)
         layout)))
 
   (defun force-list-view ()
     (setf model (gtk:make-string-list :strings '()))
     (let* ((rows (loop for uuid being the hash-keys of (game/forces-hash *game*)
                       :collect uuid))
-          (forces-view (gtk:make-column-view :model (gtk:make-single-selection :model model)))
 
           (name-factory (gtk:make-signal-list-item-factory))
           (name-col (gtk:make-column-view-column :title "Force" :factory name-factory))
@@ -113,17 +110,21 @@
 
           (pv-factory (gtk:make-signal-list-item-factory))
           (pv-col (gtk:make-column-view-column :title "PV" :factory pv-factory)))
-      (gtk:column-view-append-column forces-view name-col)
-      (gtk:column-view-append-column forces-view color-col)
-      (gtk:column-view-append-column forces-view deploy-col)
-      (gtk:column-view-append-column forces-view pv-col)
-      (gtk:connect (gtk:column-view-model forces-view) "selection-changed"
+
+      (setf view (gtk:make-column-view :model (gtk:make-single-selection :model model)))
+
+      (gtk:column-view-append-column view name-col)
+      (gtk:column-view-append-column view color-col)
+      (gtk:column-view-append-column view deploy-col)
+      (gtk:column-view-append-column view pv-col)
+
+      (gtk:connect (gtk:column-view-model view) "selection-changed"
                    (lambda (model position n-items)
                      (declare (ignore position n-items))
                      (let ((uuid (gtk:string-object-string (gobj:coerce (gtk:single-selection-selected-item model) 'gtk:string-object))))
                        (setf (game/selected-force *game*) (game/find-force *game* uuid)))))
-      (setf (gtk:widget-vexpand-p forces-view) t
-            (gtk:widget-hexpand-p forces-view) t)
+      (setf (gtk:widget-vexpand-p view) t
+            (gtk:widget-hexpand-p view) t)
 
       (flet ((setup-label (factory item)
                (declare (ignore factory))
@@ -150,5 +151,4 @@
                                (let* ((uuid (gtk:string-object-string (gobj:coerce (gtk:list-item-item item) 'gtk:string-object)))
                                       (row (gethash uuid (game/forces-hash *game*)))
                                       (value (format nil "~a" (funcall accessor row))))
-                                 (setf (gtk:label-text (gobj:coerce (gtk:list-item-child item) 'gtk:label)) value)))))))
-      forces-view)))
+                                 (setf (gtk:label-text (gobj:coerce (gtk:list-item-child item) 'gtk:label)) value))))))))))
