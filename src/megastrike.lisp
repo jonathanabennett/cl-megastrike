@@ -12,18 +12,15 @@
     (setf (gtk:window-title window) "Megastrike")
     (let ((box (gtk:make-grid)))
       (let ((lobby (draw-lobby-screen)))
-        (format t "Lobby built and returned.")
         (setf (gtk:widget-hexpand-p lobby) t
               (gtk:widget-vexpand-p lobby) t)
         (gtk:grid-attach box lobby 0 0 1 1)
-        (format t "Lobby attached.")
         (let ((button (gtk:make-button :label "Exit")))
           (gtk:connect button "clicked" (lambda (button)
                                       (declare (ignore button))
                                       (gtk:window-destroy window)))
           (gtk:grid-attach box button 0 1 1 1)))
       (setf (gtk:window-child window) box))
-        (format t "Lobby presented.")
     (unless (gtk:widget-visible-p window)
       (gtk:window-present window))))
 
