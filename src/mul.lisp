@@ -384,15 +384,16 @@
          (size-factory (gtk:make-signal-list-item-factory))
          (size-col (gtk:make-column-view-column :title "Size" :factory size-factory))
          (movement-factory (gtk:make-signal-list-item-factory))
-         (movement-col (gtk:make-column-view-column :title "Movement" :factory movement-factory))
+         (movement-col (gtk:make-column-view-column :title "MV" :factory movement-factory))
          (tmm-factory (gtk:make-signal-list-item-factory))
          (tmm-col (gtk:make-column-view-column :title "TMM" :factory tmm-factory))
          (armor-factory (gtk:make-signal-list-item-factory))
-         (armor-col (gtk:make-column-view-column :title "Armor" :factory armor-factory))
+         (armor-col (gtk:make-column-view-column :title "A" :factory armor-factory))
          (struct-factory (gtk:make-signal-list-item-factory))
-         (struct-col (gtk:make-column-view-column :title "Structure" :factory struct-factory))
-         (threshold-factory (gtk:make-signal-list-item-factory))
-         (threshold-col (gtk:make-column-view-column :title "Threshold" :factory threshold-factory))
+         (struct-col (gtk:make-column-view-column :title "S" :factory struct-factory))
+         ;; Commented out until I need them (These are only found in flying units)
+         ;; (threshold-factory (gtk:make-signal-list-item-factory))
+         ;; (threshold-col (gtk:make-column-view-column :title "Threshold" :factory threshold-factory))
          (short-factory (gtk:make-signal-list-item-factory))
          (short-col (gtk:make-column-view-column :title "S" :factory short-factory))
          (medium-factory (gtk:make-signal-list-item-factory))
@@ -441,10 +442,10 @@
                                                        :sort-func (cffi:callback compare-string-number-object-via-accessor)
                                                        :user-data (cffi:make-pointer (glib::put-object (alexandria:compose #'mek/structure (alexandria:rcurry #'gethash *mul*))))
                                                        :user-destroy (cffi:callback glib::free-object-callback))
-          (gtk:column-view-column-sorter threshold-col) (gtk:make-custom-sorter
-                                                       :sort-func (cffi:callback compare-string-number-object-via-accessor)
-                                                       :user-data (cffi:make-pointer (glib::put-object (alexandria:compose #'mek/threshold (alexandria:rcurry #'gethash *mul*))))
-                                                       :user-destroy (cffi:callback glib::free-object-callback))
+          ;; (gtk:column-view-column-sorter threshold-col) (gtk:make-custom-sorter
+          ;;                                              :sort-func (cffi:callback compare-string-number-object-via-accessor)
+          ;;                                              :user-data (cffi:make-pointer (glib::put-object (alexandria:compose #'mek/threshold (alexandria:rcurry #'gethash *mul*))))
+          ;;                                              :user-destroy (cffi:callback glib::free-object-callback))
           (gtk:column-view-column-sorter short-col) (gtk:make-custom-sorter
                                                        :sort-func (cffi:callback compare-string-number-object-via-accessor)
                                                        :user-data (cffi:make-pointer (glib::put-object (alexandria:compose #'mek/comparable-short (alexandria:rcurry #'gethash *mul*))))
@@ -478,7 +479,7 @@
     (gtk:column-view-append-column view tmm-col)
     (gtk:column-view-append-column view armor-col)
     (gtk:column-view-append-column view struct-col)
-    (gtk:column-view-append-column view threshold-col)
+    ;; (gtk:column-view-append-column view threshold-col)
     (gtk:column-view-append-column view short-col)
     (gtk:column-view-append-column view medium-col)
     (gtk:column-view-append-column view long-col)
@@ -492,12 +493,12 @@
            (teardown (factory item) (declare (ignore factory item))))
       (loop :for factory in (list chassis-factory role-factory type-factory
                                   pv-factory size-factory movement-factory tmm-factory
-                                  armor-factory struct-factory threshold-factory
+                                  armor-factory struct-factory ;; threshold-factory
                                   short-factory medium-factory long-factory extreme-factory
                                   ov-factory abilities-factory)
             :for accessor in (list #'mek/full-name #'mek/role #'mek/type
                                    #'mek/pv #'mek/size #'print-movement #'mek/tmm
-                                   #'mek/armor #'mek/structure #'mek/threshold
+                                   #'mek/armor #'mek/structure ;; #'mek/threshold
                                    #'mek/short-str #'mek/medium-str #'mek/long-str #'mek/extreme-str
                                    #'mek/ov #'mek/abilities)
             :do (gtk:connect factory "setup" #'setup)
