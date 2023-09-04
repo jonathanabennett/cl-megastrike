@@ -17,7 +17,7 @@
    (role      :initarg :role      :initform nil :accessor mek/role)
    (pv        :initarg :pv        :initform 0   :accessor mek/pv)
    (size      :initarg :size      :initform 0   :accessor mek/size)
-   (movement  :initarg :movement  :initform ""  :accessor mek/movement)
+   (movement  :initarg :movement  :initform '()  :accessor mek/movement)
    (tmm       :initarg :tmm       :initform 0   :accessor mek/tmm
               :documentation "TMM from the distance only of the first movement type. Does not include movement type modifier like jumping")
    (armor     :initarg :armor     :initform 0   :accessor mek/armor)
@@ -175,14 +175,14 @@
                       (ppcre:create-scanner "\\d+\\\"[a-zA-z]?") mv-string)))
     (dolist (str mv-strings)
       (multiple-value-bind (dist type) (extract-numbers-and-letters str)
-        (setf mv-alist (acons (cdr (rassoc type *mv-designators* :test #'string=))
+        (setf mv-alist (acons (car (rassoc type *mv-designators* :test #'string=))
                               (/ (parse-integer dist) 2) mv-alist))))
-    mv-alist))
+    (reverse mv-alist)))
 
 (defun format-move-assoc (stream m colonp atsignp)
   "The colonp and atsignp are required for a function called inside `FORMAT'."
   (declare (ignorable colonp atsignp))
-  (format stream "~a~a" (cdr m) (cdr (rassoc (car m) *mv-designators* :test #'string=))))
+  (format stream "~a~a" (cdr m) (cdr (assoc (car m) *mv-designators*))))
 
 (defun print-movement (m)
   (if m
