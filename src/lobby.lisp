@@ -16,6 +16,7 @@
           (force-setup (draw-force-setup))
           (unit-selection (draw-mul-list))
           (unit-list (gtk:make-label :str "Combat Units Position")))
+    (setf (gtk:grid-column-homogeneous-p layout) nil)
     (setf (gtk:widget-hexpand-p map-selection) t
           (gtk:widget-vexpand-p map-selection) t
           (gtk:widget-hexpand-p force-setup) t
@@ -25,14 +26,14 @@
           (gtk:widget-hexpand-p unit-list) t
           (gtk:widget-vexpand-p unit-list) t)
     (gtk:grid-attach layout map-selection  0 0 1 1)
-    (gtk:grid-attach layout unit-selection 1 0 1 1)
+    (gtk:grid-attach layout unit-selection 1 0 2 1)
     (gtk:grid-attach layout force-setup    0 1 1 1)
-    (gtk:grid-attach layout unit-list      1 1 1 1)
+    (gtk:grid-attach layout unit-list      1 1 2 1)
     layout)))
 
 (defun draw-unit-list ()
   (let ((layout (gtk:make-grid))
-        (name-label (gtk:make-label :str "Force Name"))
+        (model (gtk:make-string-list :strings (loop for id being the hash-keys of beast::*entity-index* collect (princ-to-string id))))
         (name-entry (gtk:make-entry))
         (color-selection (gtk:make-color-button))
         (deploy-label (gtk:make-label :str "Deployment Zone"))
