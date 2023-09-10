@@ -36,7 +36,7 @@
                             pilot))
 
 (defun find-sprite (mek)
-  (let ((first-pass (fuzzy-match:fuzzy-match (mek/chassis mek) (uiop:directory-files (merge-pathnames "data/images/units/mechs" *here*)))))
+  (let ((first-pass (fuzzy-match:fuzzy-match (mek/chassis mek) (uiop:directory-files (merge-pathnames "data/images/units/mechs/" *here*)))))
     (if (search (mek/model mek) (namestring (first (fuzzy-match:fuzzy-match (mek/model mek) first-pass))))
         (first (fuzzy-match:fuzzy-match (mek/model mek) first-pass))
         (first first-pass))))
