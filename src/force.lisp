@@ -30,18 +30,15 @@
 (defmethod same-force (o (f force))
   nil)
 
-(defmethod add-unit ((f force) (u combat-unit))
-  (setf (info/force u) f))
-
 (defmethod count-units ((f force))
   (let ((count 0))
-    (map-entities #'(lambda (e) (if (same-force (info/force e) f) (incf count))))
+    (map-hash #'(lambda (k v) (if (same-force (cu/force v) f) (incf count))))
     count))
 
 (defmethod force-pv ((f force))
   (let ((total 0))
-    (map-entities #'(lambda (e)
-                      (if (same-force (info/force e) f) (incf total (info/pv e)))))
+    (map-hash #'(lambda (k v)
+                      (if (same-force (cu/force v) f) (incf total (cu/pv v)))))
     total))
 
 (defmethod turn-order-list ((f force))
