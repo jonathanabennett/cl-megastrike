@@ -32,13 +32,13 @@
 
 (defmethod count-units ((f force))
   (let ((count 0))
-    (map-hash #'(lambda (k v) (if (same-force (cu/force v) f) (incf count))))
+    (maphash #'(lambda (k v) (if (same-force (cu/force v) f) (incf count))) (game/units *game*))
     count))
 
 (defmethod force-pv ((f force))
   (let ((total 0))
-    (map-hash #'(lambda (k v)
-                      (if (same-force (cu/force v) f) (incf total (cu/pv v)))))
+    (maphash #'(lambda (k v)
+                      (if (same-force (cu/force v) f) (incf total (cu/pv v)))) (game/units *game*))
     total))
 
 (defmethod turn-order-list ((f force))
