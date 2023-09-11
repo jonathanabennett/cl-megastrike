@@ -36,7 +36,7 @@
    (cu-pilot :initarg :pilot
              :accessor cu/pilot)))
 
-(defun new-combat-unit (&key mek force pv-mult (move-used nil) (cur-armor nil)
+(defun new-combat-unit (&key mek force pv-mod (move-used nil) (cur-armor nil)
                           (cur-struct nil) (crits '()) (target nil) (cur-heat 0)
                           (location nil) pilot)
   (let ((ca (if cur-armor cur-armor (mek/armor mek)))
@@ -53,7 +53,7 @@
                              :cur-heat cur-heat
                              :location location
                              :pilot pilot)))
-      cu)))
+      (setf (gethash (uuid:make-v5-uuid uuid:+namespace-dns+ (mek/full-name mek)) (game/units *game*)) cu))))
 
 (defun cu/pv (unit)
   (+ (mek/pv (cu/mek unit)) (cu/pv-mod unit)))
