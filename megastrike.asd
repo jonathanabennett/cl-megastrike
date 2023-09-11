@@ -9,7 +9,7 @@
   :license  "GPL3"
   :version "1.2.0"
   :serial t
-  :depends-on (:beast :cl-gtk4 :cl-gdk4 :fuzzy-match :cl-slug :cl-csv :cl-ppcre :uuid :str)
+  :depends-on (:cl-gtk4 :cl-gdk4 :fuzzy-match :cl-slug :cl-csv :cl-ppcre :uuid :str)
   :components ((:module "src"
                 :components
                 ((:file "package")
@@ -20,9 +20,10 @@
                  (:file "hexagon")
                  (:file "tiles")
                  (:file "board" :depends-on ("hexagon" "tiles"))
-                 (:file "element" :depends-on ("utils" "board"))
+                 (:file "combat-unit" :depends-on ("mul" "board"))
+                 ;; (:file "element" :depends-on ("utils" "board"))
                  ;; (:file "initiative" :depends-on ("utils"))
-                 (:file "force" :depends-on ("element" "utils"))
+                 (:file "force" :depends-on ("combat-unit" "utils"))
                  ;; (:file "unitcard" :depends-on ("element"))
                  ;; (:file "game-setup" :depends-on ("element" "board" "force"))
                  ;; (:file "systems" :depends-on ("element" "force"))

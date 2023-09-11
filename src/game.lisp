@@ -2,7 +2,9 @@
 
 
 (defclass game ()
-  ((active-unit      :initform nil        :accessor game/active-unit)
+  ((units            :initarg :units      :accessor game/units
+                     :initform (make-hash-table :test #'equal))
+   (active-unit      :initform nil        :accessor game/active-unit)
    (forces           :initarg :forces     :accessor game/forces-hash
                      :initform (make-hash-table :test #'equal))
    (selected-force   :initform nil        :accessor game/selected-force)

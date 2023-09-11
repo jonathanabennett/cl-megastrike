@@ -1,5 +1,5 @@
 ;;;; package.lisp
 
 (defpackage #:megastrike
-  (:use #:uuid #:common-lisp #:beast)
+  (:use #:uuid #:common-lisp)
   (:export :megastrike))
