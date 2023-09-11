@@ -341,8 +341,8 @@
                        (format t "~a ~a ~a" pname pskill (mek/full-name selected))
                        (if (and pname skill selected)
                            (new-combat-unit :mek selected :force (game/selected-force *game*)
-                                            :pv-mod (calculate-pv-modifier (mek/pv selected) pskill)
-                                            :pilot (make-pilot :name pname :skill pskill))))))
+                                            :pv-mod (calculate-pv-modifier (mek/pv selected) skill)
+                                            :pilot (make-pilot :name pname :skill skill))))))
 
       (gtk:grid-attach layout pname-label  0 3 1 1)
       (gtk:grid-attach layout pname-entry  1 3 1 1)
