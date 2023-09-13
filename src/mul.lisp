@@ -211,4 +211,3 @@
          (h-row (nth 0 data)))
     (dolist (r (cdr data))
       (mul-parser h-row r))))
-
