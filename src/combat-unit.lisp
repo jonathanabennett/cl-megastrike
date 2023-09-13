@@ -58,6 +58,23 @@
 (defun cu/pv (unit)
   (+ (mek/pv (cu/mek unit)) (cu/pv-mod unit)))
 
+(defun cu/size (unit)
+  (mek/size (cu/mek unit)))
+
+(defun cu/movement (unit)
+  (mek/movement (cu/mek unit)))
+
+(defun cu/full-name (unit)
+  (mek/full-name (cu/mek unit)))
+
+(defun cu/arm-struct (unit)
+  (format nil "~a/~a" (cu/cur-armor unit) (cu/cur-struct unit)))
+
+(defun cu/attack-string (unit)
+  (format nil "~a/~a/~a/~a"
+          (mek/short-str (cu/mek unit)) (mek/medium-str (cu/mek unit))
+          (mek/long-str (cu/mek unit)) (mek/extreme-str (cu/mek unit))))
+
 (defun calculate-pv-modifier (pv skill)
   (let ((skill-diff (- 4 skill)))
     (cond
