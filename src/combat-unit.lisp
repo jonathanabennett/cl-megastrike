@@ -64,6 +64,17 @@
 (defun cu/movement (unit)
   (mek/movement (cu/mek unit)))
 
+(defun print-pilot (cu)
+  (display (cu/pilot cu)))
+
+(defun print-force (cu)
+  (force/name (cu/force cu)))
+
+(defmethod print-movement ((cu combat-unit))
+  (if cu
+      (format nil "~{~/megastrike::format-move-assoc/~^/~}" (cu/movement cu))
+      "None"))
+
 (defun cu/full-name (unit)
   (mek/full-name (cu/mek unit)))
 

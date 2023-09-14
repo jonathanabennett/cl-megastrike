@@ -184,17 +184,18 @@
   (declare (ignorable colonp atsignp))
   (format stream "~a~a" (cdr m) (cdr (assoc (car m) *mv-designators*))))
 
-(defun print-movement (m)
+(defmethod print-movement ((m mek))
   (if m
       (format nil "~{~/megastrike::format-move-assoc/~^/~}" (mek/movement m))
       "None"))
 
 (defun filter-mek (filter m)
-  (let ((filt-name (or (mek/chassis filter) nil))
-        (filt-type (or (mek/type filter) nil)))
-    (and (if filt-name (search filt-name (mek/full-name m)) t)
-         (if filt-type (member (mek/type m) filt-type :test #'string=) t)
-         )))
+  (if (and filter m)
+      (let ((filt-name (or (mek/chassis filter) nil))
+            (filt-type (or (mek/type filter) nil)))
+        (and (if filt-name (search filt-name (mek/full-name m)) t)
+             (if filt-type (member (mek/type m) filt-type :test #'string=) t)))
+      t))
 
 (defun extract-numbers-and-letters (input)
   (let ((number-part "")

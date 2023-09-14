@@ -15,6 +15,7 @@
                 ((:file "package")
                  (:file "utils")
                  (:file "game")
+                 (:file "stringlist")
                  (:file "mul")
                  (:file "lobby" :depends-on ("mul"))
                  (:file "hexagon")

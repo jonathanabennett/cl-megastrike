@@ -76,3 +76,25 @@
 (defvar *game*)
 (defvar *lobby*)
 (defvar *current-layout*)
+
+(defmacro add-to-end (target item)
+  "This macro cleans up calls to append to the end of lists, something I need to do a lot in this codebase."
+  `(setf ,target (append ,target (list ,item))))
+
+(cffi:defcstruct gdk-rgba
+  (red :double)
+  (green :double)
+  (blue :double)
+  (alpha :double))
+
+(defmacro with-gdk-rgba ((pointer color) &body body)
+  `(locally
+       #+sbcl (declare (sb-ext:muffle-conditions sb-ext:compiler-note))
+       (cffi:with-foreign-object (,pointer '(:struct gdk-rgba))
+         (let ((,pointer (make-instance 'gir::struct-instance
+                                        :class (gir:nget gdk::*ns* "RGBA")
+                                        :this ,pointer)))
+           (gdk:rgba-parse ,pointer ,color)
+           (locally
+               #+sbcl (declare (sb-ext:unmuffle-conditions sb-ext:compiler-note))
+               ,@body)))))
