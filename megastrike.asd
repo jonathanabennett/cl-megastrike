@@ -25,7 +25,6 @@
                  (:file "initiative" :depends-on ("utils"))
                  (:file "force" :depends-on ("combat-unit" "utils"))
                  ;; (:file "unitcard" :depends-on ("element"))
-                 ;; (:file "game-setup" :depends-on ("element" "board" "force"))
                  (:file "megastrike" :depends-on ("utils" ))
                  )))
   ;; :defsystem-depends-on (:deploy)
