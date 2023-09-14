@@ -15,17 +15,17 @@
           :accessor lobby/units)))
 
 (defun check-board ()
-  (if (game/board *game*)
+  (if (lobby/map *lobby*)
       t
       nil))
 
 (defun check-forces ()
-  (and (game/forces *game*)
-       (< 1 (length (game/forces *game*)))))
+  (and (lobby/forces *lobby*)
+       (< 1 (length (string-list/strings (lobby/forces *lobby*))))))
 
 (defun check-units ()
-  (let ((unit-counts (mapcar #'count-units (game/forces *game*))))
-    (all-numbers-greater-than-zero unit-counts)))
+  (let ((forces (loop for f being the hash-values of (lobby/forces *lobby*) collect f)))
+    (all-numbers-greater-than-zero (mapcar #'count-units forces))))
 
 (defun all-numbers-greater-than-zero (lst)
   (cond ((null lst) t)
@@ -56,6 +56,8 @@
     (gtk:grid-attach layout unit-list      1 1 2 1)
     layout)))
 
+;;; Map Section
+
 (defun draw-map-selection ()
   (let ((layout (gtk:make-grid))
         (header      (gtk:make-label :str "<big>Map Selection</big>"))
@@ -74,7 +76,7 @@
                          (h (parse-integer (gtk:entry-buffer-text (gtk:entry-buffer height-entry)) :junk-allowed t)))
                      (if (and w h)
                          (progn
-                           (setf (game/board *game*) (make-board w h))
+                           (setf (lobby/map *lobby*) (make-board w h))
                            (setf (gtk:label-label map-created) "Map Created."))))))
     (setf (gtk:label-use-markup-p header) t
           (gtk:label-use-markup-p width-label) t
@@ -87,6 +89,8 @@
     (gtk:grid-attach layout create-button 1 2 1 1)
     (gtk:grid-attach layout map-created 0 2 1 1)
     layout))
+
+;;; Force Section
 
 (defun draw-force-setup ()
   (let (name deploy)
@@ -129,7 +133,7 @@
       (gtk:grid-attach layout (string-list/view (lobby/forces *lobby*)) 0 3 2 1)
       layout)))
 
-;; MUL Section
+;;; MUL Section
 
 (defun draw-mul-list ()
   (let* ((layout (gtk:make-grid))
@@ -232,6 +236,8 @@
       (gtk:grid-attach layout new-unit-btn 4 3 1 1))
 
     layout))
+
+;;; Combat Unit Section
 
 (defun draw-unit-list ()
   (let* ((layout (gtk:make-grid))
