@@ -1,38 +1,55 @@
 (in-package :megastrike)
 
 (defclass lobby ()
-  ((map :initarg :map
+  ((map :accessor lobby/map
+        :initarg :map
         :initform nil
-        :accessor lobby/map)
-   (forces :initarg :forces
+        :documentation "The map for the game being prepared.")
+   (forces :accessor lobby/forces
+           :initarg :forces
            :initform nil
-           :accessor lobby/forces)
-   (mul :initarg :mul
+           :documentation "The forces for the game being prepared")
+   (mul :accessor lobby/mul
+        :initarg :mul
         :initform (load-mul (merge-pathnames "data/units/mul.csv" (asdf:system-source-directory :megastrike)))
-        :accessor lobby/mul)
-   (units :initarg :units
+        :documentation "The list of all possible meks that could be piloted in the game.")
+   (units :accessor lobby/units
+          :initarg :units
           :initform nil
-          :accessor lobby/units)))
+          :documentation "The list of all the units in the game."))
+  (:documentation "The lobby used to build the game before it launches."))
 
 (defun check-board ()
+  "Return `t' if a board has been created."
   (if (lobby/map *lobby*)
       t
       nil))
 
 (defun check-forces ()
+  "Return `t' if there are at least 2 forces in the game."
   (and (lobby/forces *lobby*)
        (< 1 (length (string-list/strings (lobby/forces *lobby*))))))
 
 (defun check-units ()
-  (let ((forces (loop for f being the hash-values of (lobby/forces *lobby*) collect f)))
+  "Return `t' if each force has at least 1 unit."
+  (let ((forces (loop for f being the hash-values of (string-list/source (lobby/forces *lobby*))
+                      collect f)))
     (all-numbers-greater-than-zero (mapcar #'count-units forces))))
 
 (defun all-numbers-greater-than-zero (lst)
+  "Helper function for `check-units'. Return `t' if every number in the list `lst' is > 0."
   (cond ((null lst) t)
         ((>= 0 (car lst)) nil)
         (t (all-numbers-greater-than-zero (cdr lst)))))
 
+(defun game-ready-p ()
+  "Return `t' if the game is ready to play."
+  (and (check-board)
+       (check-forces)
+       (check-units)))
+
 (defun draw-lobby-screen ()
+  "GTK Function to draw the lobby."
   (setf *lobby* (make-instance 'lobby))
   (setf (lobby/forces *lobby*) (create-string-list (make-hash-table :test #'equal))
         (lobby/units *lobby*) (create-string-list (make-hash-table :test #'equal)))
@@ -41,24 +58,18 @@
           (force-setup (draw-force-setup))
           (unit-selection (draw-mul-list))
           (unit-list (draw-unit-list)))
-    (setf (gtk:grid-column-homogeneous-p layout) nil)
-    (setf (gtk:widget-hexpand-p map-selection) t
-          (gtk:widget-vexpand-p map-selection) t
-          (gtk:widget-hexpand-p force-setup) t
-          (gtk:widget-vexpand-p force-setup) t
-          (gtk:widget-hexpand-p unit-selection) t
-          (gtk:widget-vexpand-p unit-selection) t
-          (gtk:widget-hexpand-p unit-list) t
-          (gtk:widget-vexpand-p unit-list) t)
-    (gtk:grid-attach layout map-selection  0 0 1 1)
-    (gtk:grid-attach layout unit-selection 1 0 2 1)
-    (gtk:grid-attach layout force-setup    0 1 1 1)
-    (gtk:grid-attach layout unit-list      1 1 2 1)
+    (setf (gtk:grid-column-homogeneous-p layout) nil
+          (gtk:grid-row-homogeneous-p layout) nil)
+    (gtk:grid-attach layout unit-selection 0 0 2 1)
+    (gtk:grid-attach layout force-setup    2 0 1 1)
+    (gtk:grid-attach layout unit-list      0 1 2 1)
+    (gtk:grid-attach layout map-selection  2 1 1 1)
     layout)))
 
 ;;; Map Section
 
 (defun draw-map-selection ()
+  "GTK Function drawing the map selection section on the screen."
   (let ((layout (gtk:make-grid))
         (header      (gtk:make-label :str "<big>Map Selection</big>"))
         (width-label (gtk:make-label :str "<b>Map Width: </b>"))
@@ -66,9 +77,16 @@
         (height-label (gtk:make-label :str "<b>Map Height: </b>"))
         (height-entry (gtk:make-entry))
         (map-created (gtk:make-label :str "No Map Created."))
-        (create-button (gtk:make-button :label "Create Map")))
+        (create-button (gtk:make-button :label "Create Map"))
+        (launch-game-button (gtk:make-button :label "Game Not Ready")))
     (when (check-board)
       (setf (gtk:label-label map-created) "Map Created."))
+    (gtk:timeout-add 500 (lambda ()
+                           (if (game-ready-p)
+                               (progn
+                                 (setf (gtk:button-label launch-game-button) "Game Ready")
+                                 glib:+source-remove+)
+                               glib:+source-continue+)))
     (gtk:connect create-button "clicked"
                  (lambda (button)
                    (declare (ignore widget))
@@ -77,16 +95,23 @@
                      (when (and w h)
                        (setf (lobby/map *lobby*) (make-board w h))
                        (setf (gtk:label-label map-created) "Map Created.")))))
+    (gtk:connect launch-game-button "clicked"
+                 (lambda (button)
+                   (declare (ignore widget))
+                   (setf (game/units *game*) (string-list/source (lobby/units *lobby*))
+                         (game/forces-hash *game*) (string-list/source (lobby/forces *lobby*))
+                         (game/board *game*) (lobby/map *lobby*))))
     (setf (gtk:label-use-markup-p header) t
           (gtk:label-use-markup-p width-label) t
           (gtk:label-use-markup-p height-label) t)
     (gtk:grid-attach layout header 0 0 2 1)
     (gtk:grid-attach layout width-label 0 1 1 1)
     (gtk:grid-attach layout width-entry 1 1 1 1)
-    (gtk:grid-attach layout height-label 2 1 1 1)
-    (gtk:grid-attach layout height-entry 3 1 1 1)
-    (gtk:grid-attach layout create-button 1 2 1 1)
-    (gtk:grid-attach layout map-created 0 2 1 1)
+    (gtk:grid-attach layout height-label 0 2 1 1)
+    (gtk:grid-attach layout height-entry 1 2 1 1)
+    (gtk:grid-attach layout map-created 0 3 1 1)
+    (gtk:grid-attach layout create-button 1 3 1 1)
+    (gtk:grid-attach layout launch-game-button 0 4 2 1)
     layout))
 
 ;;; Force Section
@@ -119,10 +144,9 @@
                       (declare (ignore button))
                       (let ((color (gdk:rgba-to-string
                                     (gtk:color-dialog-button-rgba color-selection))))
-                        (if (and name deploy color)
-                            (let ((f (new-force name color deploy)))
-                              (string-list/add-item (lobby/forces *lobby*) f name))))))
-
+                        (when (and name deploy color)
+                          (let ((f (new-force name color deploy)))
+                            (string-list/add-item (lobby/forces *lobby*) f name))))))
       (gtk:grid-attach layout name-label                                0 0 1 1)
       (gtk:grid-attach layout name-entry                                1 0 1 1)
       (gtk:grid-attach layout deploy-label                              0 1 1 1)
