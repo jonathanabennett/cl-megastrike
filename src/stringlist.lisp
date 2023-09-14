@@ -34,46 +34,58 @@
           (if (< number-a number-b) +1 -1)))))
 
 (defclass string-list ()
-  ((uuids :initarg :uuids
-          :initform '()
-          :accessor string-list/strings)
-   (source :initarg :source
-           :initform nil
-           :accessor string-list/source)
-   (selected :initarg :selected
+  ((uuids :accessor string-list/strings
+          :initarg :uuids
+          :documentation "The UUID strings used as keys in the source and as the strings in the model.")
+   (source :accessor string-list/source
+           :initarg :source
+           :documentation "The hash-table which holds the objects to be displayed.")
+   (selected :accessor string-list/selected
+             :initarg :selected
              :initform nil
-             :accessor string-list/selected)
-   (filter :initarg :filter
-           :accessor string-list/filter)
-   (model :initarg :model
-          :initform nil
-          :accessor string-list/model)
-   (view :initarg :view
-         :initform nil
-         :accessor string-list/view)))
+             :documentation "The currently selected object in the list store.")
+   (filter-object :accessor string-list/filter-object
+                  :initarg :filter-object
+                  :initform nil
+                  :documentation "The object used as a filter.")
+   (filter :accessor string-list/filter
+           :initarg :filter
+           :initform nil
+           :documentation "The GTK:CustomFilter object")
+   (model :accessor string-list/model
+          :initarg :model
+          :documentation "The GTK:StringListStore object")
+   (view :accessor string-list/view
+         :initarg :view
+         :documentation "The GTK:ColumnView object"))
+  (:documentation "A helper class to manage interactions with GTK:StringListStores."))
 
 (defun create-string-list (source &key (filter-object nil) (filter-func nil))
   (let* ((uuids (loop :for u being the hash-keys of source
                       :collect u))
          (model (gtk:make-string-list :strings uuids))
          (view (gtk:make-column-view :model nil))
-         (sl (make-instance 'string-list :filter filter-object :uuids uuids :model model
-                            :view view :source source)))
-    (if filter-func
-        (let ((filt (gtk:make-custom-filter
-                     :match-func (cffi:callback filter-string-object-via-accessor)
-                     :user-data (cffi:make-pointer (glib::put-object (alexandria:compose (alexandria:curry filter-func (string-list/filter sl)) (alexandria:rcurry #'gethash (string-list/source sl)))))
-                     :user-destroy (cffi:callback glib::free-object-callback))))
-          (setf (gtk:column-view-model view)
-                (gtk:make-single-selection :model (gtk:make-sort-list-model :model (gtk:make-filter-list-model :model model :filter filt) :sorter (gtk:column-view-sorter view)))))
-        (setf (gtk:column-view-model view)
-              (gtk:make-single-selection :model (gtk:make-sort-list-model :model model :sorter (gtk:column-view-sorter view)))))
+         (sl (make-instance 'string-list :uuids uuids :model model :view view :source source)))
+    (setf (gtk:column-view-model view)
+          (gtk:make-single-selection :model (gtk:make-sort-list-model :model model :sorter (gtk:column-view-sorter view))))
+    (when (and filter-object filter-func)
+        (string-list/add-filter sl filter-object filter-func))
     (gtk:connect (gtk:column-view-model view) "selection-changed"
                    (lambda (model position n-items)
                      (declare (ignore position n-items))
                      (let ((uuid (gtk:string-object-string (gobj:coerce (gtk:single-selection-selected-item model) 'gtk:string-object))))
                        (setf (string-list/selected sl) (gethash uuid source nil)))))
     sl))
+
+(defmethod string-list/add-filter ((sl string-list) filter-object filter-func)
+  (setf (string-list/filter-object sl) filter-object)
+  (setf (string-list/filter sl) (gtk:make-custom-filter
+                                 :match-func (cffi:callback filter-string-object-via-accessor)
+                                 :user-data (cffi:make-pointer (glib::put-object (alexandria:compose (alexandria:curry filter-func (string-list/filter-object sl)) (alexandria:rcurry #'gethash (string-list/source sl)))))
+                                 :user-destroy (cffi:callback glib::free-object-callback)))
+  (setf (gtk:column-view-model (string-list/view sl))
+        (gtk:make-single-selection :model (gtk:make-sort-list-model :model (gtk:make-filter-list-model :model (string-list/model sl) :filter (string-list/filter sl))
+                                                                    :sorter (gtk:column-view-sorter (string-list/view sl))))))
 
 (defmethod string-list/add-label-column ((sl string-list) title accessor datatype comparator)
   "Label columns sort by default."

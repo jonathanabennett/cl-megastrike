@@ -133,9 +133,8 @@
 
 (defun draw-mul-list ()
   (let* ((layout (gtk:make-grid))
-         (scroll (gtk:make-scrolled-window))
-         (filt (make-instance 'mek :type +GROUND-UNITS+)))
-    (setf (lobby/mul *lobby*) (create-string-list *mul* :filter-object filt :filter-func #'filter-mek))
+         (scroll (gtk:make-scrolled-window)))
+    (setf (lobby/mul *lobby*) (create-string-list *mul* :filter-object (make-instance 'mek :type +GROUND-UNITS+) :filter-func #'filter-mek))
     (string-list/add-label-column (lobby/mul *lobby*) "Unit" #'mek/full-name "string" #'mek/full-name)
     (string-list/add-label-column (lobby/mul *lobby*) "Role" #'mek/role "string" #'mek/role)
     (string-list/add-label-column (lobby/mul *lobby*) "Type" #'mek/type "string" #'mek/type)
@@ -153,19 +152,20 @@
     (string-list/add-label-column (lobby/mul *lobby*) "OV" #'mek/ov "int" #'mek/ov)
     (string-list/add-label-column (lobby/mul *lobby*) "Abilities" #'mek/abilities "string" #'mek/abilities)
 
-    (loop :for label in '("Ground Units" "Battlemechs" "All Mechs" "Conventional Units"
+    (loop :for label in (list "Ground Units" "Battlemechs" "All Mechs" "Conventional Units"
                           "Vehicles" "Infantry")
-          :for filt-type in '(+ground-units+ +bm-units+ +mech-units+ +conventional-units+
-                              +vehicle-units+ +infantry-units+)
-          :for col in '(0 1 2 3 4 5)
+          :for filt-type in (list +ground-units+ +bm-units+ +mech-units+ +conventional-units+
+                                  +vehicle-units+ +infantry-units+)
+          :for col in (list 0 1 2 3 4 5)
           :do
           (let ((btn (gtk:make-button :label label))
-                (filt (string-list/filter (lobby/mul *lobby*))))
+                (filt (string-list/filter-object (lobby/mul *lobby*)))
+                (filt-type filt-type))
             (gtk:connect btn "clicked"
                          (lambda (button)
                            (declare (ignore button))
                            (setf (mek/type filt) filt-type)
-                           (gtk:filter-changed (string-list/filter sl) gtk:+filter-change-different+)))
+                           (gtk:filter-changed (string-list/filter (lobby/mul *lobby*)) gtk:+filter-change-different+)))
             (gtk:grid-attach layout btn col 0 1 1)))
 
     (let ((name-label (gtk:make-label :str "Chassis:"))
@@ -173,13 +173,13 @@
           (search-btn (gtk:make-button :label "Search")))
       (gtk:connect name-entry "changed"
                    (lambda (entry)
-                     (setf (mek/chassis filt)
+                     (setf (mek/chassis (string-list/filter-object (lobby/mul *lobby*)))
                            (ignore-errors
                             (gtk:entry-buffer-text (gtk:entry-buffer name-entry))))))
       (gtk:connect search-btn "clicked"
                    (lambda (button)
                      (declare (ignore button))
-                     (gtk:filter-changed filter gtk:+filter-change-different+)))
+                     (gtk:filter-changed (string-list/filter (lobby/mul *lobby*)) gtk:+filter-change-different+)))
       (gtk:grid-attach layout name-label 0 1 1 1)
       (gtk:grid-attach layout name-entry 1 1 1 1)
       (gtk:grid-attach layout search-btn 2 1 1 1))
