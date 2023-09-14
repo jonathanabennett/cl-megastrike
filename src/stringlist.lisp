@@ -1,7 +1,6 @@
 (in-package :megastrike)
 
-;; CALLBACK FUNCTIONS for cffi access
-
+;:; CALLBACK FUNCTIONS for cffi access
 ;; Callback function to filter objects
 (cffi:defcallback filter-string-object-via-accessor :bool
     ((item :pointer)
@@ -132,10 +131,9 @@
 (defmethod string-list/add-item ((sl string-list) item item-name)
   (let ((uuid (format nil "~a" (uuid:make-v5-uuid uuid:+namespace-dns+ item-name))))
     (setf (gethash uuid (string-list/source sl)) item)
-    (if (not (= (hash-table-count (string-list/source sl)) (length (string-list/strings sl))))
-        (progn
-          (add-to-end (string-list/strings sl) uuid)
-          (gtk:string-list-append (string-list/model sl) uuid)))))
+    (unless (= (hash-table-count (string-list/source sl)) (length (string-list/strings sl)))
+      (add-to-end (string-list/strings sl) uuid)
+      (gtk:string-list-append (string-list/model sl) uuid))))
 
 (defmethod string-list/get-column-by-title ((sl string-list) title)
   (remove-if-not #'column-searcher (gobj:coerce (gtk:column-view-columns (string-list/view sl)) 'gtk:string-object-string) title))
@@ -161,10 +159,3 @@
          (pos (gtk:single-selection-selected model)))
     (gtk:selection-model-selection-changed model pos 1)
     (gio:list-model-items-changed model pos 0 0)))
-
-;;   (defun force-pv-update ()
-;;     ;; Check which item is select and select the opposite.
-;;     (let* ((m (gobj:coerce (gtk:column-view-model view) 'gtk:single-selection))
-;;            (pos (gtk:single-selection-selected m)))
-;;       (setf (gtk:single-selection-can-unselect-p m) t)
-;;       (gtk:selection-model-selection-changed m (+ ) 1)))

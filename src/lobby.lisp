@@ -67,17 +67,16 @@
         (height-entry (gtk:make-entry))
         (map-created (gtk:make-label :str "No Map Created."))
         (create-button (gtk:make-button :label "Create Map")))
-    (if (check-board)
-        (setf (gtk:label-label map-created) "Map Created."))
+    (when (check-board)
+      (setf (gtk:label-label map-created) "Map Created."))
     (gtk:connect create-button "clicked"
                  (lambda (button)
                    (declare (ignore widget))
                    (let ((w (parse-integer (gtk:entry-buffer-text (gtk:entry-buffer width-entry)) :junk-allowed t))
                          (h (parse-integer (gtk:entry-buffer-text (gtk:entry-buffer height-entry)) :junk-allowed t)))
-                     (if (and w h)
-                         (progn
-                           (setf (lobby/map *lobby*) (make-board w h))
-                           (setf (gtk:label-label map-created) "Map Created."))))))
+                     (when (and w h)
+                       (setf (lobby/map *lobby*) (make-board w h))
+                       (setf (gtk:label-label map-created) "Map Created.")))))
     (setf (gtk:label-use-markup-p header) t
           (gtk:label-use-markup-p width-label) t
           (gtk:label-use-markup-p height-label) t)

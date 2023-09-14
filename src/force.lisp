@@ -38,7 +38,7 @@
 (defmethod force-pv ((f force))
   (let ((total 0))
     (maphash #'(lambda (k v)
-                      (if (same-force (cu/force v) f) (incf total (cu/pv v)))) (game/units *game*))
+                 (if (same-force (cu/force v) f) (incf total (cu/pv v)))) (game/units *game*))
     total))
 
 (defmethod turn-order-list ((f force))

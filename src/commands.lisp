@@ -55,16 +55,16 @@
                  :name "Move"
                  :menu t)
   ((destination 'tile))
-  (if (and (eq (game/current-phase *game*) 2) (game/active-unit *game*))
-      (move-unit (game/active-unit *game*) destination)))
+  (when (and (eq (game/current-phase *game*) 2) (game/active-unit *game*))
+    (move-unit (game/active-unit *game*) destination)))
 
 
 (define-megastrike-command (com-command-attack
                  :name "Attack"
                  :menu t)
   ((target 'combat-unit))
-  (if (and (eq (game/current-phase *game*) 3) (game/active-unit *game*))
-      (make-attack (game/active-unit *game*) target)))
+  (when (and (eq (game/current-phase *game*) 3) (game/active-unit *game*))
+    (make-attack (game/active-unit *game*) target)))
 
 (define-megastrike-command (com-roll :name "Roll" :menu t)
   ()

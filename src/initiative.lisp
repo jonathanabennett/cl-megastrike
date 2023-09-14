@@ -68,8 +68,8 @@ deployment phase. Deployment phases are only run when there are deployable units
   (let ((to-deploy '()))
      (setf (frame-current-layout frame) :game-round)
      (map-entities #'(lambda (e) (if (eql (location/q e) nil) (push e to-deploy))))
-     (if (= (length to-deploy) 0)
-         (setf (frame-current-layout frame) :round-report))))
+     (when (= (length to-deploy) 0)
+       (setf (frame-current-layout frame) :round-report))))
 
 (defun deploy-unit (frame)
   (let ((force (nth (game/initiative-place *game*) (game/initiative-list *game*)))

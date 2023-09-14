@@ -6,8 +6,8 @@
   "Load the contents of the data directory in prepration for execution."
   (let ((mech-files (uiop:directory-files (uiop:merge-pathnames* #p"data/units/" *here*))))
     (dolist (file mech-files)
-      (if (string= (pathname-type file) "lisp")
-          (load file)))))
+      (when (string= (pathname-type file) "lisp")
+        (load file)))))
 
 (defun build-mul ()
   (setf *master-unit-list* (load-database)))
@@ -19,8 +19,10 @@
     (setf (location/q u) (hexagon-q hex))
     (setf (location/r u) (hexagon-r hex))
     (setf (location/s u) (hexagon-s hex))
-    (if struct (setf (damageable/cur-struct u) struct))
-    (if armor  (setf (damageable/cur-armor  u) armor))
+    (when struct
+      (setf (damageable/cur-struct u) struct))
+    (when armor
+      (setf (damageable/cur-armor  u) armor))
     (setf (damageable/crit-list u) crits)
     (setf (heat/cur-heat u) heat)
     (setf (pilot/name u) pilot)
