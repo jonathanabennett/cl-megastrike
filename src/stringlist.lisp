@@ -60,6 +60,7 @@
   (:documentation "A helper class to manage interactions with GTK:StringListStores."))
 
 (defun create-string-list (source &key (filter-object nil) (filter-func nil))
+  "Constructor for the class."
   (let* ((uuids (loop :for u being the hash-keys of source
                       :collect u))
          (model (gtk:make-string-list :strings uuids))
@@ -77,6 +78,7 @@
     sl))
 
 (defmethod string-list/add-filter ((sl string-list) filter-object filter-func)
+  "Adds a filter to a List store."
   (setf (string-list/filter-object sl) filter-object)
   (setf (string-list/filter sl) (gtk:make-custom-filter
                                  :match-func (cffi:callback filter-string-object-via-accessor)
@@ -92,7 +94,7 @@
          (col (gtk:make-column-view-column :title title :factory fact)))
     (gtk:column-view-append-column (string-list/view sl) col)
     (setf (gtk:column-view-column-sorter col) (gtk:make-custom-sorter
-                                               :sort-func (if (string= datatype "string")
+                                               :sort-func (if (string= datatype "string") ;; Two valid sorting options are string or int
                                                               (cffi:callback compare-string-object-via-accessor)
                                                               (cffi:callback compare-string-number-object-via-accessor))
                                                :user-data (cffi:make-pointer (glib::put-object (alexandria:compose comparator (alexandria:rcurry #'gethash (string-list/source sl)))))
@@ -111,6 +113,7 @@
                      (setf (gtk:label-text (gobj:coerce (gtk:list-item-child item) 'gtk:label)) value))))))
 
 (defmethod string-list/add-color-column ((sl string-list) title accessor)
+  "Adds a color column to the display. This needs to be modified to make the color 'swatch' insensitive."
   (let* ((fact (gtk:make-signal-list-item-factory))
          (col (gtk:make-column-view-column :title title :factory fact)))
     (gtk:column-view-append-column (string-list/view sl) col)
@@ -129,17 +132,12 @@
                        (setf (gtk:color-dialog-button-rgba (gobj:coerce (gtk:list-item-child item) 'gtk:color-dialog-button)) color)))))))
 
 (defmethod string-list/add-item ((sl string-list) item item-name)
+  "Add an item to the list. Doing it here makes the addition atomic."
   (let ((uuid (format nil "~a" (uuid:make-v5-uuid uuid:+namespace-dns+ item-name))))
     (setf (gethash uuid (string-list/source sl)) item)
     (unless (= (hash-table-count (string-list/source sl)) (length (string-list/strings sl)))
       (add-to-end (string-list/strings sl) uuid)
       (gtk:string-list-append (string-list/model sl) uuid))))
-
-(defmethod string-list/get-column-by-title ((sl string-list) title)
-  (remove-if-not #'column-searcher (gobj:coerce (gtk:column-view-columns (string-list/view sl)) 'gtk:string-object-string) title))
-
-(defun column-searcher (column search-term)
-  (string= (gtk:column-view-column-title column) search-term))
 
 (defmethod string-list/brute-update ((sl string-list))
   "This update function is only useful for short lists as it manually wipes the list clean and repopulates it."
@@ -159,3 +157,9 @@
          (pos (gtk:single-selection-selected model)))
     (gtk:selection-model-selection-changed model pos 1)
     (gio:list-model-items-changed model pos 0 0)))
+
+(defmethod string-list/get-column-by-title ((sl string-list) title)
+  (remove-if-not #'column-searcher (gobj:coerce (gtk:column-view-columns (string-list/view sl)) 'gtk:string-object-string) title))
+
+(defun column-searcher (column search-term)
+  (string= (gtk:column-view-column-title column) search-term))
