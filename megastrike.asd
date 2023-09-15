@@ -9,7 +9,7 @@
   :license  "GPL3"
   :version "1.2.0"
   :serial t
-  :depends-on (:cl-gtk4 :cl-gdk4 :fuzzy-match :cl-slug :cl-csv :cl-ppcre :uuid :str)
+  :depends-on (:cl-gtk4 :cl-gdk4 :cl-cairo2 :fuzzy-match :cl-slug :cl-csv :cl-ppcre :uuid :str)
   :components ((:module "src"
                 :components
                 ((:file "package")
@@ -24,8 +24,8 @@
                  (:file "combat-unit" :depends-on ("mul" "board"))
                  (:file "initiative" :depends-on ("utils"))
                  (:file "force" :depends-on ("combat-unit" "utils"))
-                 ;; (:file "unitcard" :depends-on ("element"))
-                 (:file "megastrike" :depends-on ("utils" ))
+                 (:file "unitcard" :depends-on ("combat-unit"))
+                 (:file "megastrike" :depends-on ("utils" "unitcard"))
                  )))
   ;; :defsystem-depends-on (:deploy)
   ;; :build-operation "deploy-op"
