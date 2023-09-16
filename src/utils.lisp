@@ -1,10 +1,4 @@
-(cl:defpackage cairo-gobject
-  (:use)
-  (:export #:*ns*))
-
-(cl:in-package #:megastrike)
-
-(gir-wrapper:define-gir-namespace "cairo")
+(in-package :megastrike)
 
 ;;; Define globals and major variables
 ;;;
@@ -87,6 +81,14 @@
   "This macro cleans up calls to append to the end of lists, something I need to do a lot in this codebase."
   `(setf ,target (append ,target (list ,item))))
 
+(cl:defpackage cairo-gobject
+  (:use)
+  (:export #:*ns*))
+
+(cl:in-package #:megastrike)
+
+(gir-wrapper:define-gir-namespace "cairo")
+
 (cffi:defcstruct gdk-rgba
   (red :double)
   (green :double)
@@ -104,24 +106,3 @@
            (locally
                #+sbcl (declare (sb-ext:unmuffle-conditions sb-ext:compiler-note))
                ,@body)))))
-
-(declaim (ftype (function (t t t t) t) draw-func))
-
-(cffi:defcallback %draw-func :void ((area :pointer)
-                                    (cr :pointer)
-                                    (width :int)
-                                    (height :int)
-                                    (data :pointer))
-  (declare (ignore data))
-  (let ((cairo:*context* (make-instance 'cairo:context
-                                        :pointer cr
-                                        :width width
-                                        :height height
-                                        :pixel-based-p nil)))
-    (draw-func (make-instance 'gir::object-instance
-                              :class (gir:nget gtk:*ns* "DrawingArea")
-                              :this area)
-               (make-instance 'gir::struct-instance
-                              :class (gir:nget megastrike::*ns* "Context")
-                              :this cr)
-               width height)))

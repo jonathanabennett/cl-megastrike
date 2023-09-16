@@ -99,10 +99,10 @@ distance."
                                 :pixel-to-hex-matrix
                                   (vector (/ 2.0 3.0) 0 (/ -1.0 3.0) (/ (sqrt 3.0) 3.0))
                                 :start-angle 0
-                                :x-size 45
-                                :y-size 45
-                                :x-origin 10
-                                :y-origin 10))
+                                :x-size 35
+                                :y-size 35
+                                :x-origin 20
+                                :y-origin 20))
 
 (defclass point ()
   ((x :initarg :x
