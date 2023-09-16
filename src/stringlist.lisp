@@ -156,7 +156,7 @@
   (let* ((model (gobj:coerce (gtk:column-view-model (string-list/view sl)) 'gtk:single-selection))
          (pos (gtk:single-selection-selected model)))
     (gtk:selection-model-selection-changed model pos 1)
-    (gio:list-model-items-changed model pos 0 0)))
+    (gio:list-model-items-changed model pos 0 1)))
 
 (defmethod string-list/get-column-by-title ((sl string-list) title)
   (remove-if-not #'column-searcher (gobj:coerce (gtk:column-view-columns (string-list/view sl)) 'gtk:string-object-string) title))

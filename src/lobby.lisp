@@ -77,16 +77,9 @@
         (height-label (gtk:make-label :str "<b>Map Height: </b>"))
         (height-entry (gtk:make-entry))
         (map-created (gtk:make-label :str "No Map Created."))
-        (create-button (gtk:make-button :label "Create Map"))
-        (launch-game-button (gtk:make-button :label "Game Not Ready")))
+        (create-button (gtk:make-button :label "Create Map")))
     (when (check-board)
       (setf (gtk:label-label map-created) "Map Created."))
-    (gtk:timeout-add 500 (lambda ()
-                           (if (game-ready-p)
-                               (progn
-                                 (setf (gtk:button-label launch-game-button) "Game Ready")
-                                 glib:+source-remove+)
-                               glib:+source-continue+)))
     (gtk:connect create-button "clicked"
                  (lambda (button)
                    (declare (ignore widget))
@@ -95,12 +88,6 @@
                      (when (and w h)
                        (setf (lobby/map *lobby*) (make-board w h))
                        (setf (gtk:label-label map-created) "Map Created.")))))
-    (gtk:connect launch-game-button "clicked"
-                 (lambda (button)
-                   (declare (ignore widget))
-                   (setf (game/units *game*) (string-list/source (lobby/units *lobby*))
-                         (game/forces-hash *game*) (string-list/source (lobby/forces *lobby*))
-                         (game/board *game*) (lobby/map *lobby*))))
     (setf (gtk:label-use-markup-p header) t
           (gtk:label-use-markup-p width-label) t
           (gtk:label-use-markup-p height-label) t)
@@ -111,7 +98,6 @@
     (gtk:grid-attach layout height-entry 1 2 1 1)
     (gtk:grid-attach layout map-created 0 3 1 1)
     (gtk:grid-attach layout create-button 1 3 1 1)
-    (gtk:grid-attach layout launch-game-button 0 4 2 1)
     layout))
 
 ;;; Force Section
