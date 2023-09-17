@@ -3,7 +3,7 @@
 ;;; Tile class
 
 (defclass tile (hexagon)
-  ((occupied-p :initform nil :accessor tile-occupied)
+  ((occupied-p :initform nil :accessor tile-occupied-p)
    (elevation :initarg :elevation :accessor tile-elevation
     :documentation "The elevation of the tile.")
    (terrain :initarg :terrain :accessor tile-terrain

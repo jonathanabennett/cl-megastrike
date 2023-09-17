@@ -115,35 +115,6 @@
             (gtk:drawing-area-draw-func map-area) (list (cffi:callback %draw-func)
                                                     (cffi:null-pointer)
                                                     (cffi:null-pointer)))
-
-    ;; (gtk:connect map-area "draw"
-    ;;    (lambda (widget cr)
-    ;;      (let ((cr (pointer cr))
-    ;;            ;; Get the GdkWindow for the widget
-    ;;            (window (gtk:widget-window widget)))
-    ;;        ;; Clear surface
-    ;;        (cairo-set-source-rgb cr 1.0 1.0 1.0)
-    ;;        (cairo-paint cr)
-    ;;        ;; Example is in 1.0 x 1.0 coordinate space
-    ;;        ;; Drawing code goes here
-    ;;        (cairo-set-line-width cr 3)
-    ;;        (maphash #'(lambda (k v) (cairo-draw-hex k v cr window))
-    ;;                 (grid/tiles (game/board *game*)))
-    ;;        (cairo-set-source-rgb cr 1.0 1.0 1.0)
-    ;;        (map-entities #'(lambda (e)
-    ;;                          (if (location/q e)
-    ;;                              (let ((origin (hex-to-pixel
-    ;;                                             (get-hex e (game/board *game*))
-    ;;                                             +default-layout+)))
-    ;;                                (cairo-set-source-surface
-    ;;                                 cr
-    ;;                                 (cairo-image-surface-create-from-png (display/image-path e))
-    ;;                                 (+ (* (layout-x-size +default-layout+) -0.9)
-    ;;                                    (point-x origin))
-    ;;                                 (+ (* (layout-y-size +default-layout+) -0.8)
-    ;;                                    (point-y origin)))
-    ;;                            (cairo-paint cr)))))
-    ;;        t)))
-      (setf (gtk:scrolled-window-child map-scroll) map-area)
-;;      (gtk:grid-attach-next-to layout recordsheet map-scroll :right 1 1)
+    (setf (gtk:scrolled-window-child map-scroll) map-area)
+    ;; (gtk:grid-attach-next-to layout recordsheet map-scroll :right 1 1)
     map-scroll))
