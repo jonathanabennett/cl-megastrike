@@ -34,4 +34,5 @@
 (defmethod game/find-force ((g game) u)
   (gethash u (game/forces-hash g)))
 
-(defmethod game/tile-occupied-p ((g game) (t tile)))
+(defmethod game/tile-occupied-p ((g game) (h tile))
+  t)
