@@ -106,25 +106,21 @@
 ;;     ))
 
 (defun draw-gameplay-screen ()
-  (let ((layout (gtk:make-grid))
-        (map-scroll (draw-map))
-        (recordsheets (draw-recordsheets))
+  (let ((map-scroll (gtk:make-scrolled-window))
+        (map-area (gtk:make-drawing-area))
+        (clicker (gtk:make-gesture-click))
+       ;; (recordsheet (draw-stats))
        )
-    (setf (gtk:widget-vexpand-p map-scroll) t
-          (gtk:widget-hexpand-p map-scroll) t
-          (gtk:widget-vexpand-p recordsheets) t
-          (gtk:widget-hexpand-p recordsheets) t)
-    (gtk:grid-attach layout map-scroll 0 0 4 4)
-    (gtk:grid-attach layout recordsheets 4 0 1 4)
-    layout))
-
-(defun draw-map ()
-  (let ((layout (gtk:make-scrolled-window))
-        (map-area (gtk:make-drawing-area)))
-    (setf (gtk:drawing-area-content-width map-area) (* (* (board/width (game/board *game*)) (layout-x-size +default-layout+)) 1.2)
-          (gtk:drawing-area-content-height map-area) (* (* (board/height (game/board *game*)) (layout-y-size +default-layout+)) 1.2)
-            (gtk:drawing-area-draw-func map-area) (list (cffi:callback %draw-func)
-                                                    (cffi:null-pointer)
-                                                    (cffi:null-pointer)))
-    (setf (gtk:scrolled-window-child layout) map-area)
-    layout))
+    (setf (gtk:drawing-area-content-width map-area) 600
+          (gtk:drawing-area-content-height map-area) 800
+          (gtk:drawing-area-draw-func map-area) (list (cffi:callback %draw-func)
+                                                      (cffi:null-pointer)
+                                                      (cffi:null-pointer)))
+    (setf (gtk:event-controller-widget clicker) map-area)
+    (gtk:connect clicker "pressed"
+                 (lambda (handler presses x y)
+                   (declare (ignore handler presses))
+                   (format t "Clicked at ~a,~a" x y)))
+    (setf (gtk:scrolled-window-child map-scroll) map-area)
+    ;; (gtk:grid-attach-next-to layout recordsheet map-scroll :right 1 1)
+    map-scroll))
