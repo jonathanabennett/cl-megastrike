@@ -11,12 +11,9 @@
     (setf (gtk:window-title window) "Megastrike")
     (let ((box (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 5))
           (command-buttons (gtk:make-box :orientation gtk:+orientation-horizontal+ :spacing 5)))
-      (let ((lobby (draw-lobby-screen))
-            (game (draw-gameplay-screen)))
+      (let ((lobby (draw-lobby-screen)))
         (setf (gtk:widget-hexpand-p lobby) t
               (gtk:widget-vexpand-p lobby) t)
-        (setf (gtk:widget-hexpand-p game) t
-              (gtk:widget-vexpand-p game) t)
         (gtk:box-append box lobby)
 
         (let ((button (gtk:make-button :label "Not Ready")))
@@ -27,7 +24,10 @@
                                                 (game/forces-hash *game*) (string-list/source (lobby/forces *lobby*))
                                                 (game/board *game*) (lobby/map *lobby*))
                                           (gtk:box-remove box lobby)
-                                          (gtk:box-prepend box game)))
+                                          (let ((game (draw-gameplay-screen)))
+                                            (setf (gtk:widget-hexpand-p game) t
+                                                  (gtk:widget-vexpand-p game) t)
+                                            (gtk:box-prepend box game))))
           (gtk:timeout-add 500 (lambda ()
                                  (if (game-ready-p)
                                      (progn
@@ -106,15 +106,25 @@
 ;;     ))
 
 (defun draw-gameplay-screen ()
-  (let ((map-scroll (gtk:make-scrolled-window))
-        (map-area (gtk:make-drawing-area))
-       ;; (recordsheet (draw-stats))
+  (let ((layout (gtk:make-grid))
+        (map-scroll (draw-map))
+        (recordsheets (draw-recordsheets))
        )
-    (setf (gtk:drawing-area-content-width map-area) 600
-          (gtk:drawing-area-content-height map-area) 800
+    (setf (gtk:widget-vexpand-p map-scroll) t
+          (gtk:widget-hexpand-p map-scroll) t
+          (gtk:widget-vexpand-p recordsheets) t
+          (gtk:widget-hexpand-p recordsheets) t)
+    (gtk:grid-attach layout map-scroll 0 0 4 4)
+    (gtk:grid-attach layout recordsheets 4 0 1 4)
+    layout))
+
+(defun draw-map ()
+  (let ((layout (gtk:make-scrolled-window))
+        (map-area (gtk:make-drawing-area)))
+    (setf (gtk:drawing-area-content-width map-area) (* (* (board/width (game/board *game*)) (layout-x-size +default-layout+)) 1.2)
+          (gtk:drawing-area-content-height map-area) (* (* (board/height (game/board *game*)) (layout-y-size +default-layout+)) 1.2)
             (gtk:drawing-area-draw-func map-area) (list (cffi:callback %draw-func)
                                                     (cffi:null-pointer)
                                                     (cffi:null-pointer)))
-    (setf (gtk:scrolled-window-child map-scroll) map-area)
-    ;; (gtk:grid-attach-next-to layout recordsheet map-scroll :right 1 1)
-    map-scroll))
+    (setf (gtk:scrolled-window-child layout) map-area)
+    layout))

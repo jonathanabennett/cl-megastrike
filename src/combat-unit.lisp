@@ -15,6 +15,8 @@
 (defclass combat-unit ()
   ((cu-mek :initarg :mek
            :accessor cu/mek)
+   (cu-full-name :accessor cu/full-name
+                 :initarg :full-name)
    (cu-force :initarg :force
              :accessor cu/force)
    (cu-pv-mod :initarg :pv-mod
@@ -39,9 +41,18 @@
 (defun new-combat-unit (&key mek force pv-mod (move-used nil) (cur-armor nil)
                           (cur-struct nil) (crits '()) (target nil) (cur-heat 0)
                           (location nil) pilot)
-  (let ((ca (if cur-armor cur-armor (mek/armor mek)))
+  (let ((unit-counter 0)
+        (full-name "")
+        (ca (if cur-armor cur-armor (mek/armor mek)))
         (cs (if cur-struct cur-struct (mek/structure mek))))
-    (let ((cu (make-instance 'combat-unit
+    (loop for m being the hash-values of (string-list/source (lobby/units *lobby*))
+          if (string= (mek/full-name (cu/mek m)) (mek/full-name mek))
+            do (incf unit-counter))
+    (setf full-name (if (< 0 unit-counter)
+                        (format nil "~a #~a" (mek/full-name mek) unit-counter)
+                        (mek/full-name mek)))
+    (let* ((cu (make-instance 'combat-unit
+                             :full-name full-name
                              :mek mek
                              :force force
                              :pv-mod pv-mod
@@ -74,9 +85,6 @@
   (if cu
       (format nil "~{~/megastrike::format-move-assoc/~^/~}" (cu/movement cu))
       "None"))
-
-(defun cu/full-name (unit)
-  (mek/full-name (cu/mek unit)))
 
 (defun cu/arm-struct (unit)
   (format nil "~a/~a" (cu/cur-armor unit) (cu/cur-struct unit)))

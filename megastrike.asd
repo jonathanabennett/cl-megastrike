@@ -14,7 +14,6 @@
                 :components
                 ((:file "package")
                  (:file "utils")
-                 (:file "game")
                  (:file "stringlist")
                  (:file "mul")
                  (:file "lobby" :depends-on ("mul"))
@@ -24,8 +23,9 @@
                  (:file "combat-unit" :depends-on ("mul" "board"))
                  (:file "initiative" :depends-on ("utils"))
                  (:file "force" :depends-on ("combat-unit" "utils"))
+                 (:file "game" :depends-on ("board" "force"))
                  (:file "unitcard" :depends-on ("combat-unit"))
-                 (:file "megastrike" :depends-on ("utils" "unitcard"))
+                 (:file "megastrike" :depends-on ("utils" "unitcard" "game"))
                  )))
   ;; :defsystem-depends-on (:deploy)
   ;; :build-operation "deploy-op"

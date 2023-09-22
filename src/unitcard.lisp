@@ -1,145 +1,95 @@
 (in-package :megastrike)
 
+(defun draw-recordsheets ()
+  (let ((layout (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 15))
+        (recordsheet-label (gtk:make-label :str "Record Sheets")))
+    (gtk:box-append layout recordsheet-label)
+    (maphash #'(lambda (uuid unit)
+                 (declare (ignore uuid))
+                 (format t "Record Sheet for ~a" (cu/full-name unit))
+                 (gtk:box-append layout (draw-stat-block unit)))
+             (game/units *game*))
+    layout))
 
-;; (defun draw-stats ()
-;;   (let ((grid (gtk:make-grid)))
-;;     (when (game/active-unit *game*)
-;;       (let ((unit-id-line (gtk:make-label :str (format nil "<big>~a</big>"
-;;                                                        (info/full-name (game/active-unit *game*)))))
-;;             (info-line (general-info-block (game/active-unit *game*)))
-;;             (attack-line (attack-info-block (game/active-unit *game*)))
-;;             (heat-line (heat-info-block (game/active-unit *game*)))
-;;             (armor-levels (damage-info-block (game/active-unit *game*)))
-;;             (specials (specials-info-block (game/active-unit *game*))))
-;;         (gtk:grid-attach grid unit-id-line 0 0 1 1)
-;;         (gtk:grid-attach grid info-line 0 1 1 1)
-;;         (gtk:grid-attach grid attack-line 0 2 1 1)
-;;         (gtk:grid-attach grid heat-line 0 3 1 1)
-;;         (gtk:grid-attach grid armor-levels 0 4 1 1)
-;;         (gtk:grid-attach grid specials 0 5 1 1)))
-;;     grid))
-;;
-;; (defun general-info-block (combat-unit)
-;;   "Draws the first block of the Record sheet, containing the Type, MV, Role, and Pilot info."
-;;   (let ((u-type  (info/unit-type combat-unit))
-;;         (u-size  (info/size combat-unit))
-;;         (u-tmm   (unit-tmm combat-unit))
-;;         (u-move  (moveable/format-move combat-unit))
-;;         (u-role  (info/role combat-unit))
-;;         (u-pilot (pilot/display combat-unit)))
-;;     (let ((frame (make-instance 'gtk-frame
-;;                                 :border-width 2
-;;                                 :label "General Info"))
-;;           (info-label (make-instance 'gtk-label
-;;                                      :use-markup t
-;;                                      :halign :start
-;;                                      :label (format nil "<b>TP:</b> ~a~4@t<b>Size:</b> ~a~4@t<b>TMM:</b>~a~4@t<b>Move:</b> ~a~%<b>Role:</b> ~16a <b>Pilot:</b>~a"
-;;             u-type u-size u-tmm u-move u-role u-pilot))))
-;;       (gtk-container-add frame info-label)
-;;       frame)))
+(defun draw-stat-block (u)
+  (let ((frame (gtk:make-frame :label (cu/full-name u)))
+        (statblock (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 5))
+        (info-line (draw-general-info-line u))
+        (attack-line (draw-attack-line u))
+        (heat-line (draw-heat-line u))
+        (damage-line (draw-damage-line u))
+        (abilities-line (draw-abilities-line u)))
+    (gtk:box-append statblock info-line)
+    (gtk:box-append statblock attack-line)
+    (gtk:box-append statblock heat-line)
+    (gtk:box-append statblock damage-line)
+    (gtk:box-append statblock abilities-line)
+    (setf (gtk:frame-child frame) statblock)
+    frame))
 
-;; (defun attack-info-block (combat-unit)
-;;   "Draws the attack and heat information."
-;;   (let ((frame (make-instance 'gtk-frame
-;;                               :border-width 2
-;;                               :label "Attacks"))
-;;         (atk-label (make-instance 'gtk-label
-;;                                   :halign :start
-;;                                   :label (format nil "S: ~3a M: ~3a L: ~3a"
-;;                                                  (attacks/short combat-unit)
-;;                                                  (attacks/medium combat-unit)
-;;                                                  (attacks/long combat-unit)))))
-;;     (gtk-container-add frame atk-label)
-;;     frame))
+(defun draw-general-info-line (u)
+  (let ((line (gtk:make-box :orientation gtk:+orientation-horizontal+ :spacing 5))
+        (type-label (gtk:make-label :str (format nil "Type: ~A" (mek/type (cu/mek u)))))
+        (size-label (gtk:make-label :str (format nil "Size: ~A" (mek/size (cu/mek u)))))
+        (tmm-label (gtk:make-label :str (format nil "TMM: ~A" (mek/tmm (cu/mek u)))))
+        (move-label (gtk:make-label :str (format nil "Move: ~A" (print-movement (cu/mek u)))))
+        (role-label (gtk:make-label :str (format nil "Role: ~A" (mek/role (cu/mek u)))))
+        (pilot-label (gtk:make-label :str (format nil "Pilot: ~A" (display (cu/pilot u))))))
+    (gtk:box-append line type-label)
+    (gtk:box-append line size-label)
+    (gtk:box-append line tmm-label)
+    (gtk:box-append line move-label)
+    (gtk:box-append line role-label)
+    (gtk:box-append line pilot-label)
+    line))
 
-;; (defun heat-info-block (combat-unit)
-;;   (let ((frame (make-instance 'gtk-frame
-;;                               :border-width 2
-;;                               :label "Heat"))
+(defun draw-attack-line (u)
+  (let ((line (gtk:make-box :orientation gtk:+orientation-horizontal+ :spacing 5))
+        (attack-label (gtk:make-label :str (cu/attack-string u))))
+    (gtk:box-append line attack-label)
+    line))
 
-;;         (provider (gtk-css-provider-new))
-;;         (grid (gtk-grid-new))
-;;         (ov-label (make-instance 'gtk-label
-;;                                  :label (format nil "<b>OV: </b> ~a"
-;;                                                 (heat/ov combat-unit))
-;;                                  :use-markup t))
-;;         (heat-label (make-instance 'gtk-label
-;;                                    :label "<b>Current Heat: </b>"
-;;                                    :use-markup t))
-;;         (heat-level-bar (make-instance 'gtk-level-bar
-;;                                       :orientation :horizontal
-;;                                       :mode :discrete
-;;                                       :min-value 0
-;;                                       :max-value 4
-;;                                       :height-request 20
-;;                                       :value (heat/cur-heat combat-unit))))
-;;     (gtk-css-provider-load-from-path provider (namestring (uiop:merge-pathnames* "data/css/heatbar.css" *here*)))
-;;     (gtk-style-context-add-provider (gtk-widget-get-style-context heat-level-bar)
-;;                                     provider
-;;                                     +gtk-style-provider-priority-application+)
-;;     (gtk-grid-attach grid ov-label 0 0 1 1)
-;;     (gtk-grid-attach grid heat-label 0 1 1 1)
-;;     (gtk-grid-attach grid heat-level-bar 1 1 1 1)
-;;     (gtk-container-add frame grid)
-;;     frame))
 
-;; (defun damage-info-block (combat-unit)
-;;   "Draws the current damage and structure and any critical hits."
-;;   (let ((ca (damageable/cur-armor combat-unit))
-;;         (ma (damageable/max-armor combat-unit))
-;;         (cs (damageable/cur-struct combat-unit))
-;;         (ms (damageable/max-struct combat-unit)))
-;;     (let ((frame (make-instance 'gtk-frame
-;;                                 :border-width 2
-;;                                 :label "Damage"))
-;;           (provider (gtk-css-provider-new))
-;;           (armor-label (make-instance 'gtk-label
-;;                                       :label "Armor: "))
-;;           (armor-level-bar (make-instance 'gtk-level-bar
-;;                                           :orientation :horizontal
-;;                                           :mode :discrete
-;;                                           :min-value 0
-;;                                           :max-value ma
-;;                                           :hexpand nil
-;;                                           :halign :start
-;;                                           :width-request (* ma 20)
-;;                                           :height-request 20
-;;                                           :value ca))
-;;           (struct-label (make-instance 'gtk-label
-;;                                        :label "Structure: "))
-;;           (struct-level-bar (make-instance 'gtk-level-bar
-;;                                            :orientation :horizontal
-;;                                            :mode :discrete
-;;                                            :min-value 0
-;;                                            :max-value ms
-;;                                            :hexpand nil
-;;                                            :halign :start
-;;                                            :height-request 20
-;;                                            :width-request (* ms 20)
-;;                                            :value cs))
-;;           (grid (make-instance 'gtk-grid
-;;                                :column-spacing 10)))
-;;       (gtk-css-provider-load-from-path provider (namestring (uiop:merge-pathnames* "data/css/damagebars.css" *here*)))
-;;       (gtk-style-context-add-provider (gtk-widget-get-style-context armor-level-bar)
-;;                                       provider
-;;                                       +gtk-style-provider-priority-application+)
-;;       (gtk-style-context-add-provider (gtk-widget-get-style-context struct-level-bar)
-;;                                       provider
-;;                                       +gtk-style-provider-priority-application+)
-;;       (gtk-grid-attach grid armor-label 0 0 1 1)
-;;       (gtk-grid-attach-next-to grid armor-level-bar armor-label :right 1 1)
-;;       (gtk-grid-attach grid struct-label 0 1 1 1)
-;;       (gtk-grid-attach-next-to grid struct-level-bar struct-label :right 1 1)
-;;       (gtk-container-add frame grid)
-;;       frame)))
 
-;; (defun specials-info-block (combat-unit)
-;;   "Draws the Specials"
-;;   (let ((frame (make-instance 'gtk-frame
-;;                               :border-width 2
-;;                               :label "Damage"))
-;;         (specials-label (make-instance 'gtk-label
-;;                                        :label (format nil "Specials: ~{~a~^, ~}"
-;;                                                       (specials/special-list combat-unit)))))
-;;     (gtk-container-add frame specials-label)
-;;     frame))
+(defun draw-heat-line (u)
+  (let ((line (gtk:make-box :orientation gtk:+orientation-horizontal+ :spacing 5))
+        (ov-label (gtk:make-label :str (format nil "<b>OV:</b> ~a" (mek/ov (cu/mek u)))))
+        (heat-label (gtk:make-label :str (format nil "<b>Current Heat:</b> ~a" (cu/cur-heat u))))
+        (heat-level-bar (gtk:make-level-bar)))
+    (setf (gtk:label-use-markup-p ov-label) t
+          (gtk:label-use-markup-p heat-label) t)
+    (setf (gtk:level-bar-mode heat-level-bar) gtk:+level-bar-mode-discrete+)
+    (setf (gtk:level-bar-min-value heat-level-bar) 0d0
+          (gtk:level-bar-max-value heat-level-bar) 4d0
+          (gtk:level-bar-value heat-level-bar) (float (cu/cur-heat u) 0d0))
+
+    (gtk:box-append line ov-label)
+    (gtk:box-append line heat-label)
+    (gtk:box-append line heat-level-bar)
+    line))
+
+(defun draw-damage-line (u)
+  (let ((frame (gtk:make-frame :label "Damage"))
+        (layout (gtk:make-grid))
+        (armor-label (gtk:make-label :str "Armor: "))
+        (armor-level-bar (gtk:make-level-bar))
+        (struct-label (gtk:make-label :str "Structure: "))
+        (struct-level-bar (gtk:make-level-bar)))
+    (setf (gtk:level-bar-min-value armor-level-bar) 0d0
+          (gtk:level-bar-max-value armor-level-bar) (float (mek/armor (cu/mek u)) 0d0)
+          (gtk:level-bar-min-value struct-level-bar) 0d0
+          (gtk:level-bar-max-value struct-level-bar) (float (mek/structure (cu/mek u)) 0d0)
+          (gtk:level-bar-mode armor-level-bar) gtk:+level-bar-mode-discrete+
+          (gtk:level-bar-mode struct-level-bar) gtk:+level-bar-mode-discrete+
+          (gtk:level-bar-value armor-level-bar) (float (cu/cur-armor u) 0d0)
+          (gtk:level-bar-value struct-level-bar) (float (cu/cur-struct u) 0d0))
+    (gtk:grid-attach layout armor-label 0 0 1 1)
+    (gtk:grid-attach layout armor-level-bar 1 0 3 1)
+    (gtk:grid-attach layout struct-label 0 1 1 1)
+    (gtk:grid-attach layout struct-level-bar 1 1 3 1)
+    (setf (gtk:frame-child frame) layout)
+    frame))
+
+(defun draw-abilities-line (u)
+  (let ((abilities-label (gtk:make-label :str (format nil "Abilities: ~a" (mek/abilities (cu/mek u))))))
+    abilities-label))
