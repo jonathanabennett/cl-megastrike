@@ -6,7 +6,11 @@
     :accessor board/tiles
     :initform (make-hash-table :test 'equalp)
     :documentation "The hash of the Tile objects which make up the map,
-stored by xy coordinates.")))
+stored by xy coordinates.")
+   (width :accessor board/width
+          :initarg :width)
+   (height :accessor board/height
+           :initarg :height)))
 
 
 (defmethod insert-tile ((g board) (ti tile))
@@ -37,6 +41,7 @@ stored by xy coordinates.")))
          (style       (nth 4 line-string)))
     (list hex-address elevation terrain style)))
 
+;; TODO Add a way to figure out the width and height
 (defun load-mapsheet-file (f board)
   (let ((file-lines (uiop:read-file-lines f)))
     (dolist (l file-lines)
@@ -45,6 +50,8 @@ stored by xy coordinates.")))
 
 (defun make-board (width height)
   (let ((g (make-instance 'board)))
+    (setf (board/width g) width)
+    (setf (board/height g) height)
     (dotimes (x width)
       (dotimes (y height)
         (insert-tile g (new-tile (1+ x) (1+ y)))))

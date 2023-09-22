@@ -28,26 +28,3 @@
                  :elevation elevation
                  :terrain terrain
                  :terrain-palette palette)))
-
-(defun draw-tile (tile stream)
-  (draw-polygon stream (draw-hex tile (frame/layout *application-frame*))
-                :filled t :ink +light-green+)
-  (draw-polygon stream (draw-hex tile (frame/layout *application-frame*))
-                :filled nil :line-thickness 2)
-  (let ((x (first (offset-from-hex tile)))
-        (y (second (offset-from-hex tile))))
-    (draw-text stream (format nil "~2,'0D~2,'0D" x y)
-               (nth 3 (draw-hex tile (frame/layout *application-frame*))))))
-
-
-;; (define-presentation-method present (tile
-;;                                      (type tile)
-;;                                      stream
-;;                                      (view graphical-view) &key)
-;;   (draw-tile tile stream))
-
-;; (define-presentation-method present (tile
-;;                                      (type tile)
-;;                                      stream
-;;                                      (view textual-view) &key)
-;;   (format stream "~a" (offset-from-hex tile)))
