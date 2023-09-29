@@ -35,4 +35,6 @@
   (gethash u (game/forces-hash g)))
 
 (defmethod game/tile-occupied-p ((g game) (h tile))
-  t)
+  (loop for u being the hash-values of (game/units g)
+        if (same-hex h (cu/location u))
+          collect u))
