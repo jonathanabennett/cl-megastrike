@@ -39,6 +39,14 @@ which use an offset coordinate system instead of cubic like I do."
        (= (hexagon-r hex1) (hexagon-r hex2))
        (= (hexagon-q hex1) (hexagon-q hex2))))
 
+(defmethod same-hex (hex1 (hex2 hexagon))
+  "If one of the two things is not a hex, they are not equal."
+  nil)
+
+(defmethod same-hex ((hex1 hexagon) hex2)
+  "If one of the two things is not a hex, they are not equal."
+  nil)
+
 (defmethod hex-addition ((hex1 hexagon) (hex2 hexagon))
   "Uses Cartesian addition to add two hexagons together."
   (new-hexagon :q (+ (hexagon-q hex1) (hexagon-q hex2))
