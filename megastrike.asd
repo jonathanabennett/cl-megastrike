@@ -19,7 +19,6 @@
                  (:file "tiles")
                  (:file "mul")
                  (:file "lobby" :depends-on ("mul"))
-                 (:file "game" :depends-on ("tiles"))
                  (:file "board" :depends-on ("hexagon" "tiles"))
                  (:file "combat-unit" :depends-on ("mul" "board"))
                  (:file "initiative" :depends-on ("utils"))
