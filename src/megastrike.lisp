@@ -129,6 +129,7 @@
                  (lambda (handler presses x y)
                    (declare (ignore handler presses))
                    (let ((hex (pixel-to-hex (make-point x y) +default-layout+)))
+                     (map-click-handler hex)
                      (format t "Clicked at ~a,~a,~a: ~a~%" (hexagon-q hex) (hexagon-r hex) (hexagon-s hex) (offset-from-hex hex)))))
     (gtk:box-append layout map-scroll)
     (gtk:box-append layout recordsheet)

@@ -1,5 +1,34 @@
 (in-package :megastrike)
 
+(defun map-click-hander (hex)
+  "Determine if there is a unit in the hex clicked on and this pass the hex and the units on to
+the appropriate function based on what phase of the game it is."
+  (let ((hex-units (game/tile-occupied-p *game* hex))
+        (phase (game/current-phase *game*)))
+    (cond
+      ((= phase 0) (initiative-phase-click hex hex-units))
+      ((= phase 1) (deployment-phase-click hex hex-units))
+      ((= phase 2) (movement-phase-click hex hex-units))
+      ((= phase 3) (combat-phase-click hex hex-units))
+      ((= phase 4) (end-phase-click hex hex-units)))))
+
+(defun initiative-phase-click (hex hex-units)
+  nil)
+
+(defun deployment-phase-click (hex hex-units)
+  (when (game/active-unit *game*)
+    (unless hex-units
+      (setf (cu/location (game/active-unit *game*)) hex))))
+
+(defun movement-phase-click (hex hex-units)
+  nil)
+
+(defun combat-phase-click (hex hex-units)
+  nil)
+
+(defun end-phase-click (hex hex-units)
+  nil)
+
 (defun do-phase (frame)
   "Set appropriate tracking variables, check which phase it is, and dispatch to the
 appropriate function."
