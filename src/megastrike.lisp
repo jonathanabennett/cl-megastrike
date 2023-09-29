@@ -2,13 +2,13 @@
 
 (in-package #:megastrike)
 
-(setf *game* (new-game))
 (setf *current-layout* :lobby)
 
 (gtk:define-application (:name megastrike
                          :id "bennett.megastrike")
   (gtk:define-main-window (window (gtk:make-application-window :application gtk:*application*))
     (setf (gtk:window-title window) "Megastrike")
+    (setf *game* (new-game))
     (let ((box (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 5))
           (command-buttons (gtk:make-box :orientation gtk:+orientation-horizontal+ :spacing 5)))
       (let ((lobby (draw-lobby-screen)))

@@ -6,7 +6,6 @@
     (gtk:box-append layout recordsheet-label)
     (maphash #'(lambda (uuid unit)
                  (declare (ignore uuid))
-                 (format t "Record Sheet for ~a" (cu/full-name unit))
                  (gtk:box-append layout (draw-stat-block unit)))
              (game/units *game*))
     layout))

@@ -34,25 +34,6 @@
                                 (:aerodyne        . "a")
                                 (:spheroid        . "p")))
 
-(defparameter pv-skill-ratings '((7 . 0.68)
-                                 (6 . 0.77)
-                                 (5 . 0.86)
-                                 (4 . 1.00)
-                                 (3 . 1.38)
-                                 (2 . 1.82)
-                                 (1 . 2.24)
-                                 (0 . 2.63)))
-
-(defparameter skill-names '((7 . "Wet Behind the Ears")
-                            (6 . "Really Green")
-                            (5 . "Green")
-                            (4 . "Regular")
-                            (3 . "Veteran")
-                            (2 . "Elite")
-                            (1 . "Heroic")
-                            (0 . "Legendary")
-                            ))
-
 (deftype crit ()
   "This defines the possible critical hits an element can take in the game."
   '(member 'ENGINE 'FIRE-CONTROL 'MP 'WEAPONS))
