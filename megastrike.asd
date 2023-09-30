@@ -29,5 +29,16 @@
                  )))
   ;; :defsystem-depends-on (:deploy)
   ;; :build-operation "deploy-op"
+  :in-order-to ((test-op (test-op :megastrike/test)))
   :build-pathname "megastrike"
   :entry-point "megastrike:main")
+
+(asdf:defsystem #:megastrike/test
+  :description "Test suite for Megastrike."
+  :author "Jonathan A. Bennett"
+  :license "GPL3"
+  :depends-on (:fiveam :megastrike)
+  :components ((:module "test"
+                  :components
+                  ((:file "main"))))
+  :perform (test-op (op c) (symbol-call :fiveam :run! (find-symbol* :megastrike :megastrike/test))))
