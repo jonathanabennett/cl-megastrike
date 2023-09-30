@@ -17,8 +17,7 @@ the appropriate function based on what phase of the game it is."
 
 (defun deployment-phase-click (hex hex-units)
   (when (game/active-unit *game*)
-    (unless hex-units
-      (setf (cu/location (game/active-unit *game*)) hex))))
+    (deploy (game/active-unit *game*) hex)))
 
 (defun movement-phase-click (hex hex-units)
   nil)
