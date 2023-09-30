@@ -105,7 +105,7 @@
 (defun draw-force-setup ()
   (let (name deploy)
     (let* ((layout (gtk:make-grid))
-           (name-label (gtk:make-label :str "Unit Selection"))
+           (name-label (gtk:make-label :str "Force Name: "))
            (name-entry (gtk:make-entry))
            (color-selection-dialog (gtk:make-color-dialog))
            (color-selection (gtk:make-color-dialog-button :dialog color-selection-dialog))
