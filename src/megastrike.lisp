@@ -2,8 +2,6 @@
 
 (in-package #:megastrike)
 
-(setf *current-layout* :lobby)
-
 (gtk:define-application (:name megastrike
                          :id "bennett.megastrike")
   (gtk:define-main-window (window (gtk:make-application-window :application gtk:*application*))

@@ -56,7 +56,6 @@
 
 (defvar *game*)
 (defvar *lobby*)
-(defvar *current-layout*)
 
 (defmacro add-to-end (target item)
   "This macro cleans up calls to append to the end of lists, something I need to do a lot in this codebase."
