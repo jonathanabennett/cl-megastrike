@@ -10,7 +10,7 @@
    (selected-force   :initform nil        :accessor game/selected-force)
    (game-board       :initarg :game-board :accessor game/board
                      :initform nil)
-   (current-phase    :initform 0          :accessor game/current-phase
+   (current-phase    :initform -1         :accessor game/current-phase
                      :initarg :current-phase)
    (turn-number      :initform 0          :accessor game/turn-number
                      :initarg :turn-number)
