@@ -8,7 +8,9 @@
     (setf (gtk:window-title window) "Megastrike")
     (setf *game* (new-game))
     (let ((box (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 5))
-          (command-buttons (gtk:make-box :orientation gtk:+orientation-horizontal+ :spacing 5)))
+          (game-label (gtk:make-label :str "Megastrike"))
+          (new-game-button (gtk:make-button :label "New Game"))
+          (default-game-button (gtk:make-button :label "Launch Default Game")))
       (let ((lobby (draw-lobby-screen)))
         (setf (gtk:widget-hexpand-p lobby) t
               (gtk:widget-vexpand-p lobby) t)
