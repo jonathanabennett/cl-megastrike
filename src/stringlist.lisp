@@ -159,7 +159,7 @@
     (gio:list-model-items-changed model pos 0 1)))
 
 (defmethod string-list/get-column-by-title ((sl string-list) title)
-  (remove-if-not #'column-searcher (gobj:coerce (gtk:column-view-columns (string-list/view sl)) 'gtk:string-object-string) title))
+  (remove-if-not #'column-searcher (gobj:coerce (gtk:column-view-columns (string-list/view sl)) 'gtk:column-view-column) title))
 
 (defun column-searcher (column search-term)
   (string= (gtk:column-view-column-title column) search-term))
