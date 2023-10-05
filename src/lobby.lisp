@@ -53,18 +53,19 @@
   (setf *lobby* (make-instance 'lobby))
   (setf (lobby/forces *lobby*) (create-string-list (make-hash-table :test #'equal))
         (lobby/units *lobby*) (create-string-list (make-hash-table :test #'equal)))
-  (let ((layout (gtk:make-grid)))
+  (let ((window (gtk:make-application-window :application gtk:*application*))
+        (layout (gtk:make-grid)))
     (let ((map-selection (draw-map-selection))
           (force-setup (draw-force-setup))
           (unit-selection (draw-mul-list))
           (unit-list (draw-unit-list)))
-    (setf (gtk:grid-column-homogeneous-p layout) nil
-          (gtk:grid-row-homogeneous-p layout) nil)
-    (gtk:grid-attach layout unit-selection 0 0 2 1)
-    (gtk:grid-attach layout force-setup    2 0 1 1)
-    (gtk:grid-attach layout unit-list      0 1 2 1)
-    (gtk:grid-attach layout map-selection  2 1 1 1)
-    layout)))
+      (setf (gtk:grid-column-homogeneous-p layout) nil
+            (gtk:grid-row-homogeneous-p layout) nil)
+      (gtk:grid-attach layout unit-selection 0 0 2 1)
+      (gtk:grid-attach layout force-setup    2 0 1 1)
+      (gtk:grid-attach layout unit-list      0 1 2 1)
+      (gtk:grid-attach layout map-selection  2 1 1 1)
+      layout)))
 
 ;;; Map Section
 
