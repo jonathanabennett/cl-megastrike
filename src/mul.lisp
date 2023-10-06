@@ -102,11 +102,7 @@
       -1))
 
 (defun mek/comparable-ov (m)
-  (if m
-      (if (mek/ov m)
-          (mek/ov m)
-          -1)
-      -1))
+  (mek/comparable-num #'mek/ov m))
 
 (defun mek/full-name (m)
   (if m
