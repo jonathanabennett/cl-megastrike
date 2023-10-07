@@ -16,10 +16,13 @@
                  (lambda (lb row)
                    (declare (ignore lb))
                    (when row
-                     (let ((unit (gtk:frame-label (gobj:coerce (gtk:list-box-row-child row) 'gtk:frame))))
-                       (setf (game/active-unit *game*) (car (remove-if-not
-                                                             #'(lambda (u) (string= (cu/full-name u) unit)))))))))
-    (mapcar #'(lambda (uuid unit)
+                     (let* ((unit (gtk:frame-label (gobj:coerce (gtk:list-box-row-child row) 'gtk:frame)))
+                            (unit-list (alexandria:hash-table-values (game/units *game*))))
+                       (setf (game/active-unit *game*) (car (member unit unit-list
+                                                                    :key #'cu/full-name
+                                                                    :test #'string=)))
+                       (format t "~A~%" (cu/full-name (game/active-unit *game*)))))))
+    (maphash #'(lambda (uuid unit)
                 (declare (ignore uuid))
                 (gtk:list-box-append record-sheets (draw-stat-block unit)))
             (game/units *game*))

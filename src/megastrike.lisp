@@ -38,7 +38,7 @@
       (gtk:window-present window)))))
 
 (defun start-game ()
-  (setf (game/units *game*) (alexandria:hash-table-values (string-list/source (lobby/units *lobby*)))
+  (setf (game/units *game*)  (string-list/source (lobby/units *lobby*))
         (game/forces-hash *game*) (string-list/source (lobby/forces *lobby*))
         (game/board *game*) (lobby/map *lobby*))
   (draw-gameplay-window))
