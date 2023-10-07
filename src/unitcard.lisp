@@ -76,7 +76,7 @@
     (setf (gtk:level-bar-min-value heat-level-bar) 0d0
           (gtk:level-bar-max-value heat-level-bar) 4d0
           (gtk:level-bar-value heat-level-bar) (float (cu/cur-heat u) 0d0))
-
+    (gtk:widget-add-css-class heat-level-bar "heat-bar")
     (gtk:box-append line ov-label)
     (gtk:box-append line heat-label)
     (gtk:box-append line heat-level-bar)
@@ -97,6 +97,8 @@
           (gtk:level-bar-mode struct-level-bar) gtk:+level-bar-mode-discrete+
           (gtk:level-bar-value armor-level-bar) (float (cu/cur-armor u) 0d0)
           (gtk:level-bar-value struct-level-bar) (float (cu/cur-struct u) 0d0))
+    (gtk:widget-add-css-class armor-level-bar "damage-bar")
+    (gtk:widget-add-css-class struct-level-bar "damage-bar")
     (gtk:grid-attach layout armor-label 0 0 1 1)
     (gtk:grid-attach layout armor-level-bar 1 0 3 1)
     (gtk:grid-attach layout struct-label 0 1 1 1)
