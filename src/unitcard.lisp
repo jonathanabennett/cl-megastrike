@@ -2,12 +2,27 @@
 
 (defun draw-recordsheets ()
   (let ((layout (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 15))
-        (recordsheet-label (gtk:make-label :str "Record Sheets")))
+        (recordsheet-label (gtk:make-label :str "Record Sheets"))
+        (scroll-box (gtk:make-scrolled-window))
+        (record-sheets (gtk:make-list-box)))
     (gtk:box-append layout recordsheet-label)
-    (maphash #'(lambda (uuid unit)
-                 (declare (ignore uuid))
-                 (gtk:box-append layout (draw-stat-block unit)))
-             (game/units *game*))
+    (gtk:box-append layout scroll-box)
+    (setf (gtk:widget-vexpand-p scroll-box) t
+          (gtk:widget-hexpand-p scroll-box) t
+          (gtk:widget-vexpand-p record-sheets) t
+          (gtk:widget-hexpand-p record-sheets) t)
+    (setf (gtk:scrolled-window-child scroll-box) record-sheets)
+    (gtk:connect record-sheets "row-selected"
+                 (lambda (lb row)
+                   (declare (ignore lb))
+                   (when row
+                     (let ((unit (gtk:frame-label (gobj:coerce (gtk:list-box-row-child row) 'gtk:frame))))
+                       (setf (game/active-unit *game*) (car (remove-if-not
+                                                             #'(lambda (u) (string= (cu/full-name u) unit)))))))))
+    (mapcar #'(lambda (uuid unit)
+                (declare (ignore uuid))
+                (gtk:list-box-append record-sheets (draw-stat-block unit)))
+            (game/units *game*))
     layout))
 
 (defun draw-stat-block (u)
