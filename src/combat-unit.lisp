@@ -29,6 +29,8 @@
                   :accessor cu/cur-struct)
    (cu-crits :initarg :crits
              :accessor cu/crits)
+   (cu-destroyedp :initform nil
+                  :accessor cu/destroyedp)
    (cu-target :initarg :target
               :accessor cu/target)
    (cu-cur-heat :initarg :cur-heat
@@ -125,3 +127,76 @@
       (exact (third (car exact)))
       (chassis (third (car chassis)))
       (t     ""))))
+
+(defmethod move-unit ((cu combat-unit) (destination tile))
+  (when (>= (move-lookup cu (cu/move-used cu))
+            (hex-distance (cu/location cu) destination))
+    (setf (cu/location cu) destination)
+    (incf (game/initiative-place *game*))
+    (setf (game/phase-log *game*)
+          (concatenate 'string (game/phase-log *game*)
+                       (format nil "~a has moved to ~a.~%"
+                               (info/full-name unit) (offset-from-hex destination))))))
+
+(defmethod unit-tmm ((cu combat-unit))
+  (unless (cu/move-used cu)
+    (setf (cu/move-used cu) (car (car (cu/movement cu)))))
+  (if (eq (cu/move-used cu) :jump)
+      (1+ (mek/tmm (cu/mek cu)))
+      (mek/tmm (cu/mek cu))))
+
+(defmethod calculate-to-hit ((attacker combat-unit) (target combat-unit))
+  (let ((range (hex-distance (cu/location attacker) (cu/location target))))
+    (cond
+      ((>= 3 range) (+ (pilot/skill attacker) (unit-tmm target)))
+      ((>= 12 range) (+ (pilot/skill attacker) (unit-tmm target) 2))
+      ((>= 21 range) (+ (pilot/skill attacker) (unit-tmm target) 4))
+      ((>= 30 range) (+ (pilot/skill attacker) (unit-tmm target) 6)))))
+
+(defmethod calculate-damage ((attacker combat-unit) (target combat-unit))
+  (let ((range (hex-distance (cu/location attacker) (cu/location target)))
+        (short (mek/short (cu/mek attacker)))
+        (med (mek/medium (cu/mek attacker)))
+        (long (mek/long (cu/mek attacker)))
+        (extreme (mek/extreme (cu/mek attacker))))
+    (when ((mek/short* (cu/mek attacker)) (<= 3 (roll 1)))
+      (setf short 1))
+    (when ((mek/medium* (cu/mek attacker)) (<= 3 (roll 1)))
+      (setf medium 1))
+    (when ((mek/long* (cu/mek attacker)) (<= 3 (roll 1)))
+      (setf long 1))
+    (when ((mek/extreme* (cu/mek attacker)) (<= 3 (roll 1)))
+      (setf extreme 1))
+    (cond
+      ((>= 3 range) short)
+      ((>= 12 range) medium)
+      ((>= 21 range) long)
+      ((>= 30 range) extreme))))
+
+(defmethod take-damage ((cu combat-unit damage))
+  (dotimes (x damage)
+    (if (eq 0 (cu/cur-armor cu))
+        (decf (cu/cur-struct cu))
+        (incf (cu/cur-armor cu))))
+  (when (>= 0 (cu/cur-struct cu))
+    (setf (cu/destroyedp cu) t))
+  (setf (game/phase-log *game*)
+        (concatenate 'string (game/phase-log *game*)
+                     (format nil "~a now has ~a armor and ~a structure.~%"
+                             (info/full-name u)
+                             (damageable/cur-armor u)
+                             (damageable/cur-struct u)))))
+
+(defmethod make-attack ((attacker combat-unit) (target combat-unit))
+  (let ((target-num (calcuate-to-hit attacker target))
+        (to-hit (roll2d))
+        (log-string ""))
+    (setf log-string (concatenate `string log-string
+                                  (format nil "~a attacking ~a (needs a ~a): Rolled ~a~%"
+                                          (cu/full-name attacker)
+                                          (cu/full-name target)
+                                          target-num
+                                          to-hit)))
+    (when (<= target-num to-hit)
+      (take-damage target (calculate-damage attacker target)))
+    (incf (game/initiative-place *game*))))
