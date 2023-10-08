@@ -39,3 +39,6 @@
     (when (same-hex h (cu/location u))
         (return t)))
   nil)
+
+(defmethod print-initiative ((g game))
+  (format nil "Initiative Order: ~{~a~^, ~}" (subseq (game/initiative-list g) (game/initiative-place g))))

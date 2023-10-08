@@ -28,30 +28,27 @@ the appropriate function based on what phase of the game it is."
 (defun end-phase-click (hex hex-units)
   nil)
 
-(defun do-phase (frame)
+(defun do-phase ()
   "Set appropriate tracking variables, check which phase it is, and dispatch to the
 appropriate function."
   (setf (game/initiative-place *game*) 0)
   (setf (game/active-unit *game*) nil)
-  (run-advance-phase)
-  (setf (frame-current-layout frame) :round-report)
   (let ((phase (game/current-phase *game*)))
     (cond
-      ((= phase 0) (do-initiative-phase frame))
-      ((= phase 1) (do-deployment-phase frame))
-      ((= phase 2) (do-movement-phase   frame))
-      ((= phase 3) (do-combat-phase     frame))
-      ((= phase 4) (do-end-phase        frame)))))
+      ((= phase 0) (do-initiative-phase))
+      ((= phase 1) (do-deployment-phase))
+      ((= phase 2) (do-movement-phase))
+      ((= phase 3) (do-combat-phase))
+      ((= phase 4) (do-end-phase)))))
 
-(defun do-initiative-phase (frame)
+(defun do-initiative-phase ()
   "This function runs the initiative phase automatically (since the initiative phase
 requires no user intervention.)"
   (setf (game/phase-log *game*)
         (concatenate 'string (game/phase-log *game*)
                      (format nil "In Initiative Phase~%")))
   (setf (game/initiative-list *game*)
-        (roll-initiative (game/forces *game*)))
-  (setf (frame-current-layout frame) :round-report))
+        (roll-initiative (game/forces *game*))))
 
 (defun roll-initiative (force-list)
   (mapcar #'(lambda (a) (setf (force/initiative a) (roll2d))) force-list)
@@ -87,7 +84,7 @@ requires no user intervention.)"
             (push (pop winning-force-list) turn-order))))
     (reverse turn-order)))
 
-(defun do-deployment-phase (frame)
+(defun do-deployment-phase ()
   "This function runs each round to determine whether or not to simply skip the
 deployment phase. Deployment phases are only run when there are deployable units."
   (setf (game/phase-log *game*)
@@ -99,12 +96,12 @@ deployment phase. Deployment phases are only run when there are deployable units
      (when (= (length to-deploy) 0)
        (setf (frame-current-layout frame) :round-report))))
 
-(defun deploy-unit (frame)
+(defun deploy-unit ()
   (let ((force (nth (game/initiative-place *game*) (game/initiative-list *game*)))
         (screen (find-pane-named frame 'game-world)))
     (draw-text screen (format screen "~a's turn to deploy." force) (make-point 5 100))))
 
-(defun do-movement-phase (frame)
+(defun do-movement-phase ()
   "This function will handle the movement phase."
   (setf (game/phase-log *game*)
         (concatenate 'string (game/phase-log *game*)
@@ -114,7 +111,7 @@ deployment phase. Deployment phases are only run when there are deployable units
         (concatenate 'string (game/phase-log *game*)
                      "Entering Movement phase.")))
 
-(defun do-combat-phase (frame)
+(defun do-combat-phase ()
   "This function will handle the combat phase."
   (setf (game/phase-log *game*)
         (concatenate 'string (game/phase-log *game*)
@@ -124,7 +121,7 @@ deployment phase. Deployment phases are only run when there are deployable units
         (concatenate 'string (game/phase-log *game*)
                      "Entering Combat phase.")))
 
-(defun do-end-phase (frame)
+(defun do-end-phase ()
   (setf (game/phase-log *game*)
         (concatenate 'string (game/phase-log *game*)
                      (format nil "In End Phase~%")))
