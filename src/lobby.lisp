@@ -11,7 +11,7 @@
            :documentation "The forces for the game being prepared")
    (mul :accessor lobby/mul
         :initarg :mul
-        :initform (load-mul (merge-pathnames "data/units/mul.csv" (asdf:system-source-directory :megastrike)))
+        :initform (load-mul (merge-pathnames "units/mul.csv" *data-folder*))
         :documentation "The list of all possible meks that could be piloted in the game.")
    (units :accessor lobby/units
           :initarg :units

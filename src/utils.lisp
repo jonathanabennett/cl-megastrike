@@ -52,7 +52,32 @@
 (defun roll2d (&optional (mods 0))
   (roll 2 mods))
 
-(defparameter *here* (uiop:pathname-parent-directory-pathname (uiop:getcwd)))
+(defparameter *here* (asdf:system-source-directory :megastrike))
+(defparameter *data-folder* (merge-pathnames "data/" *here*))
+
+(defun build-mechset ()
+  (let ((f (uiop:read-file-lines (merge-pathnames "images/units/mechset.txt"
+                                                  *data-folder*)))
+        (collection '()))
+    (loop for line in f
+          do (let ((row (parse-mechset-line line)))
+               (when row
+                 (push row collection))))
+    collection))
+
+(defun parse-mechset-line (line)
+  (unless (or (equal (search "#" line) 0)
+              (string= "" line)
+              (equal (search "include" line) 0))
+    (let* ((mechset '())
+         (first-break (search " " line))
+         (second-break (search "\" " line :start2 (1+ first-break))))
+      (push (string-trim "\" " (subseq line second-break)) mechset)
+      (push (string-trim "\" " (subseq line first-break second-break)) mechset)
+      (push (string-trim "\" " (subseq line 0 first-break)) mechset)
+      mechset)))
+
+(defvar *mechset* (build-mechset))
 
 (defvar *game*)
 (defvar *lobby*)
