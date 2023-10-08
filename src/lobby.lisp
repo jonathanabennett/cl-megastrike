@@ -287,3 +287,21 @@
     (gtk:grid-attach layout scroll 0 0 1 1)
 
     layout))
+
+(defun new-draw-unit-list ()
+  (let* ((layout (gtk:make-grid))
+         (scroll (gtk:make-scrolled-window)))
+    (string-list/add-label-column (lobby/units *lobby*) "Unit Name" #'cu/full-name "string" #'cu/full-name)
+    (string-list/add-label-column (lobby/units *lobby*) "PV" #'cu/pv "int" #'cu/pv)
+    (string-list/add-label-column (lobby/units *lobby*) "Pilot" #'print-pilot "string" #'cu/pilot)
+    (string-list/add-label-column (lobby/units *lobby*) "Force" #'print-force "string" #'cu/force)
+    (string-list/add-label-column (lobby/units *lobby*) "Size" #'cu/size "int" #'cu/size)
+    (string-list/add-label-column (lobby/units *lobby*) "MV" #'print-movement "string" #'cu/movement)
+    (string-list/add-label-column (lobby/units *lobby*) "A/S" #'cu/arm-struct "string" #'cu/arm-struct)
+    (string-list/add-label-column (lobby/units *lobby*) "Attack" #'cu/attack-string "string" #'cu/attack-string)
+    (setf (gtk:widget-hexpand-p scroll) t
+          (gtk:widget-vexpand-p scroll) t)
+    (setf (gtk:scrolled-window-child scroll) (string-list/view (lobby/units *lobby*)))
+    (gtk:grid-attach layout scroll 0 0 1 1)
+
+    layout))
