@@ -13,10 +13,7 @@
         :initarg :mul
         :initform (load-mul (merge-pathnames "units/mul.csv" *data-folder*))
         :documentation "The list of all possible meks that could be piloted in the game.")
-   (units :accessor lobby/units
-          :initarg :units
-          :initform nil
-          :documentation "The list of all the units in the game."))
+   )
   (:documentation "The lobby used to build the game before it launches."))
 
 (defun check-board ()

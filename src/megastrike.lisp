@@ -11,8 +11,7 @@
     (let ((prov (gtk:make-css-provider)))
       (gtk:css-provider-load-from-path prov (namestring (merge-pathnames "data/css/style.css" (asdf:system-source-directory :megastrike))))
       (gtk:style-context-add-provider-for-display (gdk:display-default) prov gtk:+style-provider-priority-application+))
-    (setf (lobby/forces *lobby*) (create-string-list (make-hash-table :test #'equal))
-          (lobby/units *lobby*) (create-string-list (make-hash-table :test #'equal)))
+    (setf (lobby/forces *lobby*) (create-string-list (make-hash-table :test #'equal)))
     (let ((box (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 5))
           (game-label (gtk:make-label :str "Megastrike: Alphastrike on the Computer"))
           (new-game-button (gtk:make-button :label "New Game"))
@@ -38,8 +37,7 @@
       (gtk:window-present window)))))
 
 (defun start-game ()
-  (setf (game/units *game*)  (string-list/source (lobby/units *lobby*))
-        (game/forces-hash *game*) (string-list/source (lobby/forces *lobby*))
+  (setf (game/forces-hash *game*) (string-list/source (lobby/forces *lobby*))
         (game/board *game*) (lobby/map *lobby*))
   (draw-gameplay-window))
 

@@ -45,9 +45,10 @@
         (full-name "")
         (ca (if cur-armor cur-armor (mek/armor mek)))
         (cs (if cur-struct cur-struct (mek/structure mek))))
-    (loop for m being the hash-values of (string-list/source (lobby/units *lobby*))
-          if (string= (mek/full-name (cu/mek m)) (mek/full-name mek))
-            do (incf unit-counter))
+    (dolist (m (game/units *game*))
+      (when (string= (mek/full-name (cu/mek m)) (mek/full-name mek))
+        (incf unit-counter)))
+
     (setf full-name (if (< 0 unit-counter)
                         (format nil "~a #~a" (mek/full-name mek) unit-counter)
                         (mek/full-name mek)))
@@ -64,7 +65,7 @@
                              :cur-heat cur-heat
                              :location location
                              :pilot pilot)))
-      (setf (gethash (uuid:make-v5-uuid uuid:+namespace-dns+ (mek/full-name mek)) (game/units *game*)) cu))))
+      cu)))
 
 (defun cu/pv (unit)
   (+ (mek/pv (cu/mek unit)) (cu/pv-mod unit)))

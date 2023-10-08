@@ -3,7 +3,7 @@
 
 (defclass game ()
   ((units            :initarg :units      :accessor game/units
-                     :initform (make-hash-table :test #'equal))
+                     :initform '())
    (active-unit      :initform nil        :accessor game/active-unit)
    (forces           :initarg :forces     :accessor game/forces-hash
                      :initform (make-hash-table :test #'equal))
@@ -35,6 +35,7 @@
   (gethash u (game/forces-hash g)))
 
 (defmethod game/tile-occupied-p ((g game) (h tile))
-  (loop for u being the hash-values of (game/units g)
-        if (same-hex h (cu/location u))
-          collect u))
+  (dolist (u (game/units *game*))
+    (when (same-hex h (cu/location u))
+        (return t)))
+  nil)

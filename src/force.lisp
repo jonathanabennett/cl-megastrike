@@ -32,16 +32,14 @@
 
 (defmethod count-units ((f force))
   (let ((count 0))
-    (maphash #'(lambda (k u)
-                 (declare (ignore k))
+    (mapcar #'(lambda (u)
                  (if (same-force (cu/force u) f) (incf count)))
              (game/units *game*))
     count))
 
 (defmethod force-pv ((f force))
   (let ((total 0))
-    (maphash #'(lambda (k u)
-                 (declare (ignore k))
+    (mapcar #'(lambda (u)
                  (if (same-force (cu/force u) f) (incf total (cu/pv u))))
              (game/units *game*))
     total))
