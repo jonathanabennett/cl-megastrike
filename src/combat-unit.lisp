@@ -108,7 +108,19 @@
     spec-list))
 
 (defun find-sprite (mek)
-  (let ((first-pass (fuzzy-match:fuzzy-match (mek/chassis mek) (uiop:directory-files (merge-pathnames "data/images/units/mechs/" *here*)))))
-    (if (search (mek/model mek) (namestring (first (fuzzy-match:fuzzy-match (mek/model mek) first-pass))))
-        (first (fuzzy-match:fuzzy-match (mek/model mek) first-pass))
-        (first first-pass))))
+  (let ((exact
+          (member (mek/full-name (cu/mek mek))
+                  (remove-if-not #'(lambda (x) (string= "exact" (car x))) *mechset*)
+                  :key #'second
+                  :test #'string=))
+        (chassis
+          (member (mek/chassis (cu/mek mek))
+                  (remove-if-not #'(lambda (x) (string= "chassis" (car x))) *mechset*)
+                  :key #'second
+                  :test #'string=)))
+    (format t "~a~%" exact)
+    (format t "~a~%" chassis)
+    (cond
+      (exact (third (car exact)))
+      (chassis (third (car chassis)))
+      (t     ""))))
