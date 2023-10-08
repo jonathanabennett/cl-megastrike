@@ -179,6 +179,6 @@
       (cairo:text-path (format nil "~2,'0D~2,'0D" (first loc) (second loc)))
       (cairo:fill-path))))
 
-;; (defun draw-round-report ()
-;;   (let ((layout (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 5)))
-;;     ))
+(defun draw-round-report ()
+  (let ((layout (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 5)))
+    ))
