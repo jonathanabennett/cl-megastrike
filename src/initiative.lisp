@@ -28,6 +28,13 @@ the appropriate function based on what phase of the game it is."
 (defun end-phase-click (hex hex-units)
   nil)
 
+(defun advance-phase ()
+  (incf (game/current-phase *game*))
+  (when (= (game/current-phase *game*) 5)
+    (setf (game/current-phase *game*) 0)
+    (incf (game/turn-number *game*)))
+  (do-phase))
+
 (defun do-phase ()
   "Set appropriate tracking variables, check which phase it is, and dispatch to the
 appropriate function."
@@ -91,22 +98,14 @@ deployment phase. Deployment phases are only run when there are deployable units
         (concatenate 'string (game/phase-log *game*)
                      (format nil "In Deployment Phase~%")))
   (let ((to-deploy '()))
-     (setf (frame-current-layout frame) :game-round)
-     (map-entities #'(lambda (e) (if (eql (location/q e) nil) (push e to-deploy))))
-     (when (= (length to-deploy) 0)
-       (setf (frame-current-layout frame) :round-report))))
-
-(defun deploy-unit ()
-  (let ((force (nth (game/initiative-place *game*) (game/initiative-list *game*)))
-        (screen (find-pane-named frame 'game-world)))
-    (draw-text screen (format screen "~a's turn to deploy." force) (make-point 5 100))))
+     (mapcar #'(lambda (e) (if (eql (cu/location e) nil) (push e to-deploy))))
+     ))
 
 (defun do-movement-phase ()
   "This function will handle the movement phase."
   (setf (game/phase-log *game*)
         (concatenate 'string (game/phase-log *game*)
                      (format nil "In Movement Phase~%")))
-  (setf (frame-current-layout frame) :game-round)
   (setf (game/phase-log *game*)
         (concatenate 'string (game/phase-log *game*)
                      "Entering Movement phase.")))
@@ -116,7 +115,6 @@ deployment phase. Deployment phases are only run when there are deployable units
   (setf (game/phase-log *game*)
         (concatenate 'string (game/phase-log *game*)
                      (format nil "In Combat Phase~%")))
-  (setf (frame-current-layout frame) :game-round)
   (setf (game/phase-log *game*)
         (concatenate 'string (game/phase-log *game*)
                      "Entering Combat phase.")))
@@ -125,5 +123,4 @@ deployment phase. Deployment phases are only run when there are deployable units
   (setf (game/phase-log *game*)
         (concatenate 'string (game/phase-log *game*)
                      (format nil "In End Phase~%")))
-  (incf (game/turn-number *game*))
-  (run-end-phase))
+  )
