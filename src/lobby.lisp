@@ -1,7 +1,23 @@
 (in-package :megastrike)
 
 (defclass lobby ()
-  ((map :accessor lobby/map
+  ((toplevel :accessor lobby/layout
+             :initform (gtk:make-grid)
+             :documentation "The widget containing the lobby screen.")
+   (map-setup-grid :accessor lobby/map-layout
+                    :initform (gtk:make-grid)
+                    :documentation "The widget containing map layout information.")
+   (forces-setup-grid :accessor lobby/forces-layout
+                      :initform (gtk:make-grid)
+                      :documentation "The widget containing forces layout information.")
+   (mul-setup-grid :accessor lobby/mul-layout
+                   :initform (gtk:make-grid)
+                   :documentation "The widget containing mul layout information.")
+   (unit-list-box :accessor lobby/unit-list
+                   :initarg unit-list
+                   :initform (gtk:make-list-box)
+                   :documentation "The widget containing the list of units in the game.")
+   (map :accessor lobby/map
         :initarg :map
         :initform nil
         :documentation "The map for the game being prepared.")
@@ -48,7 +64,7 @@
 (defun draw-lobby-screen ()
   "GTK Function to draw the lobby."
   (let ((window (gtk:make-application-window :application gtk:*application*))
-        (layout (gtk:make-grid))
+        (layout (lobby/layout *lobby*))
         (button-bar (gtk:make-box :orientation gtk:+orientation-horizontal+ :spacing 5)))
     (let ((button (gtk:make-button :label "Not Ready")))
           (setf (gtk:widget-sensitive-p button) nil)
@@ -69,18 +85,20 @@
                                       (declare (ignore button))
                                       (gtk:window-destroy window)))
       (gtk:box-append button-bar button))
-    (let ((map-selection (draw-map-selection))
-          (force-setup (draw-force-setup))
-          (unit-selection (draw-mul-list))
-          (unit-list (draw-unit-list)))
+    (draw-map-selection)
+    (draw-force-setup)
+    (draw-mul-list)
+    (draw-unit-list)
+    (let ((unit-scroll (gtk:make-scrolled-window)))
 
       (setf (gtk:grid-column-homogeneous-p layout) nil
-            (gtk:grid-row-homogeneous-p layout) nil)
-      (gtk:grid-attach layout unit-selection 0 0 2 1)
-      (gtk:grid-attach layout force-setup    2 0 1 1)
-      (gtk:grid-attach layout unit-list      0 1 2 1)
-      (gtk:grid-attach layout map-selection  2 1 1 1)
-      (gtk:grid-attach layout button-bar     0 2 3 1)
+            (gtk:grid-row-homogeneous-p layout) nil
+            (gtk:scrolled-window-child unit-scroll) (lobby/unit-list *lobby*))
+      (gtk:grid-attach layout (lobby/mul-layout *lobby*)   0 0 2 1)
+      (gtk:grid-attach layout (lobby/forces-layout *lobby*) 2 0 1 1)
+      (gtk:grid-attach layout unit-scroll                  0 1 2 1)
+      (gtk:grid-attach layout (lobby/map-layout *lobby*)   2 1 1 1)
+      (gtk:grid-attach layout button-bar                   0 2 3 1)
       (setf (gtk:window-child window) layout)
       (unless (gtk:widget-visible-p window)
         (gtk:window-present window)))))
@@ -89,7 +107,7 @@
 
 (defun draw-map-selection ()
   "GTK Function drawing the map selection section on the screen."
-  (let ((layout (gtk:make-grid))
+  (let ((layout (lobby/map-layout *lobby*))
         (header      (gtk:make-label :str "<big>Map Selection</big>"))
         (width-label (gtk:make-label :str "<b>Map Width: </b>"))
         (width-entry (gtk:make-entry))
@@ -116,14 +134,13 @@
     (gtk:grid-attach layout height-label 0 2 1 1)
     (gtk:grid-attach layout height-entry 1 2 1 1)
     (gtk:grid-attach layout map-created 0 3 1 1)
-    (gtk:grid-attach layout create-button 1 3 1 1)
-    layout))
+    (gtk:grid-attach layout create-button 1 3 1 1)))
 
 ;;; Force Section
 
 (defun draw-force-setup ()
   (let (name deploy)
-    (let* ((layout (gtk:make-grid))
+    (let* ((layout (lobby/forces-layout *lobby*))
            (name-label (gtk:make-label :str "Force Name: "))
            (name-entry (gtk:make-entry))
            (color-selection-dialog (gtk:make-color-dialog))
@@ -158,13 +175,12 @@
       (gtk:grid-attach layout deploy-entry                              1 1 1 1)
       (gtk:grid-attach layout color-selection                           0 2 1 1)
       (gtk:grid-attach layout new-force-btn                             1 2 1 1)
-      (gtk:grid-attach layout (string-list/view (lobby/forces *lobby*)) 0 3 2 1)
-      layout)))
+      (gtk:grid-attach layout (string-list/view (lobby/forces *lobby*)) 0 3 2 1))))
 
 ;;; MUL Section
 
 (defun draw-mul-list ()
-  (let* ((layout (gtk:make-grid))
+  (let* ((layout (lobby/mul-layout *lobby*))
          (scroll (gtk:make-scrolled-window)))
     (setf (lobby/mul *lobby*) (create-string-list *mul* :filter-object (make-instance 'mek :type +GROUND-UNITS+) :filter-func #'filter-mek))
     (string-list/add-label-column (lobby/mul *lobby*) "Unit" #'mek/full-name "string" #'mek/full-name)
@@ -184,10 +200,8 @@
     (string-list/add-label-column (lobby/mul *lobby*) "OV" #'mek/ov "int" #'mek/ov)
     (string-list/add-label-column (lobby/mul *lobby*) "Abilities" #'mek/abilities "string" #'mek/abilities)
 
-    (loop :for label in (list "Ground Units" "Battlemechs" "All Mechs" "Conventional Units"
-                          "Vehicles" "Infantry")
-          :for filt-type in (list +ground-units+ +bm-units+ +mech-units+ +conventional-units+
-                                  +vehicle-units+ +infantry-units+)
+    (loop :for label in (list "Ground Units" "Battlemechs" "All Mechs" "Conventional Units" "Vehicles" "Infantry")
+          :for filt-type in (list +ground-units+ +bm-units+ +mech-units+ +conventional-units+ +vehicle-units+ +infantry-units+)
           :for col in (list 0 1 2 3 4 5)
           :do
           (let ((btn (gtk:make-button :label label))
@@ -195,9 +209,9 @@
                 (filt-type filt-type))
             (gtk:connect btn "clicked"
                          (lambda (button)
-                           (declare (ignore button))
-                           (setf (mek/type filt) filt-type)
-                           (gtk:filter-changed (string-list/filter (lobby/mul *lobby*)) gtk:+filter-change-different+)))
+                         (declare (ignore button))
+                         (setf (mek/type filt) filt-type)
+                         (gtk:filter-changed (string-list/filter (lobby/mul *lobby*)) gtk:+filter-change-different+)))
             (gtk:grid-attach layout btn col 0 1 1)))
 
     (let ((name-label (gtk:make-label :str "Chassis:"))
@@ -205,9 +219,9 @@
           (search-btn (gtk:make-button :label "Search")))
       (gtk:connect name-entry "changed"
                    (lambda (entry)
+                     (declare (ignore entry))
                      (setf (mek/chassis (string-list/filter-object (lobby/mul *lobby*)))
-                           (ignore-errors
-                            (gtk:entry-buffer-text (gtk:entry-buffer name-entry))))))
+                           (ignore-errors (gtk:entry-buffer-text (gtk:entry-buffer name-entry))))))
       (gtk:connect search-btn "clicked"
                    (lambda (button)
                      (declare (ignore button))
@@ -217,8 +231,8 @@
       (gtk:grid-attach layout search-btn 2 1 1 1))
 
     (setf (gtk:widget-hexpand-p scroll) t
-          (gtk:widget-vexpand-p scroll) t)
-    (setf (gtk:scrolled-window-child scroll) (string-list/view (lobby/mul *lobby*)))
+          (gtk:widget-vexpand-p scroll) t
+          (gtk:scrolled-window-child scroll) (string-list/view (lobby/mul *lobby*)))
     (gtk:grid-attach layout scroll 0 2 6 1)
 
     (let ((pname "")
@@ -228,24 +242,21 @@
           (pskill-label (gtk:make-label :str "Pilot Skill:"))
           (pskill-entry (gtk:make-entry))
           (new-unit-btn (gtk:make-button :label "Add Unit")))
-
       (gtk:connect pname-entry "changed"
                    (lambda (entry)
-                     (setf pname (ignore-errors
-                                  (gtk:entry-buffer-text (gtk:entry-buffer pname-entry))))))
+                     (declare (ignore entry))
+                     (setf pname (ignore-errors (gtk:entry-buffer-text (gtk:entry-buffer pname-entry))))))
 
       (gtk:connect pskill-entry "changed"
                    (lambda (entry)
-                     (setf pskill (ignore-errors
-                                   (gtk:entry-buffer-text (gtk:entry-buffer pskill-entry))))))
+                     (declare (ignore entry))
+                     (setf pskill (ignore-errors (gtk:entry-buffer-text (gtk:entry-buffer pskill-entry))))))
 
       (gtk:connect new-unit-btn "clicked"
                    (lambda (button)
                      (declare (ignore button))
-                     (setf pname (ignore-errors
-                                  (gtk:entry-buffer-text (gtk:entry-buffer pname-entry))))
-                     (setf pskill (ignore-errors
-                                   (gtk:entry-buffer-text (gtk:entry-buffer pskill-entry))))
+                     (setf pname (ignore-errors (gtk:entry-buffer-text (gtk:entry-buffer pname-entry))))
+                     (setf pskill (ignore-errors (gtk:entry-buffer-text (gtk:entry-buffer pskill-entry))))
                      (let ((skill (parse-integer pskill :junk-allowed t))
                            (selected (string-list/selected (lobby/mul *lobby*))))
                        (when (and pname skill selected)
@@ -254,51 +265,19 @@
                                     :force (string-list/selected (lobby/forces *lobby*))
                                     :pv-mod (calculate-pv-modifier (mek/pv selected) skill)
                                     :pilot (make-pilot :name pname :skill skill))))
-                           (string-list/add-item (lobby/units *lobby*) cu (cu/full-name cu))
+                           (push cu (game/units *game*))
+                           (gtk:list-box-append (lobby/unit-list *lobby*) (draw-quickstats cu))
                            (string-list/brute-update (lobby/forces *lobby*)))))))
-
       (gtk:grid-attach layout pname-label  0 3 1 1)
       (gtk:grid-attach layout pname-entry  1 3 1 1)
       (gtk:grid-attach layout pskill-label 2 3 1 1)
       (gtk:grid-attach layout pskill-entry 3 3 1 1)
-      (gtk:grid-attach layout new-unit-btn 4 3 1 1))
+      (gtk:grid-attach layout new-unit-btn 4 3 1 1))))
 
-    layout))
-
-;;; Combat Unit Section
+    ;;; Combat Unit Section
 
 (defun draw-unit-list ()
-  (let* ((layout (gtk:make-grid))
-         (scroll (gtk:make-scrolled-window)))
-    (string-list/add-label-column (lobby/units *lobby*) "Unit Name" #'cu/full-name "string" #'cu/full-name)
-    (string-list/add-label-column (lobby/units *lobby*) "PV" #'cu/pv "int" #'cu/pv)
-    (string-list/add-label-column (lobby/units *lobby*) "Pilot" #'print-pilot "string" #'cu/pilot)
-    (string-list/add-label-column (lobby/units *lobby*) "Force" #'print-force "string" #'cu/force)
-    (string-list/add-label-column (lobby/units *lobby*) "Size" #'cu/size "int" #'cu/size)
-    (string-list/add-label-column (lobby/units *lobby*) "MV" #'print-movement "string" #'cu/movement)
-    (string-list/add-label-column (lobby/units *lobby*) "A/S" #'cu/arm-struct "string" #'cu/arm-struct)
-    (string-list/add-label-column (lobby/units *lobby*) "Attack" #'cu/attack-string "string" #'cu/attack-string)
-    (setf (gtk:widget-hexpand-p scroll) t
-          (gtk:widget-vexpand-p scroll) t)
-    (setf (gtk:scrolled-window-child scroll) (string-list/view (lobby/units *lobby*)))
-    (gtk:grid-attach layout scroll 0 0 1 1)
-
-    layout))
-
-(defun new-draw-unit-list ()
-  (let* ((layout (gtk:make-grid))
-         (scroll (gtk:make-scrolled-window)))
-    (string-list/add-label-column (lobby/units *lobby*) "Unit Name" #'cu/full-name "string" #'cu/full-name)
-    (string-list/add-label-column (lobby/units *lobby*) "PV" #'cu/pv "int" #'cu/pv)
-    (string-list/add-label-column (lobby/units *lobby*) "Pilot" #'print-pilot "string" #'cu/pilot)
-    (string-list/add-label-column (lobby/units *lobby*) "Force" #'print-force "string" #'cu/force)
-    (string-list/add-label-column (lobby/units *lobby*) "Size" #'cu/size "int" #'cu/size)
-    (string-list/add-label-column (lobby/units *lobby*) "MV" #'print-movement "string" #'cu/movement)
-    (string-list/add-label-column (lobby/units *lobby*) "A/S" #'cu/arm-struct "string" #'cu/arm-struct)
-    (string-list/add-label-column (lobby/units *lobby*) "Attack" #'cu/attack-string "string" #'cu/attack-string)
-    (setf (gtk:widget-hexpand-p scroll) t
-          (gtk:widget-vexpand-p scroll) t)
-    (setf (gtk:scrolled-window-child scroll) (string-list/view (lobby/units *lobby*)))
-    (gtk:grid-attach layout scroll 0 0 1 1)
-
-    layout))
+  (let* ((unit-list (lobby/unit-list *lobby*)))
+    (mapcar #'(lambda (unit) (gtk:list-box-append unit-list (draw-quickstats unit))) (game/units *game*))
+    (setf (gtk:widget-hexpand-p unit-list) t
+          (gtk:widget-vexpand-p unit-list) t)))
