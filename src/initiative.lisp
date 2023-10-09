@@ -16,7 +16,7 @@ the appropriate function based on what phase of the game it is."
   nil)
 
 (defun deployment-phase-click (hex hex-units)
-  (when (game/active-unit *game*)
+  (when (and (game/active-unit *game*) (not hex-units))
     (deploy (game/active-unit *game*) hex)))
 
 (defun movement-phase-click (hex hex-units)
@@ -98,7 +98,7 @@ deployment phase. Deployment phases are only run when there are deployable units
         (concatenate 'string (game/phase-log *game*)
                      (format nil "In Deployment Phase~%")))
   (let ((to-deploy '()))
-     (mapcar #'(lambda (e) (if (eql (cu/location e) nil) (push e to-deploy))))
+     (mapcar #'(lambda (e) (if (eql (cu/location e) nil) (push e to-deploy))) (game/units *game*))
      ))
 
 (defun do-movement-phase ()
