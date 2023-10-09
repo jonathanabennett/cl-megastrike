@@ -34,7 +34,7 @@
 (defmethod game/find-force ((g game) u)
   (gethash u (game/forces-hash g)))
 
-(defmethod game/tile-occupied-p ((g game) (h tile))
+(defmethod game/tile-occupied-p ((g game) (h hexagon))
   (dolist (u (game/units *game*))
     (when (same-hex h (cu/location u))
         (return t)))
