@@ -18,7 +18,7 @@
 (defparameter +VEHICLE-UNITS+ '("SV" "CV"))
 (defparameter +INFANTRY-UNITS+ '("BA" "CI"))
 
-(defparameter *mv-designators* '((:walk            . "")
+(defparameter *mv-designators* '((:walk           . "")
                                 (:jump            . "j")
                                 (:tracked-quadvee . "qt")
                                 (:wheeled-quadvee . "qw")
