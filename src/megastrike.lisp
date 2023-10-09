@@ -162,7 +162,8 @@
 
 (defun cairo-draw-hex (loc hex cr)
   (let ((hex-points (draw-hex hex +default-layout+))
-        (hex-center (hex-to-pixel hex +default-layout+)))
+        (hex-center (hex-to-pixel hex +default-layout+))
+        (unit (first (member hex (game/units *game*) :key #'cu/location :test #'same-hex))))
     (with-gdk-rgba (color "#009917")
         (cairo:move-to (point-x (first hex-points)) (point-y (first hex-points)))
         (dotimes (i 6)
@@ -173,6 +174,11 @@
     (with-gdk-rgba (color "#000000")
         (gdk:cairo-set-source-rgba cr color)
         (cairo:stroke))
+    (when unit
+      (with-gdk-rgba (color "#000000")
+        (let (m (cairo:create-pattern-for-surface (cu/display unit)))
+          (cairo:move-to (point-x (nth 5 hex-points)) (point-y (nth 5 hex-points)))
+          (cairo:mask m))))
     (with-gdk-rgba (color "#000000")
       (cairo:move-to (point-x (nth 3 hex-points)) (point-y (nth 3 hex-points)))
       (cairo:set-font-size 15)
