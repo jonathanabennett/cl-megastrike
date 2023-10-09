@@ -15,6 +15,8 @@
 (defclass combat-unit ()
   ((cu-mek :initarg :mek
            :accessor cu/mek)
+   (cu-display :initarg :display
+               :accessor cu/display)
    (cu-full-name :accessor cu/full-name
                  :initarg :full-name)
    (cu-force :initarg :force
@@ -67,6 +69,7 @@
                              :cur-heat cur-heat
                              :location location
                              :pilot pilot)))
+      (find-sprite cu)
       cu)))
 
 (defun cu/pv (unit)
@@ -110,23 +113,25 @@
       (push (read-from-string spec) spec-list))
     spec-list))
 
-(defun find-sprite (mek)
+(defun find-sprite (cu)
   (let ((exact
-          (member (mek/full-name (cu/mek mek))
+          (member (mek/full-name (cu/mek cu))
                   (remove-if-not #'(lambda (x) (string= "exact" (car x))) *mechset*)
                   :key #'second
                   :test #'string=))
         (chassis
-          (member (mek/chassis (cu/mek mek))
+          (member (mek/chassis (cu/mek cu))
                   (remove-if-not #'(lambda (x) (string= "chassis" (car x))) *mechset*)
                   :key #'second
-                  :test #'string=)))
-    (format t "~a~%" exact)
-    (format t "~a~%" chassis)
+                  :test #'string=))
+        (image-file "")
+        (image-folder (merge-pathnames "images/units/" *data-folder*)))
     (cond
-      (exact (third (car exact)))
-      (chassis (third (car chassis)))
-      (t     ""))))
+      (exact (setf image-file (merge-pathnames (third (car exact)) image-folder)))
+      (chassis (setf image-file (merge-pathnames (third (car chassis)) image-folder)))
+      (t     (setf image-file (merge-pathnames "defaults/default_medium.png" image-folder))))
+    (format t "filename: ~a" image-file)
+    (setf (cu/display cu) (gdk:make-texture :path (namestring (truename image-file))))))
 
 (defmethod move-unit ((cu combat-unit) (destination tile))
   (when (>= (move-lookup cu (cu/move-used cu))
@@ -159,13 +164,13 @@
         (med (mek/medium (cu/mek attacker)))
         (long (mek/long (cu/mek attacker)))
         (extreme (mek/extreme (cu/mek attacker))))
-    (when ((mek/short* (cu/mek attacker)) (<= 3 (roll 1)))
+    (when (and (mek/short* (cu/mek attacker)) (<= 3 (roll 1)))
       (setf short 1))
-    (when ((mek/medium* (cu/mek attacker)) (<= 3 (roll 1)))
+    (when (and (mek/medium* (cu/mek attacker)) (<= 3 (roll 1)))
       (setf medium 1))
-    (when ((mek/long* (cu/mek attacker)) (<= 3 (roll 1)))
+    (when (and (mek/long* (cu/mek attacker)) (<= 3 (roll 1)))
       (setf long 1))
-    (when ((mek/extreme* (cu/mek attacker)) (<= 3 (roll 1)))
+    (when (and (mek/extreme* (cu/mek attacker)) (<= 3 (roll 1)))
       (setf extreme 1))
     (cond
       ((>= 3 range) short)
@@ -173,7 +178,7 @@
       ((>= 21 range) long)
       ((>= 30 range) extreme))))
 
-(defmethod take-damage ((cu combat-unit damage))
+(defmethod take-damage ((cu combat-unit) damage)
   (dotimes (x damage)
     (if (eq 0 (cu/cur-armor cu))
         (decf (cu/cur-struct cu))

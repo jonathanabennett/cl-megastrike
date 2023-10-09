@@ -28,15 +28,24 @@
 
 (defun draw-quickstats (u)
   (let ((frame (gtk:make-frame :label (cu/full-name u)))
+        (layout (gtk:make-box :orientation gtk:+orientation-horizontal+ :spacing 5))
         (statblock (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 5))
         (gen-line (gtk:make-box :orientation gtk:+orientation-horizontal+ :spacing 2))
         (nums-line (gtk:make-box :orientation gtk:+orientation-horizontal+ :spacing 2))
+        (picture (gtk:make-picture :paintable (cu/display u)))
         (abilities-line (draw-abilities-line u)))
-    (setf (gtk:frame-child frame) statblock)
+    (setf (gtk:frame-child frame) layout
+          (gtk:widget-hexpand-p statblock) t
+          (gtk:widget-vexpand-p statblock) t
+          (gtk:widget-hexpand-p frame) t
+          (gtk:widget-vexpand-p frame) t)
+    (gtk:box-append layout picture)
+    (gtk:box-append layout statblock)
     (gtk:box-append gen-line (gtk:make-label :str (format nil "Pilot: ~a" (print-pilot u))))
     (gtk:box-append gen-line (gtk:make-label :str (format nil "Sz: ~a" (cu/size u))))
     (gtk:box-append gen-line (gtk:make-label :str (format nil "PV: ~a" (cu/pv u))))
     (gtk:box-append gen-line (gtk:make-label :str (format nil "Force: ~a" (print-force u))))
+    (gtk:box-append gen-line picture)
     (gtk:box-append statblock gen-line)
     (gtk:box-append nums-line (gtk:make-label :str (format nil "MV: ~a" (print-movement u))))
     (gtk:box-append nums-line (gtk:make-label :str (format nil "S/M/L/E: ~a" (cu/attack-string u))))
