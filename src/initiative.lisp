@@ -1,6 +1,6 @@
 (in-package :megastrike)
 
-(defun map-click-hander (hex)
+(defun map-click-handler (hex)
   "Determine if there is a unit in the hex clicked on and this pass the hex and the units on to
 the appropriate function based on what phase of the game it is."
   (let ((hex-units (game/tile-occupied-p *game* hex))
@@ -90,6 +90,10 @@ requires no user intervention.)"
               (push (pop losing-force-list) turn-order))
             (push (pop winning-force-list) turn-order))))
     (reverse turn-order)))
+
+(defmethod deploy ((u combat-unit) (h hexagon))
+  (unless (game/tile-occupied-p *game* h)
+    (setf (cu/location u) h)))
 
 (defun do-deployment-phase ()
   "This function runs each round to determine whether or not to simply skip the
