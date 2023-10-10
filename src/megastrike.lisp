@@ -187,13 +187,12 @@
         (cairo:stroke))
     (when unit
       (with-gdk-rgba (color "#000000")
-        (let (m (cairo:create-pattern-for-surface (cu/display unit)))
-          (gdk:cairo-set-source-rgba cr color)
-          (gdk:cairo-set-source-pixbuf cr
-                                       (gdk:pixbuf-get-from-texture (cu/display unit))
-                                       (point-x (nth 5 hex-points))
-                                       (point-y (nth 5 hex-points))))
-        cairo:stroke))
+        (gdk:cairo-set-source-rgba cr color)
+        (gdk:cairo-set-source-pixbuf cr
+                                     (gdk:pixbuf-get-from-texture (cu/display unit))
+                                     (point-x (nth 5 hex-points))
+                                     (point-y (nth 5 hex-points)))
+      cairo:fill-path))
     (with-gdk-rgba (color "#000000")
       (cairo:move-to (point-x (nth 3 hex-points)) (point-y (nth 3 hex-points)))
       (cairo:set-font-size 15)
