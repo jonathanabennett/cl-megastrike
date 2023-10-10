@@ -192,7 +192,7 @@
                                      (gdk:pixbuf-get-from-texture (cu/display unit))
                                      (point-x (nth 5 hex-points))
                                      (point-y (nth 5 hex-points)))
-      cairo:fill-path))
+      (cairo:paint)))
     (with-gdk-rgba (color "#000000")
       (cairo:move-to (point-x (nth 3 hex-points)) (point-y (nth 3 hex-points)))
       (cairo:set-font-size 15)
