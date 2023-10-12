@@ -207,12 +207,15 @@
         (cairo:stroke))
     (when unit
       (with-gdk-rgba (color "#000000")
-        (gdk:cairo-set-source-rgba cr color)
-        (gdk:cairo-set-source-pixbuf cr
-                                     (gdk:pixbuf-get-from-texture (cu/display unit))
-                                     (point-x (nth 5 hex-points))
-                                     (point-y (nth 5 hex-points)))
-      (cairo:paint)))
+        (let* ((pixbuf (gdk:pixbuf-get-from-texture (cu/display unit)))
+               (x (coerce (point-x (fifth hex-points)) 'double-float))
+               (y (coerce(point-y (fifth hex-points)) 'double-float)))
+          (gdk:pixbuf-scale-simple (layout-x-size +default-layout+) (layout-y-size +default-layout))
+          (gdk:cairo-set-source-pixbuf cr pixbuf x y)
+          (format t "Drawing ~a~% X: ~a~% Y: ~a~% Width: ~a~% Height: ~a~%"
+                  (cu/full-name unit) x y (gdk:pixbuf-width pixbuf) (gdk:pixbuf-height pixbuf))
+          (cairo:rectangle x y (gdk:pixbuf-width pixbuf) (gdk:pixbuf-height pixbuf))
+          (cairo:fill-path))))
     (with-gdk-rgba (color "#000000")
       (cairo:move-to (point-x (nth 3 hex-points)) (point-y (nth 3 hex-points)))
       (cairo:set-font-size 15)
