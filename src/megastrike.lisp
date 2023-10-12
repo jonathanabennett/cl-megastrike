@@ -15,7 +15,7 @@
     (let ((box (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 5))
           (game-label (gtk:make-label :str "Megastrike: Alphastrike on the Computer"))
           (new-game-button (gtk:make-button :label "New Game"))
-          (default-game-button (gtk:make-button :label "Launch Default Game"))
+          (default-game-button (gtk:make-button :label "Test drawing"))
           (exit-button (gtk:make-button :label "Exit")))
       (gtk:connect new-game-button "clicked" (lambda (button)
                                                (declare (ignore button))
@@ -23,7 +23,7 @@
                                                (gtk:window-destroy window)))
       (gtk:connect default-game-button "clicked" (lambda (button)
                                                    (declare (ignore button))
-                                                   (draw-lobby-screen)
+                                                   (draw-test-window)
                                                    (gtk:window-destroy window)))
       (gtk:connect exit-button "clicked" (lambda (button)
                                            (declare (ignore button))
@@ -158,12 +158,32 @@
                               :this cr)
                width height)))
 
+(defun draw-test-window ()
+  (let ((window (gtk:make-application-window :application gtk:*application*))
+        (picture (gtk:make-drawing-area)))
+    (setf (gtk:window-child window) picture
+          (gtk:drawing-area-content-width picture) 500
+          (gtk:drawing-area-content-height picture) 500
+          (gtk:drawing-area-draw-func picture) (list (cffi:callback %draw-func)
+                                                    (cffi:null-pointer)
+                                                    (cffi:null-pointer)))
+    (unless (gtk:widget-visible-p window)
+      (gtk:window-present window))))
+
 (defun draw-func (area cr width height)
   (declare (ignore area)
            (optimize (speed 3)
                      (debug 0)
                      (safety 0)))
-  ;; TODO let some scaling on the size of the picture
+  ;; (with-gdk-rgba (color "#000000")
+  ;;   (let ((texture (gdk:make-texture :path (namestring (truename (merge-pathnames "images/units/mechs/Akuma.png" *data-folder*))))))
+  ;;     (cairo:rectangle 100.0 100.0 (coerce (the fixnum (gdk:texture-width texture)) 'single-float) (coerce (the fixnum (gdk:texture-height texture)) 'single-float))
+  ;;     (gdk:cairo-set-source-pixbuf cr
+  ;;                                  (gdk:pixbuf-get-from-texture texture)
+  ;;                                  (coerce (the fixnum 100) 'double-float)
+  ;;                                  (coerce (the fixnum 100) 'double-float))
+  ;;     (cairo:fill-path))))
+  TODO let some scaling on the size of the picture
   (let ((width (coerce (the fixnum width) 'single-float))
         (height (coerce (the fixnum height) 'single-float))
         (fpi (coerce pi 'single-float)))
