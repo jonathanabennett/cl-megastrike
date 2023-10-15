@@ -131,7 +131,7 @@
       (chassis (setf image-file (merge-pathnames (third (car chassis)) image-folder)))
       (t     (setf image-file (merge-pathnames "defaults/default_medium.png" image-folder))))
     (format t "filename: ~a" image-file)
-    (setf (cu/display cu) (gdk:make-texture :path (namestring (truename image-file))))))
+    (setf (cu/display cu) (namestring (truename image-file)))))
 
 (defmethod move-unit ((cu combat-unit) (destination tile))
   (when (>= (move-lookup cu (cu/move-used cu))

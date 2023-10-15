@@ -67,12 +67,6 @@
           (gtk:widget-hexpand-p box) t
           (gtk:widget-vexpand-p box) t)
     (gtk:widget-add-controller map-area clicker)
-    (gtk:connect clicker "pressed"
-                 (lambda (handler presses x y)
-                   (declare (ignore handler presses))
-                   (let ((hex (pixel-to-hex (make-point x y) +default-layout+)))
-                     (map-click-handler hex)
-                     (format t "Clicked at ~a,~a,~a: ~a~%" (hexagon-q hex) (hexagon-r hex) (hexagon-s hex) (offset-from-hex hex)))))
     (setf (gtk:label-label turn-order-label) (print-initiative *game*))
     (gtk:box-append box map-scroll)
     (gtk:box-append box recordsheet)
@@ -96,6 +90,20 @@
                      (setf command-bar (build-command-bar window))
                      (gtk:box-append layout command-bar)
                      (gtk:widget-queue-draw map-area))))
+    (let ((action (gio:make-simple-action :name "map-redraw"
+                                          :parameter-type nil)))
+      (gio:action-map-add-action gtk:*application* action)
+      (gtk:connect action "activate"
+                   (lambda (action param)
+                     (declare (ignore action param))
+                     (gtk:widget-queue-draw map-area))))
+    (gtk:connect clicker "pressed"
+                 (lambda (handler presses x y)
+                   (declare (ignore handler presses))
+                   (let ((hex (pixel-to-hex (make-point x y) +default-layout+)))
+                     (map-click-handler hex)
+                     (gtk:widget-activate-action map-area "app.map-redraw" nil)
+                     (format t "Clicked at ~a,~a,~a: ~a~%" (hexagon-q hex) (hexagon-r hex) (hexagon-s hex) (offset-from-hex hex)))))
     (unless (gtk:widget-visible-p window)
       (gtk:window-present window))))
 
@@ -121,13 +129,13 @@
     (when (= (game/current-phase *game*) 1)
       (setf (gtk:label-label phase-label) "Deployment Phase.")
       )
-    (when (= (game/current-phase *game*) 3)
+    (when (= (game/current-phase *game*) 2)
       (setf (gtk:label-label phase-label) "Movement Phase.")
       )
-    (when (= (game/current-phase *game*) 4)
+    (when (= (game/current-phase *game*) 3)
       (setf (gtk:label-label phase-label) "Combat Phase.")
       )
-    (when (= (game/current-phase *game*) 5)
+    (when (= (game/current-phase *game*) 4)
       (setf (gtk:label-label phase-label) "End Phase.")
       )
     (let ((button (gtk:make-button :label "Exit")))
@@ -136,6 +144,27 @@
                                       (gtk:window-destroy window)))
           (gtk:box-append bar button))
     bar))
+
+(declaim (ftype (function (t t t t) t) drawing-test-func))
+
+(cffi:defcallback %drawing-test-func :void ((area :pointer)
+                                    (cr :pointer)
+                                    (width :int)
+                                    (height :int)
+                                    (data :pointer))
+  (declare (ignore data))
+  (let ((cairo:*context* (make-instance 'cairo:context
+                                        :pointer cr
+                                        :width width
+                                        :height height
+                                        :pixel-based-p nil)))
+    (drawing-test-func (make-instance 'gir::object-instance
+                              :class (gir:nget gtk:*ns* "DrawingArea")
+                              :this area)
+               (make-instance 'gir::struct-instance
+                              :class (gir:nget megastrike::*ns* "Context")
+                              :this cr)
+               width height)))
 
 (declaim (ftype (function (t t t t) t) draw-func))
 
@@ -164,25 +193,36 @@
     (setf (gtk:window-child window) picture
           (gtk:drawing-area-content-width picture) 500
           (gtk:drawing-area-content-height picture) 500
-          (gtk:drawing-area-draw-func picture) (list (cffi:callback %draw-func)
+          (gtk:drawing-area-draw-func picture) (list (cffi:callback %drawing-test-func)
                                                     (cffi:null-pointer)
                                                     (cffi:null-pointer)))
     (unless (gtk:widget-visible-p window)
       (gtk:window-present window))))
+
+(defun drawing-test-func (area cr width height)
+  (declare (ignore area)
+           (optimize (speed 3)
+                     (debug 0)
+                     (safety 0)))
+  (with-gdk-rgba (color "#0000FF")
+    (let* ((picture (cairo:image-surface-create-from-png (namestring (truename (merge-pathnames "images/units/mechs/Akuma.png" *data-folder*)))))
+           (x (coerce 50 'double-float))
+           (y (coerce 50 'double-float)))
+      (cairo:scale (/ (layout-x-size +default-layout+) (cairo:image-surface-get-width picture))
+                   (/ (layout-y-size +default-layout+) (cairo:image-surface-get-height picture)))
+      (cairo:set-source-surface picture x y)
+      (cairo:rectangle x y (cairo:image-surface-get-width picture) (cairo:image-surface-get-height picture))
+      (cairo:fill-path)
+      (gdk:cairo-set-source-rgba cr color)
+      (cairo:set-operator :multiply)
+      (cairo:mask-surface picture x y)
+      )))
 
 (defun draw-func (area cr width height)
   (declare (ignore area)
            (optimize (speed 3)
                      (debug 0)
                      (safety 0)))
-  ;; (with-gdk-rgba (color "#000000")
-  ;;   (let ((texture (gdk:make-texture :path (namestring (truename (merge-pathnames "images/units/mechs/Akuma.png" *data-folder*))))))
-  ;;     (cairo:rectangle 100.0 100.0 (coerce (the fixnum (gdk:texture-width texture)) 'single-float) (coerce (the fixnum (gdk:texture-height texture)) 'single-float))
-  ;;     (gdk:cairo-set-source-pixbuf cr
-  ;;                                  (gdk:pixbuf-get-from-texture texture)
-  ;;                                  (coerce (the fixnum 100) 'double-float)
-  ;;                                  (coerce (the fixnum 100) 'double-float))
-  ;;     (cairo:fill-path))))
   TODO let some scaling on the size of the picture
   (let ((width (coerce (the fixnum width) 'single-float))
         (height (coerce (the fixnum height) 'single-float))
@@ -206,19 +246,22 @@
         (gdk:cairo-set-source-rgba cr color)
         (cairo:stroke))
     (when unit
-      (with-gdk-rgba (color "#000000")
-        (let* ((pixbuf (gdk:pixbuf-get-from-texture (cu/display unit)))
-               (x (coerce (point-x (fifth hex-points)) 'double-float))
-               (y (coerce(point-y (fifth hex-points)) 'double-float)))
-          (gdk:pixbuf-scale-simple (layout-x-size +default-layout+) (layout-y-size +default-layout))
-          (gdk:cairo-set-source-pixbuf cr pixbuf x y)
-          (format t "Drawing ~a~% X: ~a~% Y: ~a~% Width: ~a~% Height: ~a~%"
-                  (cu/full-name unit) x y (gdk:pixbuf-width pixbuf) (gdk:pixbuf-height pixbuf))
-          (cairo:rectangle x y (gdk:pixbuf-width pixbuf) (gdk:pixbuf-height pixbuf))
-          (cairo:fill-path))))
+      (with-gdk-rgba (color (force/color (cu/force unit)))
+        (let* ((picture (cairo:image-surface-create-from-png (cu/display unit)))
+           (x (coerce (- (point-x (second hex-points)) 10) 'double-float))
+           (y (coerce (+ (point-y (second hex-points)) 20) 'double-float)))
+          (cairo:save)
+          (cairo:set-source-surface picture x y)
+          (cairo:rectangle x y (cairo:image-surface-get-width picture) (cairo:image-surface-get-height picture))
+          (cairo:fill-path)
+          (gdk:cairo-set-source-rgba cr color)
+          (cairo:set-operator :multiply)
+          (cairo:mask-surface picture x y)
+          (cairo:restore))))
     (with-gdk-rgba (color "#000000")
+      (gdk:cairo-set-source-rgba cr color)
       (cairo:move-to (point-x (nth 3 hex-points)) (point-y (nth 3 hex-points)))
-      (cairo:set-font-size 15)
+      (cairo:set-font-size 25)
       (cairo:text-path (format nil "~2,'0D~2,'0D" (first loc) (second loc)))
       (cairo:fill-path))))
 

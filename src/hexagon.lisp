@@ -107,8 +107,8 @@ distance."
                                 :pixel-to-hex-matrix
                                   (vector (/ 2.0 3.0) 0 (/ -1.0 3.0) (/ (sqrt 3.0) 3.0))
                                 :start-angle 0
-                                :x-size 35
-                                :y-size 35
+                                :x-size 70
+                                :y-size 70
                                 :x-origin 20
                                 :y-origin 20))
 
