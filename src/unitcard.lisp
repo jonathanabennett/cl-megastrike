@@ -1,18 +1,27 @@
 (in-package :megastrike)
 
 (defun draw-recordsheets ()
-  (let ((layout (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 15))
-        (recordsheet-label (gtk:make-label :str "Record Sheets"))
-        (scroll-box (gtk:make-scrolled-window))
-        (record-sheets (gtk:make-list-box)))
-    (gtk:box-append layout recordsheet-label)
-    (gtk:box-append layout scroll-box)
-    (setf (gtk:widget-vexpand-p scroll-box) t
-          (gtk:widget-hexpand-p scroll-box) t
-          (gtk:widget-vexpand-p record-sheets) t
-          (gtk:widget-hexpand-p record-sheets) t)
-    (setf (gtk:scrolled-window-child scroll-box) record-sheets)
-    (gtk:connect record-sheets "row-selected"
+  (let* ((layout (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 15))
+         (current-team (nth (game/initiative-place *game*) (game/initiative-list *game*)))
+         (other-team (car (remove-if #'(lambda (f)
+                                         (same-force current-team f))
+                                     (game/initiative-list *game*)
+                                     :start (game/initiative-place *game*))))
+         (cur-team-label (gtk:make-label :str ""))
+         (cur-team-scroll (gtk:make-scrolled-window))
+         (cur-team-record-sheets (gtk:make-list-box))
+         (other-team-label (gtk:make-label :str ""))
+         (other-team-scroll (gtk:make-scrolled-window))
+         (other-team-record-sheets (gtk:make-list-box)))
+    (gtk:box-append layout cur-team-recordsheet-label)
+    (gtk:box-append layout cur-team-scroll)
+    (setf (gtk:widget-vexpand-p cur-team-scroll) t
+          (gtk:widget-hexpand-p cur-team-scroll) t
+          (gtk:widget-vexpand-p cur-team-record-sheets) t
+          (gtk:widget-hexpand-p cur-team-record-sheets) t
+          (gtk:label-label cur-team-label) (format nil "~a Units" current-team))
+    (setf (gtk:scrolled-window-child cur-team-scroll) cur-team-record-sheets)
+    (gtk:connect cur-team-record-sheets "row-selected"
                  (lambda (lb row)
                    (declare (ignore lb))
                    (when row
@@ -21,8 +30,21 @@
                                                                     :key #'cu/full-name
                                                                     :test #'string=)))
                        (format t "~A~%" (cu/full-name (game/active-unit *game*)))))))
-    (mapcar #'(lambda ( unit)
-                (gtk:list-box-append record-sheets (draw-stat-block unit)))
+    (mapcar #'(lambda (u)
+                (when (same-force (cu/force u) current-team)
+                  (gtk:list-box-append cur-team-record-sheets (draw-stat-block u))))
+            (game/units *game*))
+    (gtk:box-append layout other-team-recordsheet-label)
+    (gtk:box-append layout other-team-scroll)
+    (setf (gtk:widget-vexpand-p other-team-scroll) t
+          (gtk:widget-hexpand-p other-team-scroll) t
+          (gtk:widget-vexpand-p other-team-record-sheets) t
+          (gtk:widget-hexpand-p other-team-record-sheets) t
+          (gtk:label-label other-team-label) (format nil "~a Units" other-team))
+    (setf (gtk:scrolled-window-child other-team-scroll) other-team-record-sheets)
+    (mapcar #'(lambda (u)
+                (when (same-force (cu/force u) other-team)
+                  (gtk:list-box-append other-team-record-sheets (draw-stat-block u))))
             (game/units *game*))
     layout))
 
@@ -32,13 +54,14 @@
         (statblock (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 5))
         (gen-line (gtk:make-box :orientation gtk:+orientation-horizontal+ :spacing 2))
         (nums-line (gtk:make-box :orientation gtk:+orientation-horizontal+ :spacing 2))
-        (picture (gtk:make-picture :paintable (cu/display u)))
+        (picture (gtk:make-picture :paintable (gdk:make-texture :path (cu/display u))))
         (abilities-line (draw-abilities-line u)))
     (setf (gtk:frame-child frame) layout
           (gtk:widget-hexpand-p statblock) t
           (gtk:widget-vexpand-p statblock) t
           (gtk:widget-hexpand-p frame) t
-          (gtk:widget-vexpand-p frame) t)
+          (gtk:widget-vexpand-p frame) t
+          (gtk:widget-color frame) (force/color (cu/force u)))
     (gtk:box-append layout picture)
     (gtk:box-append layout statblock)
     (gtk:box-append gen-line (gtk:make-label :str (format nil "Pilot: ~a" (print-pilot u))))
