@@ -79,6 +79,9 @@
       (gtk:connect action "activate"
                    (lambda (action param)
                      (declare (ignore action param))
+                     (gtk:box-remove box recordsheet)
+                     (setf recordsheet (draw-recordsheets))
+                     (gtk:box-append box recordsheet)
                      (setf (gtk:label-label turn-order-label) (print-initiative *game*)))))
     (let ((action (gio:make-simple-action :name "next-phase"
                                           :parameter-type nil)))
@@ -283,7 +286,8 @@
       (cairo:move-to (point-x (nth 3 hex-points)) (point-y (nth 3 hex-points)))
       (cairo:set-font-size 25)
       (cairo:text-path (format nil "~2,'0D~2,'0D" (first loc) (second loc)))
-      (cairo:fill-path))))
+      (cairo:fill-path))
+    (cairo:restore)))
 
 (defun draw-round-report ()
   (let ((layout (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 5)))
