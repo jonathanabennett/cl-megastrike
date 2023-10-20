@@ -90,5 +90,4 @@
         "This test failed.")
     (is (every #'eql test-offset-42 (megastrike::offset-from-hex test-hex-42)))
     (is (not (megastrike::same-hex test-hex-42 (megastrike::hex-from-offset :col 0 :row 0))))
-    (is (not (every #'eql test-offset-42 (megastrike::offset-from-hex test-hex-00))))
-    ))
+    (is (not (every #'eql test-offset-42 (megastrike::offset-from-hex test-hex-00))))))
