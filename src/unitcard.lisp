@@ -3,8 +3,7 @@
 (defun draw-recordsheets ()
   (let* ((layout (gtk:make-box :orientation gtk:+orientation-vertical+ :spacing 15))
          (current-team (nth (game/initiative-place *game*) (game/initiative-list *game*)))
-         (other-team (car (remove-if #'(lambda (f)
-                                         (same-force current-team f))
+         (other-team (car (remove-if #'(lambda (f) (string= current-team f))
                                      (game/initiative-list *game*)
                                      :start (game/initiative-place *game*))))
          (cur-team-label (gtk:make-label :str ""))
@@ -13,7 +12,7 @@
          (other-team-label (gtk:make-label :str ""))
          (other-team-scroll (gtk:make-scrolled-window))
          (other-team-record-sheets (gtk:make-list-box)))
-    (gtk:box-append layout cur-team-recordsheet-label)
+    (gtk:box-append layout cur-team-label)
     (gtk:box-append layout cur-team-scroll)
     (setf (gtk:widget-vexpand-p cur-team-scroll) t
           (gtk:widget-hexpand-p cur-team-scroll) t
@@ -25,16 +24,16 @@
                  (lambda (lb row)
                    (declare (ignore lb))
                    (when row
-                     (let* ((unit (gtk:frame-label (gobj:coerce (gtk:list-box-row-child row) 'gtk:frame))))
-                       (setf (game/active-unit *game*) (car (member unit (game/units *game*)
-                                                                    :key #'cu/full-name
-                                                                    :test #'string=)))
-                       (format t "~A~%" (cu/full-name (game/active-unit *game*)))))))
+                     (let* ((str (gtk:frame-label (gobj:coerce (gtk:list-box-row-child row) 'gtk:frame)))
+                            (u (car (member str (game/units *game*) :key #'cu/full-name :test #'string=))))
+                       (if (cu/actedp u)
+                           (gtk:list-box-unselect-all lb)
+                           (setf (game/active-unit *game*) u))))))
     (mapcar #'(lambda (u)
                 (when (same-force (cu/force u) current-team)
                   (gtk:list-box-append cur-team-record-sheets (draw-stat-block u))))
             (game/units *game*))
-    (gtk:box-append layout other-team-recordsheet-label)
+    (gtk:box-append layout other-team-label)
     (gtk:box-append layout other-team-scroll)
     (setf (gtk:widget-vexpand-p other-team-scroll) t
           (gtk:widget-hexpand-p other-team-scroll) t
@@ -60,8 +59,7 @@
           (gtk:widget-hexpand-p statblock) t
           (gtk:widget-vexpand-p statblock) t
           (gtk:widget-hexpand-p frame) t
-          (gtk:widget-vexpand-p frame) t
-          (gtk:widget-color frame) (force/color (cu/force u)))
+          (gtk:widget-vexpand-p frame) t)
     (gtk:box-append layout picture)
     (gtk:box-append layout statblock)
     (gtk:box-append gen-line (gtk:make-label :str (format nil "Pilot: ~a" (print-pilot u))))
@@ -91,6 +89,8 @@
     (gtk:box-append statblock damage-line)
     (gtk:box-append statblock abilities-line)
     (setf (gtk:frame-child frame) statblock)
+    (when (cu/actedp u)
+      (gtk:widget-add-css-class frame "acted"))
     frame))
 
 (defun draw-general-info-line (u)

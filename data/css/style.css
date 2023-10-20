@@ -13,3 +13,7 @@ levelbar.heat-bar trough block.filled {
 levelbar.heat-bar trough block.empty {
   background-color: aliceblue;
 }
+
+frame.acted {
+  background-color: grey;
+}

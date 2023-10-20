@@ -39,6 +39,8 @@
                 :accessor cu/cur-heat)
    (cu-location :initarg :location
                 :accessor cu/location)
+   (cu-actedp :initform nil
+              :accessor cu/actedp)
    (cu-pilot :initarg :pilot
              :accessor cu/pilot)))
 
