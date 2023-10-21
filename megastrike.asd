@@ -22,6 +22,11 @@
                  (:file "board" :depends-on ("hexagon" "tiles"))
                  (:file "combat-unit" :depends-on ("mul" "board"))
                  (:file "initiative" :depends-on ("utils"))
+                 (:file "deployment")
+                 (:file "movement")
+                 (:file "combat")
+                 (:file "end")
+                 (:file "phases" :depends-on ("initiative"))
                  (:file "force" :depends-on ("combat-unit" "utils"))
                  (:file "game" :depends-on ("board" "force"))
                  (:file "unitcard" :depends-on ("combat-unit"))
@@ -39,6 +44,6 @@
   :license "GPL3"
   :depends-on (:fiveam :megastrike)
   :components ((:module "test"
-                  :components
-                  ((:file "main"))))
+                :components
+                ((:file "main"))))
   :perform (test-op (op c) (symbol-call :fiveam :run! (find-symbol* :megastrike :megastrike/test))))

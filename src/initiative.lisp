@@ -1,53 +1,5 @@
 (in-package :megastrike)
 
-(defun map-click-handler (hex)
-  "Determine if there is a unit in the hex clicked on and this pass the hex and the units on to
-the appropriate function based on what phase of the game it is."
-  (let ((hex-units (game/tile-occupied-p *game* hex))
-        (phase (game/current-phase *game*)))
-    (cond
-      ((= phase 0) (initiative-phase-click hex hex-units))
-      ((= phase 1) (deployment-phase-click hex hex-units))
-      ((= phase 2) (movement-phase-click hex hex-units))
-      ((= phase 3) (combat-phase-click hex hex-units))
-      ((= phase 4) (end-phase-click hex hex-units)))))
-
-(defun initiative-phase-click (hex hex-units)
-  nil)
-
-(defun deployment-phase-click (hex hex-units)
-  (when (and (game/active-unit *game*) (not hex-units))
-    (deploy (game/active-unit *game*) hex)))
-
-(defun movement-phase-click (hex hex-units)
-  nil)
-
-(defun combat-phase-click (hex hex-units)
-  nil)
-
-(defun end-phase-click (hex hex-units)
-  nil)
-
-(defun advance-phase ()
-  (incf (game/current-phase *game*))
-  (when (= (game/current-phase *game*) 5)
-    (setf (game/current-phase *game*) 0)
-    (incf (game/turn-number *game*)))
-  (do-phase))
-
-(defun do-phase ()
-  "Set appropriate tracking variables, check which phase it is, and dispatch to the
-appropriate function."
-  (setf (game/initiative-place *game*) 0)
-  (setf (game/active-unit *game*) nil)
-  (let ((phase (game/current-phase *game*)))
-    (cond
-      ((= phase 0) (do-initiative-phase))
-      ((= phase 1) (do-deployment-phase))
-      ((= phase 2) (do-movement-phase))
-      ((= phase 3) (do-combat-phase))
-      ((= phase 4) (do-end-phase)))))
-
 (defun do-initiative-phase ()
   "This function runs the initiative phase automatically (since the initiative phase
 requires no user intervention.)"
@@ -60,14 +12,14 @@ requires no user intervention.)"
 (defun roll-initiative (force-list)
   (mapcar #'(lambda (a) (setf (force/initiative a) (roll2d))) force-list)
   (if (eql 2 (length (remove-duplicates force-list :test #'(lambda (a b)
-                                                           (eql (force/initiative a)
-                                                                (force/initiative b))))))
+                                                             (eql (force/initiative a)
+                                                                  (force/initiative b))))))
       (build-initiative-order force-list)
       (roll-initiative force-list)))
 
 (defun build-initiative-order (force-list)
   (let* ((force-order (sort force-list #'(lambda (a b) (< (force/initiative a)
-                                                       (force/initiative b)))))
+                                                          (force/initiative b)))))
          (turn-order (make-turn-order (turn-order-list (first force-order))
                                       (turn-order-list (second force-order)))))
     (setf (game/phase-log *game*)
@@ -90,41 +42,3 @@ requires no user intervention.)"
               (push (pop losing-force-list) turn-order))
             (push (pop winning-force-list) turn-order))))
     (reverse turn-order)))
-
-(defmethod deploy ((u combat-unit) (h hexagon))
-  (unless (game/tile-occupied-p *game* h)
-    (setf (cu/location u) h)))
-
-(defun do-deployment-phase ()
-  "This function runs each round to determine whether or not to simply skip the
-deployment phase. Deployment phases are only run when there are deployable units."
-  (setf (game/phase-log *game*)
-        (concatenate 'string (game/phase-log *game*)
-                     (format nil "In Deployment Phase~%")))
-  (let ((to-deploy '()))
-     (mapcar #'(lambda (e) (if (eql (cu/location e) nil) (push e to-deploy))) (game/units *game*))
-     ))
-
-(defun do-movement-phase ()
-  "This function will handle the movement phase."
-  (setf (game/phase-log *game*)
-        (concatenate 'string (game/phase-log *game*)
-                     (format nil "In Movement Phase~%")))
-  (setf (game/phase-log *game*)
-        (concatenate 'string (game/phase-log *game*)
-                     "Entering Movement phase.")))
-
-(defun do-combat-phase ()
-  "This function will handle the combat phase."
-  (setf (game/phase-log *game*)
-        (concatenate 'string (game/phase-log *game*)
-                     (format nil "In Combat Phase~%")))
-  (setf (game/phase-log *game*)
-        (concatenate 'string (game/phase-log *game*)
-                     "Entering Combat phase.")))
-
-(defun do-end-phase ()
-  (setf (game/phase-log *game*)
-        (concatenate 'string (game/phase-log *game*)
-                     (format nil "In End Phase~%")))
-  )
