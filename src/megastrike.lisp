@@ -92,6 +92,10 @@
                      (gtk:box-remove layout command-bar)
                      (setf command-bar (build-command-bar window))
                      (gtk:box-append layout command-bar)
+                     (gtk:box-remove box recordsheet)
+                     (setf recordsheet (draw-recordsheets))
+                     (gtk:box-append box recordsheet)
+                     (setf (gtk:label-label turn-order-label) (print-initiative *game*))
                      (gtk:widget-queue-draw map-area))))
     (let ((action (gio:make-simple-action :name "map-redraw"
                                           :parameter-type nil)))
