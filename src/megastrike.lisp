@@ -179,6 +179,15 @@
                            (when (cu/destination cu)
                              (setf (cu/destination cu) nil))))))
         (gtk:box-append bar button))
+      (let ((button (gtk:make-button :label "Stand Still")))
+        (gtk:connect button "clicked"
+                     (lambda (button)
+                       (declare (ignore button))
+                       (let ((cu (game/active-unit *game*)))
+                         (when (and cu (not (cu/actedp cu)))
+                           (setf (cu/destination cu) (cu/location cu)
+                                 (cu/move-used cu) :stand-still)))))
+        (gtk:box-append bar button))
       (let ((button (gtk:make-button :label "Reset Move")))
         (gtk:connect button "clicked"
                      (lambda (button)
