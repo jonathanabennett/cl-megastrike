@@ -1,5 +1,8 @@
 (in-package :megastrike)
 
+(defun initiative-phase-click (hex hex-units)
+  nil)
+
 (defun do-initiative-phase ()
   "This function runs the initiative phase automatically (since the initiative phase
 requires no user intervention.)"

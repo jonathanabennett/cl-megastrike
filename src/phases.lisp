@@ -12,22 +12,6 @@ the appropriate function based on what phase of the game it is."
       ((= phase 3) (combat-phase-click hex hex-units))
       ((= phase 4) (end-phase-click hex hex-units)))))
 
-(defun initiative-phase-click (hex hex-units)
-  nil)
-
-(defun deployment-phase-click (hex hex-units)
-  (when (and (game/active-unit *game*) (not hex-units))
-    (deploy (game/active-unit *game*) hex)))
-
-(defun movement-phase-click (hex hex-units)
-  nil)
-
-(defun combat-phase-click (hex hex-units)
-  nil)
-
-(defun end-phase-click (hex hex-units)
-  nil)
-
 (defun advance-phase ()
   (incf (game/current-phase *game*))
   (when (= (game/current-phase *game*) 5)

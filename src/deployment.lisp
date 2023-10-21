@@ -1,5 +1,9 @@
 (in-package :megastrike)
 
+(defun deployment-phase-click (hex hex-units)
+  (when (and (game/active-unit *game*) (not hex-units))
+    (deploy (game/active-unit *game*) hex)))
+
 (defmethod deploy ((u combat-unit) (h hexagon))
   (unless (game/tile-occupied-p *game* h)
     (setf (cu/location u) h)))

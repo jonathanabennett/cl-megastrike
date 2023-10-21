@@ -1,5 +1,8 @@
 (in-package :megastrike)
 
+(defun combat-phase-click (hex hex-units)
+  nil)
+
 (defun do-combat-phase ()
   "This function will handle the combat phase."
   (setf (game/phase-log *game*)
