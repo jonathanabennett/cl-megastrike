@@ -25,6 +25,8 @@
                :accessor cu/pv-mod)
    (cu-move-used :initarg :move-used
                  :accessor cu/move-used)
+   (cu-destination :initform nil
+                   :accessor cu/destination)
    (cu-cur-armor :initarg :cur-armor
                  :accessor cu/cur-armor)
    (cu-cur-struct :initarg :cur-struct
