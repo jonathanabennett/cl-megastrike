@@ -24,7 +24,7 @@ the appropriate function based on what phase of the game it is."
 appropriate function."
   (setf (game/initiative-place *game*) 0)
   (setf (game/active-unit *game*) nil)
-  (mapcar (lambda (u) (setf (cu/actedp u) nil) (game/units *game*)))
+  (mapcar (lambda (u) (setf (cu/actedp u) nil)) (game/units *game*))
   (let ((phase (game/current-phase *game*)))
     (cond
       ((= phase 0) (do-initiative-phase))
