@@ -12,4 +12,5 @@ deployment phase. Deployment phases are only run when there are deployable units
                      (format nil "In Deployment Phase~%")))
   (let ((to-deploy '()))
     (mapcar #'(lambda (e) (if (eql (cu/location e) nil) (push e to-deploy))) (game/units *game*))
-    ))
+    (when (= (length to-deploy) 0)
+       (advance-phase))))
