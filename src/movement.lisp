@@ -1,7 +1,8 @@
 (in-package :megastrike)
 
 (defun movement-phase-click (hex hex-units)
-  nil)
+  (when (and (game/active-unit *game*) (not hex-units))
+    (move-unit (game/active-unit *game*) hex)))
 
 (defun do-movement-phase ()
   "This function will handle the movement phase."
