@@ -22,7 +22,7 @@
    (cu-force :initarg :force
              :accessor cu/force)
    (cu-pv-mod :initarg :pv-mod
-               :accessor cu/pv-mod)
+              :accessor cu/pv-mod)
    (cu-move-used :initarg :move-used
                  :accessor cu/move-used)
    (cu-destination :initform nil
@@ -61,18 +61,18 @@
                         (format nil "~a #~a" (mek/full-name mek) unit-counter)
                         (mek/full-name mek)))
     (let* ((cu (make-instance 'combat-unit
-                             :full-name full-name
-                             :mek mek
-                             :force force
-                             :pv-mod pv-mod
-                             :move-used move-used
-                             :cur-armor ca
-                             :cur-struct cs
-                             :crits crits
-                             :target target
-                             :cur-heat cur-heat
-                             :location location
-                             :pilot pilot)))
+                              :full-name full-name
+                              :mek mek
+                              :force force
+                              :pv-mod pv-mod
+                              :move-used move-used
+                              :cur-armor ca
+                              :cur-struct cs
+                              :crits crits
+                              :target target
+                              :cur-heat cur-heat
+                              :location location
+                              :pilot pilot)))
       (find-sprite cu)
       cu)))
 
@@ -137,15 +137,20 @@
     (format t "filename: ~a" image-file)
     (setf (cu/display cu) (namestring (truename image-file)))))
 
-(defmethod move-unit ((cu combat-unit) (destination tile))
+(defmethod move-lookup (m (mv-type symbol))
+  nil)
+
+(defmethod move-lookup ((m combat-unit) (mv-type symbol))
+  (cdr (assoc mv-type (cu/movement m))))
+
+;; TODO This method currently only uses manhattan distance.
+;; I need to rewrite this with a pathfinding routine.
+;; That will likely require adjustments to the `Tile' class.
+
+(defmethod move-unit ((cu combat-unit) (destination hexagon))
   (when (>= (move-lookup cu (cu/move-used cu))
             (hex-distance (cu/location cu) destination))
-    (setf (cu/location cu) destination)
-    (incf (game/initiative-place *game*))
-    (setf (game/phase-log *game*)
-          (concatenate 'string (game/phase-log *game*)
-                       (format nil "~a has moved to ~a.~%"
-                               (info/full-name unit) (offset-from-hex destination))))))
+    (setf (cu/destination cu) destination)))
 
 (defmethod unit-tmm ((cu combat-unit))
   (unless (cu/move-used cu)
