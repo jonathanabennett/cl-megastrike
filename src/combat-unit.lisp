@@ -196,6 +196,13 @@
       ((>= 21 range) (+ (pilot/skill attacker) (unit-tmm target) 4))
       ((>= 30 range) (+ (pilot/skill attacker) (unit-tmm target) 6)))))
 
+(defmethod calculate-damage ((attacker combat-unit) target)
+  (cond
+    ((>= 3 range) (mek/short-str))
+    ((>= 12 range) (mek/medium-str))
+    ((>= 21 range) (mek/long-str))
+    ((>= 42 range) (mek/extreme-str))))
+
 (defmethod calculate-damage ((attacker combat-unit) (target combat-unit))
   (let ((range (hex-distance (cu/location attacker) (cu/location target)))
         (short (mek/short (cu/mek attacker)))
