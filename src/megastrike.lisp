@@ -110,8 +110,8 @@
                    (let ((hex (pixel-to-hex (make-point x y) +default-layout+)))
                      (map-click-handler hex)
                      (gtk:widget-activate-action map-area "app.map-redraw" nil)
-                     (gtk:widget-activate-action map-area "app.update-initiative" nil)
-                     (format t "Clicked at ~a,~a,~a: ~a~%" (hexagon-q hex) (hexagon-r hex) (hexagon-s hex) (offset-from-hex hex)))))
+                     ;; TODO Move this somewhere else so it doesn't keep killing active-unit
+                     (gtk:widget-activate-action map-area "app.update-initiative" nil))))
     (unless (gtk:widget-visible-p window)
       (gtk:window-present window))))
 
