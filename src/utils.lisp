@@ -34,6 +34,18 @@
                                 (:aerodyne        . "a")
                                 (:spheroid        . "p")))
 
+(defparameter *percentages* '((2 . 100)
+                              (3 . 97.2)
+                              (4 . 91.7)
+                              (5 . 83.3)
+                              (6 . 72.2)
+                              (7 . 58.3)
+                              (8 . 41.7)
+                              (9 . 27.8)
+                              (10 . 16.7)
+                              (11 . 8.3)
+                              (12 . 2.8)))
+
 (deftype crit ()
   "This defines the possible critical hits an element can take in the game."
   '(member 'ENGINE 'FIRE-CONTROL 'MP 'WEAPONS))
