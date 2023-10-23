@@ -199,5 +199,5 @@ distance."
          (hex-list '())
          (step (/ 1.0 (max distance 1))))
     (dotimes (c distance)
-      (push (hex-round (hex-lerp a b (* c step))) hex-list))
+      (destructuring-bind (q r s) (hex-lerp a b (* c step)) (push (hex-round q r s) hex-list)))
     hex-list))

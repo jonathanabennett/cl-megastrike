@@ -1,28 +1,29 @@
 name: build-linux-release
 on:
-  [push]
-  # release:
-  #   types: [published]
+  push:
+    branches:
+      - 'main'
+      - 'master'
+  pull_request:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: Install sbcl
-        run: sudo apt-get install sbcl
-      - name: Download Quicklisp
-        run: curl -O https://beta.quicklisp.org/quicklisp.lisp
-      - name: Build Dependency Bundle
-        run: |
-          sbcl --eval "(require 'asdf)" \
-               --load quicklisp.lisp \
-               --eval "(quicklisp-quickstart:install)" \
-               --load megastrike.asd \
-               --eval "(ql:bundle-systems '(:beast :mcclim :mito :cl-ppcre :str :dbd-sqlite3 :cl-dejavu) :to (uiop:merge-pathnames* \"dist/\" (uiop:getcwd)))"
-
-      - name: Build Megastrike
-        run: make gh_build
+      - name: Setup Lisp
+        uses: 40ants/setup-lisp@v2
+        with:
+          asdf-system: megastrike
+          qlfile-template: |
+            {% ifequal quicklisp_dist "ultralisp" %}
+            dist ultralisp http://dist.ultralisp.org
+            {% endifequal %}
+      - name: Install Dependencies
+        run: qlot install
+      - name: Build Binary
+        run: ros run --exec "(asdf:operate :program-op :megastrike)"
       - name: Archive binary
         uses: actions/upload-artifact@v3
         with:

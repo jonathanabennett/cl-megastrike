@@ -1,8 +1,5 @@
 ;;;; megastrike.asd
 
-;; (ql:quickload :deploy)
-;; (deploy:define-resource-directory bundle (uiop:merge-pathnames* "dists/" (uiop:getcwd)))
-
 (asdf:defsystem #:megastrike
   :description "A port of the Alphastrike Board game to Computer using Common Lisp and QTools."
   :author "Jonathan A. Bennett <doulos05@gmail.com>"
@@ -32,11 +29,10 @@
                  (:file "unitcard" :depends-on ("combat-unit"))
                  (:file "megastrike" :depends-on ("utils" "unitcard" "game"))
                  )))
-  ;; :defsystem-depends-on (:deploy)
-  ;; :build-operation "deploy-op"
+  :build-operation "program-op"
   :in-order-to ((test-op (test-op :megastrike/test)))
   :build-pathname "megastrike"
-  :entry-point "megastrike:main")
+  :entry-point "megastrike:megastrike")
 
 (asdf:defsystem #:megastrike/test
   :description "Test suite for Megastrike."

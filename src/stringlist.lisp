@@ -133,7 +133,8 @@
 
 (defmethod string-list/add-item ((sl string-list) item item-name)
   "Add an item to the list. Doing it here makes the addition atomic."
-  (let ((uuid (format nil "~a" (uuid:make-v5-uuid uuid:+namespace-dns+ item-name))))
+  (let ((model (gobj:coerce (gtk:column-view-model (string-list/view sl)) 'gtk:single-selection))
+        (uuid (format nil "~a" (uuid:make-v5-uuid uuid:+namespace-dns+ item-name))))
     (setf (gethash uuid (string-list/source sl)) item)
     (unless (= (hash-table-count (string-list/source sl)) (length (string-list/strings sl)))
       (add-to-end (string-list/strings sl) uuid)
@@ -157,9 +158,3 @@
          (pos (gtk:single-selection-selected model)))
     (gtk:selection-model-selection-changed model pos 1)
     (gio:list-model-items-changed model pos 0 1)))
-
-(defmethod string-list/get-column-by-title ((sl string-list) title)
-  (remove-if-not #'column-searcher (gobj:coerce (gtk:column-view-columns (string-list/view sl)) 'gtk:column-view-column) title))
-
-(defun column-searcher (column search-term)
-  (string= (gtk:column-view-column-title column) search-term))

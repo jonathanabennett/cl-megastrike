@@ -51,9 +51,10 @@
                        :left-arc left-arc :right-arc right-arc :rear-arc rear-arc))
 
 (defun mul-parser (header-row row)
-  (let ((data (loop for key in header-row
-                    for value in row
-                    collect `(,(read-from-string key) . ,value))))
+  (let* ((*package* (find-package :megastrike))
+         (data (loop for key in header-row
+                     for value in row
+                     collect `(,(read-from-string key) . ,value))))
     (setf (cdr (assoc 'size data)) (parse-integer (cdr (assoc 'size data))))
     (setf (cdr (assoc 'movement data)) (construct-mv-alist (cdr (assoc 'movement data))))
     (setf (cdr (assoc 'tmm data)) (parse-integer (cdr (assoc 'tmm data))))
