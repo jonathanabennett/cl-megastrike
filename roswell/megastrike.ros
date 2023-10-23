@@ -14,5 +14,5 @@ exec ros -Q -- $0 "$@"
 
 (defun main (&rest argv)
   (declare (ignorable argv))
-  (megastrike:main))
+  (megastrike:megastrike))
 ;;; vim: set ft=lisp lisp:
