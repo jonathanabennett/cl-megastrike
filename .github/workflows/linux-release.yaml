@@ -23,7 +23,7 @@ jobs:
       - name: Install Dependencies
         run: qlot update
       - name: Build Binary
-        run: 'qlot run --exec "(asdf:operate :program-op :megastrike)"'
+        run: 'qlot run --eval "(asdf:operate :program-op :megastrike)"'
       - name: Archive binary
         uses: actions/upload-artifact@v3
         with:
