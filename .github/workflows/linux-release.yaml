@@ -22,15 +22,15 @@ jobs:
             {% endifequal %}
       - name: Install Dependencies
         run: |
-          ros run --eval "(ql-dist:install-dist 'http://dist.ultralisp.org/' :prompt nil)" \
-          --eval "(ql:quickload :cl-gtk4)" \
-          --eval "(ql:quickload :cl-gdk4)" \
-          --eval "(ql:quickload :cl-cairo2)" \
-          --eval "(ql:quickload :fuzzy-match)" \
-          --eval "(ql:quickload :cl-slug)" \
-          --eval "(ql:quickload :cl-csv)' \
-          --eval "(ql:quickload :cl-ppcre)" \
-          --eval "(ql:quickload :uuid)"
+          ros run --eval "\(ql-dist:install-dist 'http://dist.ultralisp.org/' :prompt nil\)" \
+          --eval "\(ql:quickload :cl-gtk4\)" \
+          --eval "\(ql:quickload :cl-gdk4\)" \
+          --eval "\(ql:quickload :cl-cairo2\)" \
+          --eval "\(ql:quickload :fuzzy-match\)" \
+          --eval "\(ql:quickload :cl-slug\)" \
+          --eval "\(ql:quickload :cl-csv\)' \
+          --eval "\(ql:quickload :cl-ppcre\)" \
+          --eval "\(ql:quickload :uuid\)"
       - name: Build Binary
         run: 'ros run --eval "(asdf:operate :program-op :megastrike)"'
       - name: Archive binary
