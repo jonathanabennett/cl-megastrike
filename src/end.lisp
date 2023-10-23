@@ -4,7 +4,11 @@
   nil)
 
 (defun do-end-phase ()
-  (setf (game/phase-log *game*)
-        (concatenate 'string (game/phase-log *game*)
-                     (format nil "In End Phase~%")))
-  )
+  (setf (game/units *game*) (remove-if #'cu/destroyedp (game/units *game*)))
+  (mapcar #'reset-unit (game/units *game*)))
+
+(defun reset-unit (u)
+  (setf (cu/target u) nil
+        (cu/move-used u) nil
+        (cu/destination u) nil
+        (cu/actedp u) nil))
