@@ -134,14 +134,15 @@
       (exact (setf image-file (merge-pathnames (third (car exact)) image-folder)))
       (chassis (setf image-file (merge-pathnames (third (car chassis)) image-folder)))
       (t     (setf image-file (merge-pathnames "defaults/default_medium.png" image-folder))))
-    (format t "filename: ~a" image-file)
     (setf (cu/display cu) (namestring (truename image-file)))))
 
 (defmethod move-lookup (m (mv-type symbol))
   nil)
 
 (defmethod move-lookup ((m combat-unit) (mv-type symbol))
-  (cdr (assoc mv-type (cu/movement m))))
+  (if mv-type
+      (cdr (assoc mv-type (cu/movement m)))
+      (cdr (first (cu/movement m)))))
 
 ;; TODO This method currently only uses manhattan distance.
 ;; I need to rewrite this with a pathfinding routine.
