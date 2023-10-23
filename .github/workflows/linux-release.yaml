@@ -18,7 +18,7 @@ jobs:
         run: curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh -x
       - name: Install Ultralisp
         run: |
-          ros -e "(ql-dist:install-dist 'http://dist.ultralisp.org/' :prompt nil)"
+          ros -e "(ql-dist:install-dist \"http://dist.ultralisp.org/\" :prompt nil)"
       - name: Update all dists
         run: |
           ros -e "(ql:update-all-dists :prompt nil)"
