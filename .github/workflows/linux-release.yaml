@@ -21,9 +21,9 @@ jobs:
             dist ultralisp http://dist.ultralisp.org
             {% endifequal %}
       - name: Install Dependencies
-        run: qlot install
+        run: qlot update
       - name: Build Binary
-        run: ros run --exec "(asdf:operate :program-op :megastrike)"
+        run: qlot run --exec "(asdf:operate :program-op :megastrike)"
       - name: Archive binary
         uses: actions/upload-artifact@v3
         with:
