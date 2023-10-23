@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      - name: Install GTK4
+        run: "sudo apt install libgtk-4-dev"
       - name: Install Roswell
         env:
           LISP: sbcl-bin
