@@ -145,12 +145,10 @@ distance."
                           (/ (- (point-y pt)
                                 (layout-y-origin layout))
                              (layout-y-size layout))))
-    (format t "Modified point: ~a, ~a~%" (point-x modified-point) (point-y modified-point))
     (setf q (+ (* (point-x modified-point) (elt vec 0))
                (* (point-y modified-point) (elt vec 1))))
     (setf r (+ (* (point-x modified-point) (elt vec 2))
                (* (point-y modified-point) (elt vec 3))))
-    (format t "Hex Address: ~a, ~a, ~a~%" q r (* (+ q r) -1))
     (hex-round q r (* (+ q r) -1))))
 
 (defun find-hex-corner (center corner layout)
