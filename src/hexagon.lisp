@@ -39,6 +39,14 @@ which use an offset coordinate system instead of cubic like I do."
        (= (hexagon-r hex1) (hexagon-r hex2))
        (= (hexagon-q hex1) (hexagon-q hex2))))
 
+(defmethod same-hex (hex1 (hex2 hexagon))
+  "If one of the two things is not a hex, they are not equal."
+  nil)
+
+(defmethod same-hex ((hex1 hexagon) hex2)
+  "If one of the two things is not a hex, they are not equal."
+  nil)
+
 (defmethod hex-addition ((hex1 hexagon) (hex2 hexagon))
   "Uses Cartesian addition to add two hexagons together."
   (new-hexagon :q (+ (hexagon-q hex1) (hexagon-q hex2))
@@ -97,12 +105,21 @@ distance."
                                 :hex-to-pixel-matrix
                                   (vector (/ 3.0 2.0) 0 (/ (sqrt 3.0) 2.0) (sqrt 3.0))
                                 :pixel-to-hex-matrix
-                                  (vector (/ 2.0 3.0) 0 (/ 1.0 3.0) (/ (sqrt 3.0) 3.0))
+                                  (vector (/ 2.0 3.0) 0 (/ -1.0 3.0) (/ (sqrt 3.0) 3.0))
                                 :start-angle 0
-                                :x-size 45
-                                :y-size 45
-                                :x-origin 10
-                                :y-origin 10))
+                                :x-size 70
+                                :y-size 70
+                                :x-origin 20
+                                :y-origin 20))
+
+(defclass point ()
+  ((x :initarg :x
+      :accessor point-x)
+   (y :initarg :y
+      :accessor point-y)))
+
+(defun make-point (x y)
+  (make-instance 'point :x x :y y))
 
 (defmethod hex-to-pixel ((hex hexagon) layout)
   "Converts from a q,r,s address, to an x,y pixel position for the center of the hex."
@@ -115,6 +132,24 @@ distance."
                             (* (elt vec 3) (hexagon-r hex)))
                          (layout-y-size layout))
                       (layout-y-origin layout)))))
+
+(defun pixel-to-hex (pt layout)
+  "Converts from an x,y pixel position to a q,r,s address."
+  (let ((vec (layout-pixel-to-hex-matrix layout))
+        (modified-point nil)
+        (q nil) (r nil))
+    (setf modified-point (make-point
+                          (/ (- (point-x pt)
+                                (layout-x-origin layout))
+                             (layout-x-size layout))
+                          (/ (- (point-y pt)
+                                (layout-y-origin layout))
+                             (layout-y-size layout))))
+    (setf q (+ (* (point-x modified-point) (elt vec 0))
+               (* (point-y modified-point) (elt vec 1))))
+    (setf r (+ (* (point-x modified-point) (elt vec 2))
+               (* (point-y modified-point) (elt vec 3))))
+    (hex-round q r (* (+ q r) -1))))
 
 (defun find-hex-corner (center corner layout)
   "Find the x,y pixel coordinates for the corner of a hex."
@@ -133,3 +168,36 @@ distance."
     (dotimes (i 6)
       (push (find-hex-corner center i layout) points))
      points))
+
+(defun hex-round (q r s)
+  (let* ((q-int (round q))
+         (r-int (round r))
+         (s-int (round s))
+         (q-diff (abs (- q q-int)))
+         (r-diff (abs (- r r-int)))
+         (s-diff (abs (- s s-int))))
+    (cond
+      ((and (> q-diff r-diff)
+            (> q-diff s-diff))
+       (new-hexagon :q (* (+ r-int s-int) -1) :r r-int :s s-int))
+      ((and (> r-diff s-diff)
+            (> r-diff q-diff))
+       (new-hexagon :q q-int :r (* (+ q-int s-int) -1) :s s-int))
+      (t (new-hexagon :q q-int :r r-int :s (* (+ q-int r-int) -1))))))
+
+(defun linear-interpolation (a b step)
+  (+ a (* (- b a) step)))
+
+(defmethod hex-lerp ((a hexagon) (b hexagon) step)
+  (let ((q (linear-interpolation (hexagon-q a) (hexagon-q b) step))
+        (r (linear-interpolation (hexagon-r a) (hexagon-r b) step))
+        (s (linear-interpolation (hexagon-s a) (hexagon-s b) step))))
+  (values q r s))
+
+(defmethod hex-line ((a hexagon) (b hexagon))
+  (let* ((distance (hex-distance a b))
+         (hex-list '())
+         (step (/ 1.0 (max distance 1))))
+    (dotimes (c distance)
+      (destructuring-bind (q r s) (hex-lerp a b (* c step)) (push (hex-round q r s) hex-list)))
+    hex-list))

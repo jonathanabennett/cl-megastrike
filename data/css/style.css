@@ -1,0 +1,19 @@
+levelbar.damage-bar trough block.empty {
+  background-color: crimson;
+}
+
+levelbar.damage-bar trough block.filled {
+  background-color: green;
+}
+
+levelbar.heat-bar trough block.filled {
+  background-color: crimson;
+}
+
+levelbar.heat-bar trough block.empty {
+  background-color: aliceblue;
+}
+
+frame.acted {
+  background-color: grey;
+}

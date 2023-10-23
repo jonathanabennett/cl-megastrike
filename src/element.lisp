@@ -1,15 +1,15 @@
 (in-package :megastrike)
 
 ;;; Aspects for Elements
-(define-aspect info short-name full-name unit-type role pv size tro (army :initform nil))
-(define-aspect damageable cur-armor max-armor cur-struct max-struct crit-list destroyedp)
+(define-aspect info chassis model type role pv size (force :initform nil))
 (define-aspect can-activate
   (selectedp :initform nil)
   (has-acted :initform nil))
-(define-aspect moveable move-alist move-used (destination-tile :initform nil))
-(define-aspect attacks short medium long (target :initform nil))
+(define-aspect moveable move-alist tmm move-used)
+(define-aspect damageable cur-armor max-armor cur-struct max-struct crit-list destroyedp)
+(define-aspect attacks short medium long extreme (target :initform nil))
 (define-aspect heat ov cur-heat)
-(define-aspect specials special-list)
+(define-aspect specials abilities)
 
 (define-aspect display
   (image-path :initform nil))
@@ -35,33 +35,24 @@
                             location
                             pilot))
 
+(defun find-sprite (mek)
+  (let ((first-pass (fuzzy-match:fuzzy-match (mek/chassis mek) (uiop:directory-files (merge-pathnames "data/images/units/mechs/" *here*)))))
+    (if (search (mek/model mek) (namestring (first (fuzzy-match:fuzzy-match (mek/model mek) first-pass))))
+        (first (fuzzy-match:fuzzy-match (mek/model mek) first-pass))
+        (first first-pass))))
+
 (defun new-element-from-mul (m &key pname pskill)
-  (with-slots (short-name long-name unit-type role pv size armor struct mv-string
-               short medium long ov display specials-str tro) m
-    (let ((mv-cons (construct-mv-alist mv-string))
-          (spec-list (construct-spec-list specials-str)))
-      (new-element :short-name short-name :full-name long-name :unit-type unit-type
-                   :role role :pv pv :size size :cur-armor armor :max-armor armor
-                   :cur-struct struct :max-struct struct :move-list mv-cons
-                   :short (floor short) :medium (floor medium) :long (floor long)
-                   :ov ov :special-list spec-list
-                   :img display :tro tro :pilot pname :skill pskill))))
-
-(defun construct-mv-alist (mv-string)
-  (let ((mv-alist '())
-         (mv-strings (ppcre:all-matches-as-strings
-                      (ppcre:create-scanner "\\d+[a-zA-z]?") mv-string)))
-    (dolist (str mv-strings)
-      (multiple-value-bind (dist type) (parse-integer str :junk-allowed t)
-        (if (= (length str) type)
-            (setf mv-alist (acons :walk dist mv-alist))
-            (cond
-              ((string= "j" (subseq str type))
-               (setf mv-alist (acons :jump dist mv-alist)))
-
-              (t
-               (setf mv-alist (acons :walk dist mv-alist)))))))
-    mv-alist))
+  (with-slots (chassis model role unit-type size movement tmm armor structure
+               ov pv abilities) m
+    (let ((spec-list (construct-spec-list abilities))
+          (display (find-sprite m)))
+      (new-element :chassis chassis :model model :type unit-type :role role :pv pv
+                   :tmm tmm :size size :cur-armor armor :max-armor armor
+                   :cur-struct structure :max-struct structure :move-list movement
+                   :short (mek/comparable-short m) :medium (mek/comparable-medium m)
+                   :long (mek/comparable-long m) :extreme (mek/comparable-extreme m)
+                   :ov ov :special-list spec-list :img (find-sprite m) :pilot pname
+                   :skill pskill))))
 
 (defun construct-spec-list (specials-str)
   (let ((spec-list '()))
@@ -69,18 +60,17 @@
       (push (read-from-string spec) spec-list))
     spec-list))
 
-(defun new-element (&key short-name full-name unit-type role pv size
-                      cur-armor max-armor cur-struct max-struct
-                      move-list short medium long ov (cur-heat 0)
-                      special-list (crit-list '()) img tro q r s
+(defun new-element (&key chassis model type role pv size cur-armor max-armor tmm
+                      cur-struct max-struct move-list short medium long extreme
+                      ov (cur-heat 0) special-list (crit-list '()) img q r s
                       (pilot "Shooty McGee") (skill 4))
   (let ((arm    (if (eq cur-armor nil) max-armor cur-armor))
         (struct (if (eq cur-struct nil) max-struct cur-struct))
         (asset-path (merge-pathnames img *here*)))
     (create-entity 'combat-unit
-                   :info/short-name short-name
-                   :info/full-name full-name
-                   :info/unit-type unit-type
+                   :info/chassis chassis
+                   :info/model model
+                   :info/type type
                    :info/role role
                    :info/pv pv
                    :info/size size
@@ -92,15 +82,17 @@
                    :damageable/destroyedp nil
                    :moveable/move-alist move-list
                    :moveable/move-used (car (car move-list))
+                   :moveable/tmm tmm
                    :attacks/short short
                    :attacks/medium medium
                    :attacks/long long
+                   :attacks/extreme extreme
                    :heat/ov ov
                    :heat/cur-heat cur-heat
-                   :specials/special-list special-list
+                   :specials/abilities special-list
                    :damageable/crit-list crit-list
-                   :display/image-path (make-pattern-from-bitmap-file asset-path)
-                   :info/tro tro
+                   ;; TODO Replace for transition to GTK
+                   :display/image-path (namestring asset-path)
                    :location/q q
                    :location/r r
                    :location/s s
@@ -110,50 +102,26 @@
 (defmethod same-entity ((e entity) (o entity))
   (eq (entity-id e) (entity-id o)))
 
-(define-presentation-method present (combat-unit
-                                     (type entity)
-                                     stream
-                                     (view graphical-view) &key)
-  (let ((origin (hex-to-pixel (new-hexagon :q (location/q combat-unit)
-                                           :r (location/r combat-unit)
-                                           :s (location/s combat-unit))
-                              (frame/layout *application-frame*)))
-        (color (army/color (info/army combat-unit)))
-        (layout (frame/layout *application-frame*)))
-    (with-translation (stream (* (layout-x-size layout) -0.9)
-                              (* (layout-y-size layout) -0.8))
-      (draw-pattern* stream (display/image-path combat-unit)
-                     (point-x origin) (point-y origin)))
-    (with-translation (stream 0 (* (layout-y-size layout) -0.8))
-      (surrounding-output-with-border (stream :ink color :filled t :shape :rectangle)
-        (if (can-activate/selectedp combat-unit)
-            (with-text-style (stream *selected-text-style*)
-              (draw-text stream (format nil "~a" (info/short-name combat-unit))
-                         origin :align-x :center :align-y :top))
-            (draw-text stream (format nil "~a" (info/short-name combat-unit))
-                       origin :align-x :center :align-y :top))))))
+(defmethod select ((e combat-unit))
+  (if (or (not (game/initiative-list *game*))
+          (< (length (game/initiative-list *game*)) (game/initiative-place *game*)))
+      (progn
+        (run-clear-selection)
+        (setf (can-activate/selectedp e) t)
+        (setf (game/active-unit *game*) e))
+      (if (and (not (can-activate/has-acted e))
+               (same-force (info/force e) (nth (game/initiative-place *game*)
+                                             (game/initiative-list *game*))))
+          (progn
+            (run-clear-selection)
+            (setf (can-activate/selectedp e) t)
+            (setf (game/active-unit *game*) e)))))
 
-
-(define-presentation-method present (combat-unit
-                                     (type entity)
-                                     stream
-                                     (view quickstats-view) &key)
-  (quickstats-block stream combat-unit))
-
-(define-presentation-method present (combat-unit
-                                     (type entity)
-                                     stream
-                                     (view textual-view) &key)
-  (format stream "~a #~a" (info/full-name combat-unit) (entity-id combat-unit)))
-;;; Movement methods
-
-(defun format-move-assoc (stream m colonp atsignp)
-  "The colonp and atsignp are required for a function called inside `FORMAT'."
-  (declare (ignorable colonp atsignp))
-  (format stream "~a~a" (cdr m) (cdr (assoc (car m) *mv-designators*))))
-
-(defmethod format-move ((m moveable))
-  (format nil "~{~/megastrike::format-move-assoc/~^/~}" (moveable/move-alist m)))
+(defmethod get-hex ((cu combat-unit) (g board))
+  (gethash (offset-from-hex (new-hexagon :q (location/q cu)
+                                         :r (location/r cu)
+                                         :s (location/s cu)))
+           (board/tiles g)))
 
 (defmethod move-lookup ((m moveable) (mv-type symbol))
   (cdr (assoc mv-type (moveable/move-alist m))))
@@ -165,10 +133,10 @@
                                      :s (location/s unit))
                         destination))
       (progn (set-location unit destination)
-             (incf (initiative-place *application-frame*))
+             (incf (game/initiative-place *game*))
              (setf (can-activate/has-acted unit) t)
-             (setf (phase-log *application-frame*)
-                   (concatenate 'string (phase-log *application-frame*)
+             (setf (game/phase-log *game*)
+                   (concatenate 'string (game/phase-log *game*)
                                 (format nil "~a has moved to ~a.~%"
                                         (info/full-name unit)
                                         (offset-from-hex destination)))))))
@@ -237,7 +205,7 @@
                                           to-hit)))
     (if (<= target-num to-hit)
         (take-damage target (calculate-damage attacker target))))
-  (incf (initiative-place *application-frame*))
+  (incf (game/initiative-place *game*))
   (setf (can-activate/has-acted attacker) t))
 
 (defmethod take-damage ((u damageable) damage)
@@ -247,8 +215,8 @@
         (decf (damageable/cur-armor u))))
   (if (>= 0 (damageable/cur-struct u))
       (setf (damageable/destroyedp u) t))
-  (setf (phase-log *application-frame*)
-        (concatenate 'string (phase-log *application-frame*)
+  (setf (game/phase-log *game*)
+        (concatenate 'string (game/phase-log *game*)
                      (format nil "~a now has ~a armor and ~a structure.~%"
                              (info/full-name u)
                              (damageable/cur-armor u)

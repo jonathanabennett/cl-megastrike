@@ -1,10 +1,10 @@
 (in-package :megastrike)
 
 (defmethod display-round-report ((frame megastrike) stream)
-  (write-string (phase-log frame) stream)
-  (incf (current-phase frame))
-  (if (= (current-phase frame) 5)
-      (setf (current-phase frame) 0))
+  (write-string (game/phase-log *game*) stream)
+  (incf (game/current-phase *game*))
+  (if (= (game/current-phase *game*) 5)
+      (setf (game/current-phase *game*) 0))
   (terpri stream)
   (let ((done-button (make-pane 'push-button
                                 :label "Done"
@@ -14,84 +14,9 @@
     (with-output-as-gadget (stream)
     done-button)))
 
-(defmethod display-overview ((frame megastrike) stream)
-  (format stream "Current Army List~%")
-  (formatting-table (stream)
-    (formatting-row (stream)
-      (formatting-cell (stream)
-        (format stream "Army"))
-      (formatting-cell (stream)
-        (format stream "Color")))
-    (dolist (a (frame/armies frame))
-      (formatting-row (stream)
-        (formatting-cell (stream)
-          (present a 'army :stream stream))
-      (formatting-cell (stream)
-        (draw-rectangle* stream 0 0 30 30 :ink (army/color a))))))
-  (terpri stream)
-  (let ((army-text (make-pane 'text-field :width 200
-                                          :foreground +black+
-                                          :background +white+
-                                          :value "AFFS"))
-        (army-color (make-pane 'list-pane
-                               :items (mapcar #'car +color-list+))))
-    (format stream "Army Name:    ")
-    (with-output-as-gadget (stream)
-      army-text)
-    (terpri stream)
-    (surrounding-output-with-border (stream :ink +grey30+ :shape :rounded)
-      (with-output-as-gadget (stream)
-        army-color))
-    (terpri stream)
-    (with-output-as-gadget (stream)
-      (let ((new-army-button (make-pane 'push-button
-                                        :label "New Army"
-                                        :activate-callback
-                                        #'(lambda (gadget)
-                                            (new-army (gadget-value army-text)
-                                                      (cdr (assoc (gadget-value army-color) +color-list+)))
-                                            (redisplay-frame-panes frame)))))
-        new-army-button)))
-  (terpri stream)
-  (terpri stream)
-  (terpri stream)
-  (let ((width  (make-pane 'text-field :width 50 :value "16"))
-        (height (make-pane 'text-field :width 50 :value "17")))
-    (write-string "Map Settings" stream)
-    (terpri stream)
-    (write-string "Width: ")
-    (with-output-as-gadget (stream)
-      width)
-    (terpri stream)
-    (write-string "Height: ")
-    (with-output-as-gadget (stream)
-      height)
-    (with-output-as-gadget (stream)
-      (let ((update-map-button (make-pane 'push-button
-                                          :label "Update Map Size"
-                                          :activate-callback
-                                          #'(lambda (gadget)
-                                              (setf (frame/game-board frame)
-                                                    (make-grid (parse-integer (gadget-value width))
-                                                               (parse-integer (gadget-value height))))
-                                              (redisplay-frame-panes frame)))))
-        update-map-button)))
-  (terpri stream)
-    (let ((armies-ready (> (length (frame/armies frame)) 1))
-          (map-ready (> (hash-table-count (tiles (frame/game-board frame))) 1)))
-      (if (and armies-ready map-ready)
-          (with-output-as-gadget (stream)
-            (let ((launch-game-button (make-pane
-                               'push-button
-                               :label "Game Ready"
-                               :activate-callback
-                               #'(lambda (g)
-                                   (do-initiative-phase frame)))))
-              launch-game-button)))))
-
-(defmethod display-lobby-army-list ((frame megastrike) stream)
+(defmethod display-lobby-force-list ((frame megastrike) stream)
   (if (= 0 (length (beast:all-entities)))
-      (write-string "Army has no units yet." stream)
+      (write-string "Force has no units yet." stream)
       (formatting-table (stream)
         (formatting-row (stream)
           (formatting-cell (stream) (write-string "Unit Name" stream))
@@ -99,7 +24,7 @@
           (formatting-cell (stream) (write-string "Pilot Name" stream))
           (formatting-cell (stream) (write-string "Skill" stream))
           (formatting-cell (stream) (write-string "Starting Hex" stream)))
-        (run-list-army))))
+        (run-list-force))))
 
 (defmethod display-lobby-detail-view ((frame megastrike) stream)
   (let* ((pname  (make-pane 'text-field :width 200 :value "Test Pilot"))
@@ -117,9 +42,9 @@
                          :label "Add Unit"
                          :activate-callback
                          #'(lambda (g)
-                             (add-unit (lobby/selected-army frame)
+                             (add-unit (game/selected-force *game*)
                                        (new-element-from-mul
-                                        (lobby/selected-mek frame)
+                                        (lobby/selected-mek *lobby*)
                                         :pname (gadget-value pname)
                                         :pskill (parse-integer (gadget-value pskill))))
                              (redisplay-frame-panes frame)))))
@@ -137,27 +62,12 @@
         (formatting-cell (stream) (write-string "A/S" stream))
         (formatting-cell (stream) (write-string "Specials" stream)))
     (dolist (m meks)
-      (if (and (lobby/selected-mek frame)
+      (if (and (lobby/selected-mek *lobby*)
                (string= (mek/short-name m)
-                        (mek/short-name (lobby/selected-mek frame))))
+                        (mek/short-name (lobby/selected-mek *lobby*))))
           (with-text-style (stream *selected-text-style*)
             (present m 'mek :stream stream))
           (present m 'mek :stream stream))))))
-
-(defmethod display-map ((frame megastrike) stream)
-  (maphash (lambda (k v)
-             (declare (ignorable k))
-             (present v 'tile :stream stream))
-           (tiles (frame/game-board frame)))
-  (run-draw-units))
-
-(defmethod display-record-sheet ((frame megastrike) stream)
-  (with-text-style (stream (make-text-style :serif :bold :large))
-     (format stream "Turn: ~8a Phase: ~a~%"
-             (turn-number frame) (nth (current-phase frame) *phase-order*)))
-  (if (active-unit frame) (unit-detail stream (active-unit frame)))
-  (terpri stream)
-  (format stream "~a" (initiative-list frame)))
 
 (defmethod display-quickstats ((frame megastrike) stream)
   (run-show-quickstats))

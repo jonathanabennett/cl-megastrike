@@ -1,33 +1,45 @@
-;;;; alphastrike.asd
-
-(ql:quickload :deploy)
-(deploy:define-resource-directory bundle (uiop:merge-pathnames* "dists/" (uiop:getcwd)))
+;;;; megastrike.asd
 
 (asdf:defsystem #:megastrike
-  :description "A port of the Alphastrike Board game to Computer using Common Lisp and McCLIM."
+  :description "A port of the Alphastrike Board game to Computer using Common Lisp and QTools."
   :author "Jonathan A. Bennett <doulos05@gmail.com>"
   :license  "GPL3"
   :version "1.2.0"
   :serial t
-  :depends-on (:beast :mcclim :mito :cl-ppcre :str :dbd-sqlite3 :cl-dejavu :trivial-backtrace)
+  :depends-on (:cl-gtk4 :cl-gdk4 :cl-cairo2 :fuzzy-match :cl-slug :cl-csv :cl-ppcre :uuid :str)
   :components ((:module "src"
                 :components
                 ((:file "package")
                  (:file "utils")
-                 (:file "megastrike" :depends-on ("utils"))
-                 (:file "db")
+                 (:file "stringlist")
                  (:file "hexagon")
                  (:file "tiles")
-                 (:file "element" :depends-on ("utils"))
+                 (:file "mul")
+                 (:file "lobby" :depends-on ("mul"))
+                 (:file "board" :depends-on ("hexagon" "tiles"))
+                 (:file "combat-unit" :depends-on ("mul" "board"))
                  (:file "initiative" :depends-on ("utils"))
-                 (:file "army" :depends-on ("element" "utils"))
-                 (:file "unitcard" :depends-on ("element"))
-                 (:file "board" :depends-on ("element" "hexagon" "tiles"))
-                 (:file "game-setup" :depends-on ("element" "board" "army"))
-                 (:file "systems" :depends-on ("element" "army"))
-                 (:file "display-methods" :depends-on ("element" "unitcard" "army" "board"))
-                 (:file "commands" :depends-on ("megastrike")))))
-  :defsystem-depends-on (:deploy)
-  :build-operation "deploy-op"
+                 (:file "deployment")
+                 (:file "movement")
+                 (:file "combat")
+                 (:file "end")
+                 (:file "phases" :depends-on ("initiative"))
+                 (:file "force" :depends-on ("combat-unit" "utils"))
+                 (:file "game" :depends-on ("board" "force"))
+                 (:file "unitcard" :depends-on ("combat-unit"))
+                 (:file "megastrike" :depends-on ("utils" "unitcard" "game"))
+                 )))
+  :build-operation "program-op"
+  :in-order-to ((test-op (test-op :megastrike/test)))
   :build-pathname "megastrike"
-  :entry-point "megastrike:main")
+  :entry-point "megastrike:megastrike")
+
+(asdf:defsystem #:megastrike/test
+  :description "Test suite for Megastrike."
+  :author "Jonathan A. Bennett"
+  :license "GPL3"
+  :depends-on (:fiveam :megastrike)
+  :components ((:module "test"
+                :components
+                ((:file "main"))))
+  :perform (test-op (op c) (symbol-call :fiveam :run! (find-symbol* :megastrike :megastrike/test))))
