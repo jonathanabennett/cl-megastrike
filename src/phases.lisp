@@ -3,14 +3,15 @@
 (defun map-click-handler (hex)
   "Determine if there is a unit in the hex clicked on and this pass the hex and the units on to
 the appropriate function based on what phase of the game it is."
-  (let ((hex-units (game/tile-occupied-p *game* hex))
+  (let ((unit (first (member hex (game/units *game*) :key #'cu/location :test #'same-hex)))
         (phase (game/current-phase *game*)))
+    (format t "Click during phase ~a" phase)
     (cond
-      ((= phase 0) (initiative-phase-click hex hex-units))
-      ((= phase 1) (deployment-phase-click hex hex-units))
-      ((= phase 2) (movement-phase-click hex hex-units))
-      ((= phase 3) (combat-phase-click hex hex-units))
-      ((= phase 4) (end-phase-click hex hex-units)))))
+      ((= phase 0) (initiative-phase-click hex unit))
+      ((= phase 1) (deployment-phase-click hex unit))
+      ((= phase 2) (movement-phase-click hex unit))
+      ((= phase 3) (combat-phase-click hex unit))
+      ((= phase 4) (end-phase-click hex unit)))))
 
 (defun advance-phase ()
   (incf (game/current-phase *game*))
