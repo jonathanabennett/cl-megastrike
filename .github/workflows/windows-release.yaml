@@ -37,17 +37,22 @@ jobs:
       - name: Install Roswell
         env:
           LISP: sbcl-bin
+        shell: pwsh
         run: curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh -x
       - name: Install Ultralisp
+        shell: pwsh
         run: |
           ros -e "(ql-dist:install-dist \"http://dist.ultralisp.org/\" :prompt nil)"
       - name: Update all dists
+        shell: pwsh
         run: |
           ros -e "(ql:update-all-dists :prompt nil)"
       - name: Install Dependencies
+        shell: pwsh
         run: |
           ros run -e "(ql:quickload :megastrike)"
       - name: Build Binary
+        shell: pwsh
         run: |
           ros run -e "(asdf:make :megastrike)"
       - name: Archive binary
