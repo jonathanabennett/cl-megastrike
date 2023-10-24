@@ -1,4 +1,4 @@
-name: build-macos-release
+name: build-ubuntu-release
 on:
   workflow_dispatch:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3

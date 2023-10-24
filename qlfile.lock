@@ -1,0 +1,40 @@
+("quicklisp" .
+ (:class qlot/source/dist:source-dist
+  :initargs (:distribution "https://beta.quicklisp.org/dist/quicklisp.txt" :%version :latest)
+  :version "2023-10-21"))
+("cl-gtk4" .
+ (:class qlot/source/git:source-git
+  :initargs (:remote-url "https://github.com/bohonghuang/cl-gtk4")
+  :version "git-442e238aa23c89702acf19c78397c9e609b22ea4"))
+("cl-gdk4" .
+ (:class qlot/source/git:source-git
+  :initargs (:remote-url "https://github.com/bohonghuang/cl-gtk4")
+  :version "git-442e238aa23c89702acf19c78397c9e609b22ea4"))
+("cl-cairo2" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version "2023-10-21")
+  :version "ql-2023-10-21"))
+("fuzzy-match" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version "2023-10-21")
+  :version "ql-2023-10-21"))
+("cl-slug" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version "2023-10-21")
+  :version "ql-2023-10-21"))
+("cl-csv" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version "2023-10-21")
+  :version "ql-2023-10-21"))
+("cl-ppcre" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version "2023-10-21")
+  :version "ql-2023-10-21"))
+("uuid" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version "2023-10-21")
+  :version "ql-2023-10-21"))
+("cl-str" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version "2023-10-21")
+  :version "ql-2023-10-21"))

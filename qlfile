@@ -1,0 +1,9 @@
+git cl-gtk4 https://github.com/bohonghuang/cl-gtk4 :ref 442e238aa23c89702acf19c78397c9e609b22ea4
+git cl-gdk4 https://github.com/bohonghuang/cl-gtk4 :ref 442e238aa23c89702acf19c78397c9e609b22ea4
+ql cl-cairo2 2023-10-21
+ql fuzzy-match 2023-10-21
+ql cl-slug 2023-10-21
+ql cl-csv 2023-10-21
+ql cl-ppcre 2023-10-21
+ql uuid 2023-10-21
+ql cl-str 2023-10-21
