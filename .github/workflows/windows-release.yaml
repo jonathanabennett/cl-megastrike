@@ -1,24 +1,57 @@
 name: build-windows-release
 on:
-  [push]
-  # release:
-  #   types: [published]
+  push:
+    branches:
+      - 'main'
+      - 'master'
+  pull_request:
+
 jobs:
   build:
     runs-on: windows-latest
     steps:
+      - name: Install msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          path-type: minimal
+          msystem: MINGW64
+          release: true
+          update: true
+          install: 'git base-devel unzip mingw-w64-x86_64-gcc mingw64/ming2-w65-x86_64-zlib mingw-w64-x86_64-gtk4'
+      - name: Windows specific settings
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          # make sure MSYSCON is set so roswell doesn't try to install msys
+          echo "MSYSCON=defterm" | Out-File -FilePath $env:GITHUB_ENV -Append
+          # roswell installs to windows profile dir, so add to PATH using
+          # pwsh $HOME also
+          echo "$HOME/.roswell/bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          # not sure what makes roswell install things here
+          echo "$HOME/.roswell/lisp/quicklisp/bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          echo home = $HOME
+          echo userprofile = $USERPROFILE
       - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: Download sbcl
-        run: curl.exe --output sbcl-windows-installer.zip https://github.com/sbcl/sbcl/suites/14610349674/artifacts/828195592
-      - name: Unzip sbcl
-        run: Expand-Archive sbcl-windows-installer.zip Get-Location -Force
-      - name: Install sbcl
-        run: msiexec /package sbcl-2.3.6.183-b834c521c-x86-64-windows-binary.msi /quiet /norestart
-      - name: Build Megastrike
-        run: make install
+      - name: Install Roswell
+        env:
+          LISP: sbcl-bin
+        run: curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh -x
+      - name: Install Ultralisp
+        run: |
+          ros -e "(ql-dist:install-dist \"http://dist.ultralisp.org/\" :prompt nil)"
+      - name: Update all dists
+        run: |
+          ros -e "(ql:update-all-dists :prompt nil)"
+      - name: Install Dependencies
+        run: |
+          ros run -e "(ql:quickload :megastrike)"
+      - name: Build Binary
+        run: |
+          ros run -e "(asdf:operate :program-op :megastrike)"
       - name: Archive binary
         uses: actions/upload-artifact@v3
         with:
           name: megastrike
-          path: ../
+          path: ./
