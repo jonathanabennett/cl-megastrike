@@ -13,7 +13,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Install GTK4
-        run: "brew install gtk4"
+        run: |
+          brew install gtk4
+          export PATH=/opt/homebrew/Cellar/gtk4/4.12.3/bin:$PATH
+          export LD_LIBRARY_PATH=/opt/homebrew/Cellar/gtk4/4.12.3/lib
+          export PKG_CONFIG_PATH=/opt/homebrew/Cellar/gtk4/4.12.3/lib/pkgconfig
       - name: Install Roswell
         env:
           LISP: sbcl-bin
