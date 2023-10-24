@@ -17,7 +17,7 @@ jobs:
           msystem: MINGW64
           release: true
           update: true
-          install: 'git base-devel unzip mingw-w64-x86_64-gcc mingw64/ming2-w65-x86_64-zlib mingw-w64-x86_64-gtk4'
+          install: 'git base-devel unzip mingw-w64-x86_64-gcc mingw64/ming2-w64-x86_64-zlib mingw-w64-x86_64-gtk4'
       - name: Windows specific settings
         shell: pwsh
         run: |
