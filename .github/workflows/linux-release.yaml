@@ -26,6 +26,7 @@ jobs:
           LDFLAGS: -L/opt/gtk/lib
           PKG_CONFIG_PATH: /opt/gtk/lib/pkgconfig
         run: |
+          sudo apt update
           sudo apt install meson ninja-build
           cd gtk
           meson setup --prefix /opt/gtk builddir

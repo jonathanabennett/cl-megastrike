@@ -16,6 +16,7 @@ jobs:
           path: megastrike
       - name: Install GTK4
         run: |
+          brew update
           brew install gtk4
           cp -r /usr/local/Cellar/gtk4/4.12.2/lib/girepository-1.0 ./megastrike
           cp -r /usr/local/Cellar/gtk4/4.12.2/lib/libgtk-4.dylib ./megastrike
