@@ -34,11 +34,6 @@ jobs:
           echo userprofile = $USERPROFILE
       - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: Install Roswell
-        env:
-          LISP: sbcl-bin
-        shell: pwsh
-        run: curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh -x
       - name: Install Ultralisp
         shell: pwsh
         run: |
