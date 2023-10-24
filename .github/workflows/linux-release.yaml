@@ -29,7 +29,7 @@ jobs:
           ros run -e "(ql:quickload :megastrike)"
       - name: Build Binary
         run: |
-          ros run -e "(asdf:operate :program-op :megastrike)"
+          ros run -e "(asdf:make :megastrike)"
       - name: Archive binary
         uses: actions/upload-artifact@v3
         with:
