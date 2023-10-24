@@ -1,0 +1,17 @@
+#!/bin/sh
+docker run \
+    -v .:/app:z \
+    -u 0 \
+    ubuntu:latest \
+    sh -c "
+    whoami
+    apt-get update
+    apt-get install -y sudo
+    mkdir -p /app/build_data/home
+    useradd -u $(id -u) -d /app/build_data/home builduser
+    echo 'builduser ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+    chown -R $(id -u) /app
+    cd /app
+    export GITHUB_ACTION='test'
+    su builduser - scripts/unix-release"
+

@@ -8,6 +8,12 @@ name="megastrike"
 
 build_data="${root_path}/build_data"
 
+if [ -z "${HOME}" -o "${HOME}" = "/" ]
+then
+    mkdir -p "${build_data}/home"
+    export HOME="${build_data}/home"
+fi
+
 #rm -rf "${build_data}"
 mkdir -p "${build_data}"
 

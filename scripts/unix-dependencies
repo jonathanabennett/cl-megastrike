@@ -23,6 +23,25 @@ then
 elif cat /etc/os-release | grep -q -E "Ubuntu|Debian"
 then
     debian=1
+    sudo apt-get update
+fi
+
+if ! which git >/dev/null 2>&1
+then
+    if [ "${macos}" -ne 0 ]
+    then
+        brew install git
+    elif [ "${redhat}" -ne 0 ]
+    then
+        sudo dnf install -y git
+    elif [ "${debian}" -ne 0 ]
+    then
+        sudo apt-get install -y git
+    else
+        echo "Unknown OS, and git is not present." >&2
+        echo "Please install git manually." >&2
+        exit 1
+    fi
 fi
 
 if ! which python >/dev/null 2>&1

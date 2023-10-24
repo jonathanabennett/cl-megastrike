@@ -2,13 +2,21 @@
  (:class qlot/source/dist:source-dist
   :initargs (:distribution "https://beta.quicklisp.org/dist/quicklisp.txt" :%version :latest)
   :version "2023-10-21"))
+("cl-gobject-introspection-wrapper" .
+ (:class qlot/source/git:source-git
+  :initargs (:remote-url "https://github.com/bohonghuang/cl-gobject-introspection-wrapper" :ref "886e041729167a38af35a364f213bdbb973d720a")
+  :version "git-886e041729167a38af35a364f213bdbb973d720a"))
+("cl-glib" .
+ (:class qlot/source/git:source-git
+  :initargs (:remote-url "https://github.com/bohonghuang/cl-glib" :ref "31d8d33d604edcf8b3b258e4c9630dae64d51239")
+  :version "git-31d8d33d604edcf8b3b258e4c9630dae64d51239"))
 ("cl-gtk4" .
  (:class qlot/source/git:source-git
-  :initargs (:remote-url "https://github.com/bohonghuang/cl-gtk4")
+  :initargs (:remote-url "https://github.com/bohonghuang/cl-gtk4" :ref "442e238aa23c89702acf19c78397c9e609b22ea4")
   :version "git-442e238aa23c89702acf19c78397c9e609b22ea4"))
 ("cl-gdk4" .
  (:class qlot/source/git:source-git
-  :initargs (:remote-url "https://github.com/bohonghuang/cl-gtk4")
+  :initargs (:remote-url "https://github.com/bohonghuang/cl-gtk4" :ref "442e238aa23c89702acf19c78397c9e609b22ea4")
   :version "git-442e238aa23c89702acf19c78397c9e609b22ea4"))
 ("cl-cairo2" .
  (:class qlot/source/ql:source-ql
