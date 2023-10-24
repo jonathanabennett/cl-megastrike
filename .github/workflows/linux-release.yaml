@@ -12,11 +12,30 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          path: megastrike
+      - name: Checkout GTK4
+        uses: actions/checkout@v3
+        with:
+          repository: GNOME/gtk
+          ref: 4.12.0
+          path: gtk
       - name: Install GTK4
-        run: "sudo apt install libgtk-4-dev"
+        env:
+          CPPFLAGS: -I/opt/gtk/include
+          LDFLAGS: -L/opt/gtk/lib
+          PKG_CONFIG_PATH: /opt/gtk/lib/pkgconfig
+        run: |
+          cd gtk
+          meson setup --prefix /opt/gtk builddir
+          cd builddir
+          sudo ninja
+          sudo ninja install
       - name: Install Roswell
         env:
           LISP: sbcl-bin
+          LD_LIBRARY_PATH: /opt/gtk/lib
+          PATH: /opt/gtk/bin:$PATH
         run: curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh -x
       - name: Install Ultralisp
         run: |
