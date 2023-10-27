@@ -18,7 +18,7 @@ jobs:
         run: |
           brew update
           brew install gtk4
-          cp -r /usr/local/Cellar/gtk4/4.12.3/lib/girepository-1.0 ./megastrike
+          cp -r /usr/local/lib/girepository-1.0.dylib ./megastrike
           cp -r /usr/local/Cellar/gtk4/4.12.3/lib/libgtk-4.dylib ./megastrike
       - name: Install Roswell
         env:
