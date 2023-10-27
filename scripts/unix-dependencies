@@ -117,6 +117,7 @@ fi
 # your build. It is a *beast*.
 if [ "${macos}" -ne 0 ]
 then
+    brew install gobject-introspection
     brew install gtk4
 elif [ ! -e /usr/lib64/libgtk-4.so -a ! -e /usr/lib/libgtk-4.so ]
 then
