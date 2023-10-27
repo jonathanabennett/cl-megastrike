@@ -92,3 +92,4 @@ qlot install
 qlot bundle
 ros build "${root_path}/roswell/megastrike.ros"
 mv "${root_path}/roswell/megastrike" "${dist_dir}/"
+cp -r "${root_path}/data" "${dist_dir}"
