@@ -1,4 +1,4 @@
-name: build-macos-release
+name: build-fedora-release
 on:
   workflow_dispatch:
   push:
@@ -9,13 +9,12 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: fedora-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Run build
         run: scripts/unix-release
-
       - name: Archive binary
         uses: actions/upload-artifact@v3
         with:

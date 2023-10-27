@@ -1,0 +1,49 @@
+* text=auto
+
+# Source
+.gitignore text
+qlfile text
+*.lisp text eol=lf
+*.asd text eol=lf
+*.ros text eol=lf
+
+# Linux, Mac scripts
+*.sh text eol=lf
+
+# Windows scripts
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+
+# Build stuff
+*.lock text
+/megastrike binary
+/roswell/megastrike binary
+*.1 text eol=lf
+*.[1-9] text eol=lf
+*.abcl binary
+*.fasl binary
+*.dx32fsl binary
+*.dx64fsl binary
+*.lx32fsl binary
+*.lx64fsl binary
+*.x86f binary
+*.exe binary
+*.dll binary
+*.so binary
+
+# Documentation
+*.md text
+*.org text
+*.rtf binary
+
+# Assets
+*.txt text
+*.css text
+*.csv text
+*.board text eol=lf
+*.bmp binary
+*.gif binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.xcf binary

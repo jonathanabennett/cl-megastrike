@@ -1,0 +1,94 @@
+#!/bin/sh
+
+export POSIXLY_CORRECT=1
+set -ex
+
+root_path="${PWD}"
+name="megastrike"
+
+build_data="${root_path}/build_data"
+
+if [ -z "${HOME}" -o "${HOME}" = "/" ]
+then
+    mkdir -p "${build_data}/home"
+    export HOME="${build_data}/home"
+fi
+
+#rm -rf "${build_data}"
+mkdir -p "${build_data}"
+
+cd "${build_data}"
+
+# Install the dependencies if within a GitHub Action
+if [ -n "${GITHUB_ACTION}" ]
+then
+    . "${root_path}/scripts/unix-dependencies"
+fi
+
+# This builds GTK4
+# But I don't think you want to do this
+# A million deps need to be installed before the build succeeds
+#if [ ! -d "${build_data}/gtk"]
+#then
+#    git clone git@github.com:GNOME/gtk.git
+#    cd gtk
+#    git checkout 4.12.0
+#else
+#    cd gtk
+#fi
+#
+#build_venv="${build_data}/venv"
+#
+#if [ ! -d "${build_data}/venv"]
+#then
+#    python3 -m venv "${build_venv}"
+#fi
+#
+#. "${build_venv}/bin/activate"
+#
+#python -m pip install meson==1.2.3
+#python -m pip install ninja
+#
+#meson_builddir="${build_data}/meson"
+#
+#meson_install_dir="${build_data}/gtk-built"
+#
+#meson setup --prefix "${meson_install_dir}" "${meson_builddir}"
+#cd "${meson_builddir}"
+#ninja
+#ninja install
+#
+#deactivate
+#cd "${root_path}"
+
+#CPPFLAGS="-I${meson_install_dir}/include"
+#LDFLAGS="-L${meson_install_dir}/lib"
+#PKG_CONFIG_PATH="${meson_install_dir}/lib/pkgconfig"
+#LISP="sbcl-bin"
+#LD_LIBRARY_PATH="${meson_install_dir}/lib"
+#PATH="${meson_install_dir}/bin:${PATH}"
+
+# Make the current directory discoverable by ASDF.
+# This obviates the need to quickload the system.
+if [ "${root_path}" != "${HOME}/common-lisp/${name}" -a \
+     ! -h "${HOME}/common-lisp/${name}" ]
+then
+    mkdir -p "${HOME}/common-lisp"
+    ln -s "${root_path}" "${HOME}/common-lisp/${name}"
+fi
+
+
+dist_dir="${build_data}/dist"
+mkdir -p "${dist_dir}"
+
+ros -e "(ql:update-all-dists :prompt nil)"
+if [ -f "${root_path}/roswell/megastrike" ]
+then
+    # Clean old builds
+    rm -f "${root_path}/roswell/megastrike"
+fi
+cd "${root_path}"
+qlot install
+qlot bundle
+ros build "${root_path}/roswell/megastrike.ros"
+mv "${root_path}/roswell/megastrike" "${dist_dir}/"

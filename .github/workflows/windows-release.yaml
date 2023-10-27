@@ -1,10 +1,11 @@
 name: build-windows-release
 on:
-  push:
-    branches:
-      - 'main'
-      - 'master'
-  pull_request:
+  workflow_dispatch:
+  #push:
+  #  branches:
+  #    - 'main'
+  #    - 'master'
+  #pull_request:
 
 jobs:
   build:

@@ -1,0 +1,220 @@
+#!/bin/sh
+#
+# Placed in a separate script and run only during github actions
+# since these require sudo.
+set -ex
+export POSIXLY_CORRECT=1
+
+# OS detection
+macos=0
+redhat=0
+debian=0
+if uname -a | grep -q 'Darwin'
+then
+    macos=1
+    # Install brew
+    if ! which brew >/dev/null 2>&1
+    then
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
+elif cat /etc/os-release | grep -q -E "Fedora|CentOS|Red Hat|RedHat|RHEL|Rocky"
+then
+    redhat=1
+elif cat /etc/os-release | grep -q -E "Ubuntu|Debian"
+then
+    debian=1
+    sudo apt-get update
+fi
+
+if ! which git >/dev/null 2>&1
+then
+    if [ "${macos}" -ne 0 ]
+    then
+        brew install git
+    elif [ "${redhat}" -ne 0 ]
+    then
+        sudo dnf install -y git
+    elif [ "${debian}" -ne 0 ]
+    then
+        sudo apt-get install -y git
+    else
+        echo "Unknown OS, and git is not present." >&2
+        echo "Please install git manually." >&2
+        exit 1
+    fi
+fi
+
+if ! which python >/dev/null 2>&1
+then
+    if [ "${macos}" -ne 0 ]
+    then
+        brew install python3
+    elif [ "${redhat}" -ne 0 ]
+    then
+        sudo dnf install -y python3
+    elif [ "${debian}" -ne 0 ]
+    then
+        sudo apt-get install -y python3-venv python3-pip python3-setuptools python3
+    else
+        echo "Unknown OS, and python3 is not present." >&2
+        echo "Please install python3 manually." >&2
+        exit 1
+    fi
+fi
+
+if ! which pkg-config >/dev/null 2>&1
+then
+    if [ "${macos}" -ne 0 ]
+    then
+        brew install pkg-config
+    elif [ "${redhat}" -ne 0 ]
+    then
+        sudo dnf install -y pkgconf-pkg-config
+    elif [ "${debian}" -ne 0 ]
+    then
+        sudo apt-get install -y pkg-config
+    else
+        echo "Unknown OS, and pkg-config is not present." >&2
+        echo "Please install pkg-config manually." >&2
+        exit 1
+    fi
+fi
+
+if ! which cc >/dev/null 2>&1
+then
+    if [ "${macos}" -ne 0 ]
+    then
+        echo "You should already have a compiler installed, skipping install."
+    elif [ "${redhat}" -ne 0 ]
+    then
+        sudo dnf install -y gcc g++ autoconf automake
+    elif [ "${debian}" -ne 0 ]
+    then
+        sudo apt-get install -y build-essential
+    else
+        echo "Unknown OS, and gcc is not present." >&2
+        echo "Please install gcc manually." >&2
+        exit 1
+    fi
+fi
+
+if ! which curl >/dev/null 2>&1
+then
+    if [ "${redhat}" -ne 0 ]
+    then
+        sudo dnf install -y curl
+    elif [ "${debian}" -ne 0 ]
+    then
+        sudo apt-get install -y curl
+    else
+        echo "Unknown OS, and curl is not present." >&2
+        echo "Please install curl manually." >&2
+        exit 1
+    fi
+fi
+
+# Trust me, you do not want to be in the business of building GTK4 as part of
+# your build. It is a *beast*.
+if [ "${macos}" -ne 0 ]
+then
+    brew install gtk4
+elif [ ! -e /usr/lib64/libgtk-4.so -a ! -e /usr/lib/libgtk-4.so ]
+then
+    if [ "${redhat}" -ne 0 ]
+    then
+        sudo dnf install -y gtk4-devel
+    elif [ "${debian}" -ne 0 ]
+    then
+        sudo apt-get install -y libgtk-4-dev
+    else
+        echo "Unknown OS, and libgtk-4 is not present." >&2
+        echo "Please install libgtk-4 manually." >&2
+        exit 1
+    fi
+fi
+
+# Install roswell in a way that works on both glibc and musl
+# and which works well both for CI and for local builds.
+if ! which ros >/dev/null 2>&1
+then
+    if [ "${macos}" -ne 0 ]
+    then
+        brew install roswell
+    else
+        back="${PWD}"
+        cd "${HOME}"
+        if strings "$(ldd /bin/sh | grep libc.so | awk '{print $3}')" |
+            grep -q GLIBC
+        then
+            # We are on glibc
+            curl -o "roswell.tar.bz2" -fSsL 'https://github.com/roswell/roswell/releases/download/v23.10.14.114/roswell-23.10.14.114-linux-x86_64.tar.bz2'
+        else
+            # We are on musl
+            curl -o "roswell.tar.bz2" -fSsL 'https://github.com/roswell/roswell/releases/download/v23.10.14.114/roswell-23.10.14.114-linux-x86_64-musl.tar.bz2'
+
+        fi
+        # Makes a directory called "roswell"
+        tar -xjf roswell.tar.bz2
+        if ! cat "${HOME}/.bashrc" | grep -q 'roswell'
+        then
+            echo "export PATH=\"${HOME}/roswell:${PATH}\"" >> "${HOME}/.bashrc"
+            echo "Added stuff to the PATH, you may want to \`source ~/.bashrc\`"
+        elif ! cat "${HOME}/.zshrc" | grep -q 'roswell'
+        then
+            echo "export PATH=\"${HOME}/roswell:${PATH}\"" >> "${HOME}/.zshrc"
+            echo "Added stuff to the PATH, you may want to \`source ~/.zshrc\`"
+        fi
+        # For the actual build script
+        export PATH="${HOME}/roswell:${PATH}"
+        cd "${back}"
+    fi
+fi
+
+if test -d "${HOME}/.roswell" && ! echo "${PATH}" | grep -q -E "${HOME}/[.]roswell/bin"
+then
+    if ! cat "${HOME}/.bashrc" | grep -q -E '[.]roswell/bin'
+    then
+        echo "export PATH=\"${HOME}/.roswell/bin:${PATH}\"" >> "${HOME}/.bashrc"
+        echo "Added stuff to the PATH, you may want to \`source ~/.bashrc\`"
+    elif ! cat "${HOME}/.zshrc" | grep -q -E '[.]roswell/bin'
+    then
+        echo "export PATH=\"${HOME}/.roswell/bin:${PATH}\"" >> "${HOME}/.zshrc"
+        echo "Added stuff to the PATH, you may want to \`source ~/.zshrc\`"
+    fi
+    export PATH="${HOME}/.roswell/bin:${PATH}"
+fi
+
+# Install openssl
+if [ "${macos}" -ne 0 ]
+then
+    brew install openssl
+elif [ "${redhat}" -ne 0 ]
+then
+    sudo dnf install -y openssl-devel
+elif [ "${debian}" -ne 0 ]
+then
+    sudo apt-get install -y libssl-dev
+else
+    echo "Unknown OS, and openssl development files are not present." >&2
+    echo "Please install openssl development files manually." >&2
+    exit 1
+fi
+
+if ! which qlot
+then
+    #ros install fukamachi/qlot
+    curl -L https://qlot.tech/installer | bash
+    if ! echo "${PATH}" | grep -q -E "${HOME}/[.]qlot/bin"
+    then
+        if ! cat "${HOME}/.bashrc" | grep -q -E '[.]qlot/bin'
+        then
+            echo "export PATH=\"${HOME}/.qlot/bin:${PATH}\"" >> "${HOME}/.bashrc"
+            echo "Added stuff to the PATH, you may want to \`source ~/.bashrc\`"
+        elif ! cat "${HOME}/.zshrc" | grep -q -E '[.]qlot/bin'
+        then
+            echo "export PATH=\"${HOME}/.qlot/bin:${PATH}\"" >> "${HOME}/.zshrc"
+            echo "Added stuff to the PATH, you may want to \`source ~/.zshrc\`"
+        fi
+        export PATH="${HOME}/.qlot/bin:${PATH}"
+    fi
+fi
