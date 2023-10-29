@@ -2,11 +2,10 @@
 docker run \
     -v .:/app:z \
     -u 0 \
-    ubuntu:latest \
+    fedora:latest \
     sh -c "
     whoami
-    apt-get update
-    apt-get install -y sudo
+    dnf install -y sudo
     mkdir -p /app/build_data/home
     useradd -u $(id -u) -d /app/build_data/home builduser
     echo 'builduser ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
