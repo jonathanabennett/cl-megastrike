@@ -26,6 +26,7 @@ then
     debian=1
     sudo apt-get update
 elif cat /etc/os-release | grep -q -E "Arch"
+then
      arch=1
      pacman -Syu
 fi
@@ -42,6 +43,7 @@ then
     then
         sudo apt-get install -y git
     elif [ "${arch}" -ne 0 ]
+    then
          pacman -S git
     else
         echo "Unknown OS, and git is not present." >&2
@@ -62,6 +64,7 @@ then
     then
         sudo apt-get install -y python3-venv python3-pip python3-setuptools python3
     elif [ "${arch}" -ne 0 ]
+    then
          pacman -S python3
     else
         echo "Unknown OS, and python3 is not present." >&2
@@ -82,6 +85,7 @@ then
     then
         sudo apt-get install -y pkg-config
     elif [ "${arch}" -ne 0 ]
+    then
          pacman -S pkg-config
     else
         echo "Unknown OS, and pkg-config is not present." >&2
@@ -102,6 +106,7 @@ then
     then
         sudo apt-get install -y build-essential
     elif [ "${arch}" -ne 0 ]
+    then
          pacman -S build-essential
     else
         echo "Unknown OS, and gcc is not present." >&2
@@ -119,6 +124,7 @@ then
     then
         sudo apt-get install -y curl
     elif [ "${arch}" -ne 0 ]
+    then
          pacman -S curl
     else
         echo "Unknown OS, and curl is not present." >&2
@@ -143,6 +149,7 @@ then
     then
         sudo apt-get install -y libgtk-4-dev
     elif [ "${arch}" -ne 0 ]
+    then
          pacman -S libgtk-4-dev
     else
         echo "Unknown OS, and libgtk-4 is not present." >&2
@@ -213,6 +220,7 @@ elif [ "${debian}" -ne 0 ]
 then
     sudo apt-get install -y libssl-dev
 elif [ "${arch}" -ne 0 ]
+then
      pacman -S libssl-dev
 else
     echo "Unknown OS, and openssl development files are not present." >&2
