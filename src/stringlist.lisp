@@ -69,12 +69,12 @@
     (setf (gtk:column-view-model view)
           (gtk:make-single-selection :model (gtk:make-sort-list-model :model model :sorter (gtk:column-view-sorter view))))
     (when (and filter-object filter-func)
-        (string-list/add-filter sl filter-object filter-func))
+      (string-list/add-filter sl filter-object filter-func))
     (gtk:connect (gtk:column-view-model view) "selection-changed"
-                   (lambda (model position n-items)
-                     (declare (ignore position n-items))
-                     (let ((uuid (gtk:string-object-string (gobj:coerce (gtk:single-selection-selected-item model) 'gtk:string-object))))
-                       (setf (string-list/selected sl) (gethash uuid source nil)))))
+                 (lambda (model position n-items)
+                   (declare (ignore position n-items))
+                   (let ((uuid (gtk:string-object-string (gobj:coerce (gtk:single-selection-selected-item model) 'gtk:string-object))))
+                     (setf (string-list/selected sl) (gethash uuid source nil)))))
     sl))
 
 (defmethod string-list/add-filter ((sl string-list) filter-object filter-func)
@@ -86,7 +86,11 @@
                                  :user-destroy (cffi:callback glib::free-object-callback)))
   (setf (gtk:column-view-model (string-list/view sl))
         (gtk:make-single-selection :model (gtk:make-sort-list-model :model (gtk:make-filter-list-model :model (string-list/model sl) :filter (string-list/filter sl))
-                                                                    :sorter (gtk:column-view-sorter (string-list/view sl))))))
+                                                                    :sorter (gtk:column-view-sorter (string-list/view sl)))))
+  (gtk:connect (string-list/filter sl) "changed"
+               (lambda (filter change)
+                 (declare (ignore filter change))
+                 (gtk:selection-model-selection-changed (gtk:column-view-model (string-list/view sl)) 0 10))))
 
 (defmethod string-list/add-label-column ((sl string-list) title accessor datatype comparator)
   "Label columns sort by default."
@@ -150,7 +154,7 @@
               (gtk:string-list-remove (string-list/model sl) 0))
             (string-list/strings sl))
     (mapcar (lambda (el)
-            (gtk:string-list-append (string-list/model sl) el))
+              (gtk:string-list-append (string-list/model sl) el))
             (string-list/strings sl))
     (gtk:selection-model-select-item model pos t)))
 
