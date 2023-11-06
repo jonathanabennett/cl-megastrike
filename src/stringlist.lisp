@@ -138,7 +138,9 @@
     (setf (gethash uuid (string-list/source sl)) item)
     (unless (= (hash-table-count (string-list/source sl)) (length (string-list/strings sl)))
       (add-to-end (string-list/strings sl) uuid)
-      (gtk:string-list-append (string-list/model sl) uuid))))
+      (gtk:string-list-append (string-list/model sl) uuid))
+    (unless (string-list/selected sl)
+      (setf (string-list/selected sl) item))))
 
 (defmethod string-list/brute-update ((sl string-list))
   "This update function is only useful for short lists as it manually wipes the list clean and repopulates it."
