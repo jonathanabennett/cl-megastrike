@@ -15,10 +15,10 @@ jobs:
         uses: actions/checkout@v3
       - name: Install Dependencies
         run: scripts/unix-dependencies
-      - name: Run build
-        run: ./install.sh
       - name: Update path
         run: source ~/.zshrc
+      - name: Run build
+        run: ./install.sh
       - name: Archive distributable
         uses: actions/upload-artifact@v3
         with:
