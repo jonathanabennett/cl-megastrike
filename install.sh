@@ -22,6 +22,7 @@ fi
 if [ -f "${root_path}/megastrike.asd" ]
 then
     qlot install
-    ros run --eval "(ql:quickload :megastrike)" \
+    ros run --load megastrike.asd \
+        --eval "(ql:quickload :megastrike)" \
         --eval "(asdf:make :megastrike)"
 fi
