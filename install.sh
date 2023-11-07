@@ -15,12 +15,10 @@ root_path="${PWD}"
 name="megastrike"
 
 ros install qlot
-ros -e "(ql:update-all-dists :prompt nil)"
 
 if [ -f "${root_path}/megastrike.asd" ]
 then
     qlot install
-    ros run --eval "(ql:quickload :megastrike)" \
+    ros run --load megastrike.asd \
         --eval "(asdf:make :megastrike)"
-    chmod +x ./megastrike
 fi
