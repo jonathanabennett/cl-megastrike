@@ -16,6 +16,7 @@ root_path="${PWD}"
 if ! command -v qlot &> /dev/null
 then
     ros install qlot
+    export PATH="${HOME}/.qlot/bin:${PATH}" # Ensure qlot is in the path when we're done.
 fi
 
 if [ -f "${root_path}/megastrike.asd" ]
