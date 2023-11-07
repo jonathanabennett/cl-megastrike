@@ -12,9 +12,11 @@ export POSIXLY_CORRECT=1
 set -ex
 
 root_path="${PWD}"
-name="megastrike"
 
-ros install qlot
+if ! command -v qlot &> /dev/null
+then
+    ros install qlot
+fi
 
 if [ -f "${root_path}/megastrike.asd" ]
 then
