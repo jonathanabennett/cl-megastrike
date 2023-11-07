@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 # This script assumes you have installed the following list of prerequisites.
 # - GTK4.10 or newer and its dependencies.
