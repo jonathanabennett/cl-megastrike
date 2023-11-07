@@ -42,7 +42,7 @@ jobs:
           ros -e "(ql-dist:install-dist \"http://dist.ultralisp.org/\" :prompt nil)"
 
       - name: Build binary
-        run: install.sh
+        run: ./install.sh
       - name: Archive binary
         uses: actions/upload-artifact@v3
         with:
