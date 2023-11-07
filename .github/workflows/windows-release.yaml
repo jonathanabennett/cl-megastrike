@@ -10,6 +10,9 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
     steps:
       - name: Install msys2
         uses: msys2/setup-msys2@v2
@@ -20,7 +23,6 @@ jobs:
           update: true
           install: "git base-devel unzip mingw-w64-x86_64-gcc mingw-w64-x86_64-gtk4 mingw-w64-x86_64-roswell"
       - name: Windows specific settings
-        shell: pwsh
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
@@ -36,11 +38,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Install Ultralisp
-        shell: pwsh
         run: |
           ros -e "(ql-dist:install-dist \"http://dist.ultralisp.org/\" :prompt nil)"
+
       - name: Build binary
-        shell: pwsh
         run: install.sh
       - name: Archive binary
         uses: actions/upload-artifact@v3
