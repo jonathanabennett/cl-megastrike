@@ -18,7 +18,7 @@ jobs:
           msystem: MINGW64
           release: true
           update: true
-          install: 'git base-devel unzip mingw-w64-x86_64-gcc mingw-w64-x86_64-gtk4 mingw-w64-x86_64-roswell'
+          install: "git base-devel unzip mingw-w64-x86_64-gcc mingw-w64-x86_64-gtk4 mingw-w64-x86_64-roswell"
       - name: Windows specific settings
         shell: pwsh
         run: |
@@ -39,18 +39,9 @@ jobs:
         shell: pwsh
         run: |
           ros -e "(ql-dist:install-dist \"http://dist.ultralisp.org/\" :prompt nil)"
-      - name: Update all dists
+      - name: Build binary
         shell: pwsh
-        run: |
-          ros -e "(ql:update-all-dists :prompt nil)"
-      - name: Install Dependencies
-        shell: pwsh
-        run: |
-          ros run -e "(ql:quickload :megastrike)"
-      - name: Build Binary
-        shell: pwsh
-        run: |
-          ros run -e "(asdf:make :megastrike)"
+        run: install.sh
       - name: Archive binary
         uses: actions/upload-artifact@v3
         with:

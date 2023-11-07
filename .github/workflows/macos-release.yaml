@@ -13,11 +13,12 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      - name: Install Dependencies
+        run: scripts/unix-dependencies
       - name: Run build
-        run: scripts/unix-release
-
-      - name: Archive binary
+        run: install.sh
+      - name: Archive distributable
         uses: actions/upload-artifact@v3
         with:
           name: megastrike
-          path: build_data/dist/
+          path: ./

@@ -20,3 +20,4 @@ jobs:
         with:
           name: megastrike
           path: build_data/dist/
+# This currently doesn't work because ubuntu-latest doesn't have GTK4.10

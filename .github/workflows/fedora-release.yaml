@@ -20,3 +20,5 @@ jobs:
         with:
           name: megastrike
           path: build_data/dist/
+# This requires a custom runner. I don't have one of those set up yet.
+# I plan to dedicate an oracle instance to this purpose.
