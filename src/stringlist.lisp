@@ -1,6 +1,7 @@
 (in-package :megastrike)
 
-;:; CALLBACK FUNCTIONS for cffi access
+;; CALLBACK FUNCTIONS for cffi access
+
 ;; Callback function to filter objects
 (cffi:defcallback filter-string-object-via-accessor :bool
     ((item :pointer)

@@ -42,13 +42,13 @@
 (defun new-mek (chassis model role unit-type size movement tmm armor structure
                 threshold short short* medium medium* long long* extreme extreme*
                 ov pv abilities front-arc left-arc right-arc rear-arc)
-   (make-instance 'mek :chassis chassis :model model :role role :type unit-type
-                       :size size :movement movement :tmm tmm :armor armor
-                       :structure structure :threshold threshold
-                       :short short :short* short* :medium medium :medium* medium*
-                       :long long :long* long* :extreme extreme :extreme* extreme*
-                       :ov ov :pv pv :abilities abilities :front-arc front-arc
-                       :left-arc left-arc :right-arc right-arc :rear-arc rear-arc))
+  (make-instance 'mek :chassis chassis :model model :role role :type unit-type
+                      :size size :movement movement :tmm tmm :armor armor
+                      :structure structure :threshold threshold
+                      :short short :short* short* :medium medium :medium* medium*
+                      :long long :long* long* :extreme extreme :extreme* extreme*
+                      :ov ov :pv pv :abilities abilities :front-arc front-arc
+                      :left-arc left-arc :right-arc right-arc :rear-arc rear-arc))
 
 (defun mul-parser (header-row row)
   (let* ((*package* (find-package :megastrike))
@@ -166,8 +166,8 @@
 
 (defun construct-mv-alist (mv-string)
   (let ((mv-alist '())
-         (mv-strings (ppcre:all-matches-as-strings
-                      (ppcre:create-scanner "\\d+\\\"[a-zA-z]?") mv-string)))
+        (mv-strings (ppcre:all-matches-as-strings
+                     (ppcre:create-scanner "\\d+\\\"[a-zA-z]?") mv-string)))
     (dolist (str mv-strings)
       (multiple-value-bind (dist type) (extract-numbers-and-letters str)
         (setf mv-alist (acons (car (rassoc type *mv-designators* :test #'string=))
@@ -188,7 +188,7 @@
   (if (and filter m)
       (let ((filt-name (or (mek/chassis filter) nil))
             (filt-type (or (mek/type filter) nil)))
-        (and (if filt-name (search filt-name (mek/full-name m)) t)
+        (and (if filt-name (search filt-name (mek/full-name m) :test #'char-equal) t)
              (if filt-type (member (mek/type m) filt-type :test #'string=) t)))
       t))
 
@@ -197,9 +197,9 @@
         (letter-part ""))
     (loop for char across input
           if (digit-char-p char)
-          do (setf number-part (concatenate 'string number-part (string char)))
+            do (setf number-part (concatenate 'string number-part (string char)))
           else if (alpha-char-p char)
-          do (setf letter-part (concatenate 'string letter-part (string char))))
+                 do (setf letter-part (concatenate 'string letter-part (string char))))
     (values number-part letter-part)))
 
 (defun load-mul (f)
