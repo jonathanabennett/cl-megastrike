@@ -22,5 +22,17 @@ jobs:
         with:
           name: megastrike
           path: |
-            ./
-            ! .git/*
+            ./.qlot/*
+            ./.bundle-libs/*
+            ./data/*
+            ./roswell/*
+            ./scripts/*
+            ./src/*
+            ./test/*
+            ./README.md
+            ./install.sh
+            ./Makefile
+            ./megastrike
+            ./megastrike.asd
+            ./qlfile
+            ./qlfile.lock
