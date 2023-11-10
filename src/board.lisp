@@ -1,7 +1,11 @@
 (in-package #:megastrike)
 
 (defclass board ()
-  ((tile-hash
+  ((name
+    :initarg :name
+    :accessor board/name
+    :initform "")
+   (tile-hash
     :initarg :tiles
     :accessor board/tiles
     :initform (make-hash-table :test 'equalp)
@@ -43,7 +47,9 @@ stored by xy coordinates.")
 
 ;; TODO Add a way to figure out the width and height
 (defun load-mapsheet-file (f board)
-  (let ((file-lines (uiop:read-file-lines f)))
+  (let ((mapsheet-name (pathname-name f))
+        (file-lines (uiop:read-file-lines f)))
+    (setf board/name mapsheet-name)
     (dolist (l file-lines)
       (when (search "hex" l)
         (insert-tile board (new-tile l))))))

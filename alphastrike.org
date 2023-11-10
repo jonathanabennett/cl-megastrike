@@ -41,6 +41,19 @@ Move unit drawing looping logic out to teams since they're the ones that hold co
 *** Who knows what?
 The elements can't know their initiative because it's based on the team
 Teams are
+** Maps and Boards
+How do I represent the map before vs. during vs. after the lobby?
+*** Before and During the Lobby
+Represent the map as a nested list of board objects. This will require me to expand the existing board class so it supports any extra details I need.
+*** After the Lobby
+Write a function which maps over the board objects in the nested list and copy the tiles into a game board object, offsetting them appropriately.
+*** Representing Terrain
+What are the things I need to know about terrain, according to the charts in the back of Alphastrike?
+
+- Type
+- Height
+
+I'm sure there's more in the advanced rules, but this will do for now. I can represent this pretty easily with just a plist
 * Point Release plan
 ** 0.1.0
 *** Next Steps
